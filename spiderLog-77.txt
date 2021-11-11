@@ -1,0 +1,64 @@
+2021-11-11 07:06:29.7808.-05:00	0	INFO	**********************************************************************************
+2021-11-11 07:06:29.7828.-05:00	0	INFO	BEGINNING NEW GAME
+2021-11-11 07:06:29.7828.-05:00	0	INFO	**********************************************************************************
+2021-11-11 07:06:29.7828.-05:00	0	DEGUG	Logging state of all controller variables
+2021-11-11 07:06:29.7828.-05:00	0	INFO	**********************************************************************************
+2021-11-11 07:06:29.7828.-05:00	0	DEGUG	isDebugModeOn|True
+2021-11-11 07:06:29.7828.-05:00	0	DEGUG	debugLogFileDirectory|
+2021-11-11 07:06:29.7828.-05:00	0	DEGUG	runSpeed|55
+2021-11-11 07:06:29.7828.-05:00	0	DEGUG	jumpThrustPerSecond|120
+2021-11-11 07:06:29.7828.-05:00	0	DEGUG	maxJumpThrust|20
+2021-11-11 07:06:29.7828.-05:00	0	DEGUG	movementSmoothing|0.05
+2021-11-11 07:06:29.7828.-05:00	0	DEGUG	gravityOnPlayer|20
+2021-11-11 07:06:29.7828.-05:00	0	DEGUG	stateTransitionNumFrames|90
+2021-11-11 07:06:29.7828.-05:00	0	DEGUG	isHorizontalMovementInAirAllowed|True
+2021-11-11 07:06:29.7828.-05:00	0	DEGUG	canWallCrall|True
+2021-11-11 07:06:29.7828.-05:00	0	DEGUG	applyJumpThrust|False
+2021-11-11 07:06:29.7828.-05:00	0	DEGUG	orientation.headingDirection|RIGHT
+2021-11-11 07:06:29.7828.-05:00	0	DEGUG	orientation.thrustingDirection|UP
+2021-11-11 07:06:29.7838.-05:00	0	DEGUG	orientation.gravityDirection|DOWN
+2021-11-11 07:06:29.7838.-05:00	0	DEGUG	currentJumpThrust|0
+2021-11-11 07:06:29.7838.-05:00	0	DEGUG	velocity|(0.00, 0.00, 0.00)
+2021-11-11 07:06:29.7838.-05:00	0	DEGUG	isAnimatorFalling|True
+2021-11-11 07:06:29.7838.-05:00	0	DEGUG	isAnimatorRunning|False
+2021-11-11 07:06:29.7838.-05:00	0	DEGUG	isAnimatorJumping|False
+2021-11-11 07:06:29.7838.-05:00	0	DEGUG	isAnimatorStarboardFacingCamera|True
+2021-11-11 07:06:29.7838.-05:00	0	INFO	**********************************************************************************
+2021-11-11 07:06:29.8781.-05:00	1	DEGUG	State change: IDLE to FALLING
+2021-11-11 07:06:30.6975.-05:00	184	DEGUG	State change: FALLING to BEGINNING_A_LANDING_H
+2021-11-11 07:06:30.6995.-05:00	185	DEGUG	State change: BEGINNING_A_LANDING_H to IDLE
+2021-11-11 07:06:34.4884.-05:00	2087	DEGUG	State change: IDLE to RUNNING
+2021-11-11 07:06:34.9088.-05:00	2284	DEGUG	Pressed jump
+2021-11-11 07:06:34.9098.-05:00	2284	DEGUG	State change: RUNNING to BEGINNING_A_JUMP
+2021-11-11 07:06:34.9188.-05:00	2287	DEGUG	Begin jump
+2021-11-11 07:06:34.9188.-05:00	2287	DEGUG	Adding jump force of 2.4. Current total thrust of 2.4.
+2021-11-11 07:06:34.9188.-05:00	2288	DEGUG	State change: BEGINNING_A_JUMP to RUNNING
+2021-11-11 07:06:35.0694.-05:00	2358	DEGUG	Released jump
+2021-11-11 07:06:35.9641.-05:00	2779	DEGUG	State change: RUNNING to IDLE
+2021-11-11 07:06:37.8180.-05:00	3616	DEGUG	Logging state of all controller variables
+2021-11-11 07:06:37.8180.-05:00	3616	INFO	**********************************************************************************
+2021-11-11 07:06:37.8180.-05:00	3616	DEGUG	isDebugModeOn|True
+2021-11-11 07:06:37.8180.-05:00	3616	DEGUG	debugLogFileDirectory|
+2021-11-11 07:06:37.8180.-05:00	3616	DEGUG	runSpeed|55
+2021-11-11 07:06:37.8180.-05:00	3616	DEGUG	jumpThrustPerSecond|120
+2021-11-11 07:06:37.8180.-05:00	3616	DEGUG	maxJumpThrust|20
+2021-11-11 07:06:37.8180.-05:00	3616	DEGUG	movementSmoothing|0.05
+2021-11-11 07:06:37.8180.-05:00	3616	DEGUG	gravityOnPlayer|20
+2021-11-11 07:06:37.8180.-05:00	3616	DEGUG	stateTransitionNumFrames|90
+2021-11-11 07:06:37.8180.-05:00	3616	DEGUG	isHorizontalMovementInAirAllowed|True
+2021-11-11 07:06:37.8180.-05:00	3616	DEGUG	canWallCrall|True
+2021-11-11 07:06:37.8180.-05:00	3616	DEGUG	applyJumpThrust|False
+2021-11-11 07:06:37.8180.-05:00	3616	DEGUG	orientation.headingDirection|RIGHT
+2021-11-11 07:06:37.8190.-05:00	3616	DEGUG	orientation.thrustingDirection|UP
+2021-11-11 07:06:37.8190.-05:00	3616	DEGUG	orientation.gravityDirection|DOWN
+2021-11-11 07:06:37.8190.-05:00	3616	DEGUG	currentJumpThrust|2.4
+2021-11-11 07:06:37.8190.-05:00	3616	DEGUG	velocity|(0.00, 0.00, 0.00)
+2021-11-11 07:06:37.8190.-05:00	3616	DEGUG	isAnimatorFalling|False
+2021-11-11 07:06:37.8190.-05:00	3616	DEGUG	isAnimatorRunning|False
+2021-11-11 07:06:37.8190.-05:00	3616	DEGUG	isAnimatorJumping|False
+2021-11-11 07:06:37.8190.-05:00	3616	DEGUG	isAnimatorStarboardFacingCamera|True
+2021-11-11 07:06:37.8190.-05:00	3616	INFO	**********************************************************************************
+2021-11-11 07:06:37.8190.-05:00	3616	INFO	**********************************************************************************
+2021-11-11 07:06:37.8190.-05:00	3616	INFO	GAME OVER
+2021-11-11 07:06:37.8190.-05:00	3616	INFO	**********************************************************************************
+
