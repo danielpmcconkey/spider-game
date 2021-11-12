@@ -104,6 +104,31 @@ namespace Assets.Scripts.CharacterControl
             CheckUserInupt();
             _stateMachine.CheckState(_movementCapabilities, _userInput, _currentJumpThrust);
             _characterAnimationController.SetState(_stateMachine.playerStateCurrentFrame, _characterOrienter);
+            // act on the trigger states. these states
+            // shouldn't move the character. Just trigger
+            // certain events that will be acted on in the
+            // next FixedUpdate()
+            if (_stateMachine.playerStateCurrentFrame == CharacterState.TRIGGER_JUMP)
+            {
+                BeginJump();
+            }
+            if (_stateMachine.playerStateCurrentFrame == CharacterState.TRIGGER_FALL)
+            {
+                BeginFall();
+            }
+            if (_stateMachine.playerStateCurrentFrame == CharacterState.TRIGGER_LANDING_H)
+            {
+                Land();
+            }
+            if (_stateMachine.playerStateCurrentFrame == CharacterState.TRIGGER_LANDING_V)
+            {
+                LandV();
+            }
+            if (_stateMachine.playerStateCurrentFrame == CharacterState.TRIGGER_LANDING_CEILING)
+            {
+                LandCeiling();
+            }
+
         }
         private void FixedUpdate()
         {
@@ -111,26 +136,13 @@ namespace Assets.Scripts.CharacterControl
             // action
 
             float thrustWeMightAdd = (jumpThrustPerSecond * Time.deltaTime);
-            if (_stateMachine.playerStateCurrentFrame == CharacterState.BEGINNING_A_JUMP)
-            {
-                BeginJump();
-            }
+            
             if (_stateMachine.playerStateCurrentFrame == CharacterState.ADDIND_THRUST_TO_JUMP)
             {
                 ApplyJumpForce(thrustWeMightAdd);
             }
-            if (_stateMachine.playerStateCurrentFrame == CharacterState.BEGINNING_TO_FALL)
-            {
-                BeginFall();
-            }
-            if (_stateMachine.playerStateCurrentFrame == CharacterState.BEGINNING_A_LANDING_H)
-            {
-                Land();
-            }
-            if (_stateMachine.playerStateCurrentFrame == CharacterState.BEGINNING_A_LANDING_V)
-            {
-                LandV();
-            }
+            
+            
             if (_stateMachine.playerStateCurrentFrame == CharacterState.RUNNING)
             {
                 ApplyDirectionalMovementForceH();
@@ -188,7 +200,6 @@ namespace Assets.Scripts.CharacterControl
             if (_characterOrienter.headingDirection == FacingDirection.RIGHT
                 || _characterOrienter.headingDirection == FacingDirection.LEFT)
             {
-                _characterOrienter.SetGravityDirection(FacingDirection.DOWN);
                 if (_characterOrienter.thrustingDirection == FacingDirection.UP)
                 {
                     _characterOrienter.SetGravityDirection(FacingDirection.DOWN);
@@ -204,7 +215,6 @@ namespace Assets.Scripts.CharacterControl
             if (_characterOrienter.headingDirection == FacingDirection.UP
                 || _characterOrienter.headingDirection == FacingDirection.DOWN)
             {
-                _characterOrienter.SetGravityDirection(FacingDirection.RIGHT);
                 if (_characterOrienter.thrustingDirection == FacingDirection.LEFT)
                 {
                     _characterOrienter.SetGravityDirection(FacingDirection.RIGHT);
@@ -336,8 +346,7 @@ namespace Assets.Scripts.CharacterControl
             LoggerCustom.DEBUG("LandV");
             StopH();
             StopV();
-            rigidBody2D.gravityScale = 0;
-
+            
             if (_characterOrienter.headingDirection == FacingDirection.RIGHT)
             {
                 SetFacingDirections(FacingDirection.UP, FacingDirection.LEFT);
@@ -346,6 +355,17 @@ namespace Assets.Scripts.CharacterControl
             {
                 SetFacingDirections(FacingDirection.UP, FacingDirection.RIGHT);
             }
+
+            _currentJumpThrust = 0f;
+            _stateMachine.SetState(CharacterState.EARLY_LANDING_CYCLE_V);
+        }
+        private void LandCeiling()
+        {
+            LoggerCustom.DEBUG("LandCeiling");
+            StopH();
+            StopV();
+
+            SetFacingDirections(_characterOrienter.headingDirection, FacingDirection.DOWN);
 
             _currentJumpThrust = 0f;
             _stateMachine.SetState(CharacterState.EARLY_LANDING_CYCLE_V);

@@ -18,6 +18,7 @@ namespace Assets.Scripts.CharacterControl
         private bool _isTouchingNothing = true;
         private bool _isTouchingPlatformWithBelly;
         private bool _isTouchingPlatformForward;
+        private bool _isTouchingPlatformWithBack;   // meaning the top of the spider
         private CharacterOrienter _characterOrienter;
         private CharacterMovementCapabilities _movementCapabilities;
         private UserInputCollection _userInput;
@@ -67,24 +68,24 @@ namespace Assets.Scripts.CharacterControl
             // determine whether we're landing or free falling
             if (_isTouchingNothing && wasTouchingNothing
                 && playerStateCurrentFrame != CharacterState.ADDIND_THRUST_TO_JUMP
-                && playerStateCurrentFrame != CharacterState.BEGINNING_A_JUMP
+                && playerStateCurrentFrame != CharacterState.TRIGGER_JUMP
                 && playerStateCurrentFrame != CharacterState.EARLY_JUMP_CYCLE
-                && playerStateCurrentFrame != CharacterState.BEGINNING_TO_FALL)
+                && playerStateCurrentFrame != CharacterState.TRIGGER_FALL)
             {
                 SetState(CharacterState.FALLING);
             }
             else if (_isTouchingNothing && !wasTouchingNothing
                 && playerStateCurrentFrame != CharacterState.ADDIND_THRUST_TO_JUMP
-                && playerStateCurrentFrame != CharacterState.BEGINNING_A_JUMP
+                && playerStateCurrentFrame != CharacterState.TRIGGER_JUMP
                 && playerStateCurrentFrame != CharacterState.EARLY_JUMP_CYCLE
                 && playerStateCurrentFrame != CharacterState.EARLY_LANDING_CYCLE_H
                 && playerStateCurrentFrame != CharacterState.EARLY_LANDING_CYCLE_V)
             {
-                SetState(CharacterState.BEGINNING_TO_FALL);
+                SetState(CharacterState.TRIGGER_FALL);
             }
             else if (_isTouchingNothing && !wasTouchingNothing
                 && playerStateCurrentFrame != CharacterState.ADDIND_THRUST_TO_JUMP
-                && playerStateCurrentFrame != CharacterState.BEGINNING_A_JUMP
+                && playerStateCurrentFrame != CharacterState.TRIGGER_JUMP
                 && playerStateCurrentFrame != CharacterState.EARLY_JUMP_CYCLE
                 && playerStateCurrentFrame != CharacterState.EARLY_LANDING_CYCLE_H
                 && playerStateCurrentFrame != CharacterState.EARLY_LANDING_CYCLE_V)
@@ -97,14 +98,22 @@ namespace Assets.Scripts.CharacterControl
                 && playerStateCurrentFrame != CharacterState.EARLY_LANDING_CYCLE_H
                 && playerStateCurrentFrame != CharacterState.EARLY_LANDING_CYCLE_V)
             {
-                SetState(CharacterState.BEGINNING_A_LANDING_H);
+                SetState(CharacterState.TRIGGER_LANDING_H);
             }
             else if (wasTouchingNothing && _isTouchingPlatformForward
                 && playerStateCurrentFrame != CharacterState.EARLY_JUMP_CYCLE
                 && _characterOrienter.thrustingDirection == FacingDirection.UP
                 && movementCapabilities.canWallCrawl)
             {
-                SetState(CharacterState.BEGINNING_A_LANDING_V);
+                SetState(CharacterState.TRIGGER_LANDING_V);
+            }
+            else if (wasTouchingNothing && _isTouchingPlatformWithBack
+                && playerStateCurrentFrame != CharacterState.EARLY_JUMP_CYCLE
+                && _characterOrienter.thrustingDirection == FacingDirection.UP
+                && movementCapabilities.canCeilingCrawl)
+            {
+                SetState(CharacterState.TRIGGER_LANDING_CEILING);
+                LoggerCustom.INFO("BITCHES");
             }
             else if (wasTouchingNothing && _isTouchingPlatformForward
                 && playerStateCurrentFrame != CharacterState.EARLY_LANDING_CYCLE_H
@@ -113,10 +122,10 @@ namespace Assets.Scripts.CharacterControl
                 && _characterOrienter.thrustingDirection == FacingDirection.UP
                 && !movementCapabilities.canWallCrawl)
             {
-                SetState(CharacterState.BEGINNING_TO_FALL);
+                SetState(CharacterState.TRIGGER_FALL);
             }
             // figure out if we're running
-            else if (playerStateCurrentFrame != CharacterState.BEGINNING_A_JUMP
+            else if (playerStateCurrentFrame != CharacterState.TRIGGER_JUMP
                 && playerStateCurrentFrame != CharacterState.EARLY_JUMP_CYCLE
                 && playerStateCurrentFrame != CharacterState.ADDIND_THRUST_TO_JUMP
                 && _isTouchingPlatformWithBelly
@@ -138,10 +147,11 @@ namespace Assets.Scripts.CharacterControl
             // figure out if we're idle
             // check we're not jumping before we put it in idle
             else if (playerStateCurrentFrame != CharacterState.ADDIND_THRUST_TO_JUMP
-                && playerStateCurrentFrame != CharacterState.BEGINNING_A_JUMP
+                && playerStateCurrentFrame != CharacterState.TRIGGER_JUMP
                 && playerStateCurrentFrame != CharacterState.EARLY_JUMP_CYCLE
-                && playerStateCurrentFrame != CharacterState.BEGINNING_A_LANDING_V
-                && playerStateCurrentFrame != CharacterState.BEGINNING_TO_FALL)
+                && playerStateCurrentFrame != CharacterState.TRIGGER_LANDING_V
+                && playerStateCurrentFrame != CharacterState.TRIGGER_LANDING_CEILING
+                && playerStateCurrentFrame != CharacterState.TRIGGER_FALL)
             {
                 SetState(CharacterState.IDLE);
 
@@ -187,7 +197,7 @@ namespace Assets.Scripts.CharacterControl
             // check to see if we are beginning a jump
             if (_userInput.isJumpPressed && CanWeBeginJump())
             {
-                SetState(CharacterState.BEGINNING_A_JUMP);
+                SetState(CharacterState.TRIGGER_JUMP);
             }
             // check to see if we need to start jumping
             // and start falling
@@ -199,12 +209,12 @@ namespace Assets.Scripts.CharacterControl
                     SetState(CharacterState.ADDIND_THRUST_TO_JUMP);
                     if (currentJumpThrust > _maxJumpThrust)
                     {
-                        SetState(CharacterState.BEGINNING_TO_FALL);
+                        SetState(CharacterState.TRIGGER_FALL);
                     }
                 }
                 if (_userInput.isJumpReleased)
                 {
-                    SetState(CharacterState.BEGINNING_TO_FALL);
+                    SetState(CharacterState.TRIGGER_FALL);
                 }
             }
         }
@@ -229,6 +239,7 @@ namespace Assets.Scripts.CharacterControl
             _isTouchingPlatformForward = false;
             _isTouchingPlatformWithBelly = IsCollidingWithPlatform(_collisionTransforms.bellyCheckTransform);
             _isTouchingPlatformForward = IsCollidingWithPlatform(_collisionTransforms.forwardCheckTransform);
+            _isTouchingPlatformWithBack = IsCollidingWithPlatform(_collisionTransforms.ceilingCheckTransform);
             _isTouchingNothing = (!_isTouchingPlatformWithBelly && !_isTouchingPlatformForward) ? true : false;
         } 
         #endregion

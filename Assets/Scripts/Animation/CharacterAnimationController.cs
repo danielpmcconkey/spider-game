@@ -30,19 +30,20 @@ namespace Assets.Scripts.Animation
             switch (characterState)
             {
                 case CharacterState.FALLING:
-                case CharacterState.BEGINNING_TO_FALL:
+                case CharacterState.TRIGGER_FALL:
                     newState = (isStarboardFacingCamera) ? AnimationState.FALLING_RIGHT : AnimationState.FALLING_LEFT;
                     break;
                 case CharacterState.RUNNING:
                     newState = (isStarboardFacingCamera) ? AnimationState.RUNNING_RIGHT : AnimationState.RUNNING_LEFT;
                     break;
-                case CharacterState.BEGINNING_A_JUMP:
+                case CharacterState.TRIGGER_JUMP:
                 case CharacterState.EARLY_JUMP_CYCLE:
                 case CharacterState.ADDIND_THRUST_TO_JUMP:
                     newState = (isStarboardFacingCamera) ? AnimationState.JUMPING_RIGHT : AnimationState.JUMPING_LEFT;
                     break;
-                case CharacterState.BEGINNING_A_LANDING_H:
-                case CharacterState.BEGINNING_A_LANDING_V:
+                case CharacterState.TRIGGER_LANDING_H:
+                case CharacterState.TRIGGER_LANDING_V:
+                case CharacterState.TRIGGER_LANDING_CEILING:
                 case CharacterState.EARLY_LANDING_CYCLE_H:
                 case CharacterState.EARLY_LANDING_CYCLE_V:
                     newState = (isStarboardFacingCamera) ? AnimationState.IDLE_RIGHT : AnimationState.IDLE_LEFT;
