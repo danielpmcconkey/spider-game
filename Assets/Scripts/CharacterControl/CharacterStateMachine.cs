@@ -25,12 +25,16 @@ namespace Assets.Scripts.CharacterControl
         private PlatformCollisionTransforms _collisionTransforms;
         private const float _platformContactCheckRadius = .2f; // Radius of the overlap circle to determine if touching a platform
         private float _maxJumpThrust;
+        private bool _isDebugModeOn = false;
+        private bool _isClutchEngaged = false;
 
 
         #region public methods
         public CharacterStateMachine(GameObject gameObject, PlatformCollisionTransforms collisionTransforms, 
-            float maxJumpThrust, CharacterOrienter characterOrienter)
+            float maxJumpThrust, CharacterOrienter characterOrienter, bool isDebugModeOn)
         {
+            _isDebugModeOn = isDebugModeOn;
+
             _gameObject = gameObject;
             _collisionTransforms = collisionTransforms;
             _maxJumpThrust = maxJumpThrust;
@@ -49,6 +53,12 @@ namespace Assets.Scripts.CharacterControl
              * transform in this method. Only update variables so that movement can 
              * happen in the FixedUpdate() method
              * */
+
+            // if the clutch is engaged, disable state transitions
+            // this is to prevent the character from falling off
+            // a wall just because their belly isn't touching during
+            // the rotation
+            if (_isClutchEngaged) return;   
 
             _movementCapabilities = movementCapabilities;
             _userInput = userInput;
@@ -113,7 +123,6 @@ namespace Assets.Scripts.CharacterControl
                 && movementCapabilities.canCeilingCrawl)
             {
                 SetState(CharacterState.TRIGGER_LANDING_CEILING);
-                LoggerCustom.INFO("BITCHES");
             }
             else if (wasTouchingNothing && _isTouchingPlatformForward
                 && playerStateCurrentFrame != CharacterState.EARLY_LANDING_CYCLE_H
@@ -167,6 +176,10 @@ namespace Assets.Scripts.CharacterControl
             playerStatePriorFrame = playerStateCurrentFrame;
 
         }
+        public void SetClutch(bool isEngaged)
+        {
+            _isClutchEngaged = isEngaged;
+        }
         public void SetState(CharacterState newState)
         {
             playerStateCurrentFrame = newState;
@@ -189,7 +202,6 @@ namespace Assets.Scripts.CharacterControl
                     //}
                 }
             }
-
             return canWeJump;
         }
         private void CheckJumpStates(float currentJumpThrust)

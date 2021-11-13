@@ -28,6 +28,7 @@ namespace Assets.Scripts.CharacterControl
         [SerializeField] public float maxJumpThrust = 30f;
         [Range(0, .3f)] [SerializeField] public float movementSmoothing = .05f;  // How much to smooth out the movement
         [SerializeField] public float gravityOnPlayer = 40f;
+        [SerializeField] public float rotationDegreesPerSecond = 720;
 
         [Header("Movement abilities")]
         [Space(10)]
@@ -45,7 +46,6 @@ namespace Assets.Scripts.CharacterControl
         [SerializeField] public LayerMask whatIsPlatform;  // A mask determining what is ground to the character 
         #endregion
 
-
         // private movement vars
         private CharacterMovementCapabilities _movementCapabilities;
         private CharacterStateMachine _stateMachine;
@@ -54,8 +54,10 @@ namespace Assets.Scripts.CharacterControl
         private float _currentJumpThrust;
         private Vector3 _velocity = Vector3.zero; // I don't know what it was but it was in the script I copied from
         private CharacterAnimationController _characterAnimationController;
-
-
+        private Vector3 _startRotation;
+        private Vector3 _targetRotation;
+        private float _clutchCountDown = 0f; // when > 0, then the clutch is engaged, disallowing state transitions
+        private float _numSecondsToEngageClutch = 0.25f;
 
         #region overrides of the base class
         private void Awake()
@@ -83,8 +85,9 @@ namespace Assets.Scripts.CharacterControl
                 ceilingCheckTransform = ceilingCheckTransform,
                 whatIsPlatform = whatIsPlatform
             };
-            _stateMachine = new CharacterStateMachine(gameObject, collisionTransforms, maxJumpThrust, _characterOrienter);
-            // todo: add _isDebugModeOn to statemachine
+            _stateMachine = new CharacterStateMachine(gameObject, collisionTransforms, maxJumpThrust, 
+                _characterOrienter, isDebugModeOn);
+            
             _characterAnimationController = new CharacterAnimationController(animator, isDebugModeOn);
 
 
@@ -129,6 +132,13 @@ namespace Assets.Scripts.CharacterControl
                 LandCeiling();
             }
 
+            if (_clutchCountDown > 0f)
+            {
+                _stateMachine.SetClutch(true);
+                _clutchCountDown -= Time.deltaTime;
+            }
+            else _stateMachine.SetClutch(false);
+
         }
         private void FixedUpdate()
         {
@@ -172,6 +182,9 @@ namespace Assets.Scripts.CharacterControl
 
             // apply artifical gravity based on which way we're facing
             ApplyArtificalGravity();
+
+            // slowly rotatate character towards target
+            RotateCharacterByStep();
 
             if (isDebugModeOn) WriteDebugInfoToUi();
         }
@@ -412,74 +425,38 @@ namespace Assets.Scripts.CharacterControl
                 SetFacingDirections(FacingDirection.UP, _characterOrienter.thrustingDirection);
             }
         }
+        private void RotateCharacterByStep()
+        {
+            float degreesNow = rotationDegreesPerSecond * Time.deltaTime;
+            Quaternion targetQuaternion = Quaternion.Euler(_targetRotation);
+            transform.localRotation = Quaternion.RotateTowards(transform.localRotation, targetQuaternion, degreesNow);
+        }
         private void SetFacingDirections(FacingDirection heading, FacingDirection thrusting)
         {
-            Vector3 targetRotation = new Vector3(
-                transform.rotation.x, transform.rotation.y, transform.rotation.z);
-            switch (heading)
+            if (_characterOrienter.headingDirection == heading && _characterOrienter.thrustingDirection == thrusting)
             {
-                case FacingDirection.RIGHT:
-                    if (thrusting == FacingDirection.UP)
-                    {
-                        targetRotation.x = 0;
-                        targetRotation.y = 0;
-                        targetRotation.z = 0;
-                    }
-                    else if (thrusting == FacingDirection.DOWN)
-                    {
-                        targetRotation.x = 0;
-                        targetRotation.y = 180;
-                        targetRotation.z = 180;
-                    }
-                    break;
-                case FacingDirection.LEFT:
-                    if (thrusting == FacingDirection.UP)
-                    {
-                        targetRotation.x = 0;
-                        targetRotation.y = 180;
-                        targetRotation.z = 0;
-                    }
-                    else if (thrusting == FacingDirection.DOWN)
-                    {
-                        targetRotation.x = 0;
-                        targetRotation.y = 0;
-                        targetRotation.z = 180;
-                    }
-                    break;
-                case FacingDirection.UP:
-                    if (thrusting == FacingDirection.LEFT)
-                    {
-                        targetRotation.x = 0;
-                        targetRotation.y = 0;
-                        targetRotation.z = 90;
-                    }
-                    else if (thrusting == FacingDirection.RIGHT)
-                    {
-                        targetRotation.x = 0;
-                        targetRotation.y = 180;
-                        targetRotation.z = 90;
-                    }
-                    break;
-                case FacingDirection.DOWN:
-                    if (thrusting == FacingDirection.LEFT)
-                    {
-                        targetRotation.x = 0;
-                        targetRotation.y = 180;
-                        targetRotation.z = -90;
-                    }
-                    else if (thrusting == FacingDirection.RIGHT)
-                    {
-                        targetRotation.x = 0;
-                        targetRotation.y = 0;
-                        targetRotation.z = -90;
-                    }
-                    break;
+                return;
             }
-            transform.localRotation = Quaternion.Euler(targetRotation);
 
-            // finally, assign new heading and thrusting directions
+            // we've got a change in orientation
+            RotationTarget rotator = new RotationTarget() {
+                currentHeadingDirection = _characterOrienter.headingDirection,
+                currentThrustingDirection = _characterOrienter.thrustingDirection,
+                targetHeadingDirection = heading,
+                targetThrustingDirection = thrusting,
+            };
+            rotator = RotationHelper.getRotationVectors(rotator);
+            // update our starting rotation so we
+            // have a baseline for timing rotations
+            _startRotation = rotator.startingRotation;
+            _targetRotation = rotator.targetRotation;
+
             _characterOrienter.SetHeadingDirection(heading);
             _characterOrienter.SetThrustingDirection(thrusting);
+
+            // set the clutch to ensure we don't have any state
+            // transitions while rotating
+            _clutchCountDown = _numSecondsToEngageClutch;
         }
         private void StopH()
         {
@@ -501,10 +478,14 @@ namespace Assets.Scripts.CharacterControl
             LoggerCustom.DEBUG(string.Format("{0}|{1}", "runSpeed", runSpeed));
             LoggerCustom.DEBUG(string.Format("{0}|{1}", "jumpThrustPerSecond", jumpThrustPerSecond));
             LoggerCustom.DEBUG(string.Format("{0}|{1}", "maxJumpThrust", maxJumpThrust));
+            LoggerCustom.DEBUG(string.Format("{0}|{1}", "initialJumpThrust", initialJumpThrust));
+            LoggerCustom.DEBUG(string.Format("{0}|{1}", "rotationDegreesPerSecond", rotationDegreesPerSecond));
             LoggerCustom.DEBUG(string.Format("{0}|{1}", "movementSmoothing", movementSmoothing));
             LoggerCustom.DEBUG(string.Format("{0}|{1}", "gravityOnPlayer", gravityOnPlayer));
             LoggerCustom.DEBUG(string.Format("{0}|{1}", "isHorizontalMovementInAirAllowed", _movementCapabilities.isHorizontalMovementInAirAllowed));
             LoggerCustom.DEBUG(string.Format("{0}|{1}", "canWallCrall", _movementCapabilities.canWallCrawl));
+            LoggerCustom.DEBUG(string.Format("{0}|{1}", "canCeilingCrawl", _movementCapabilities.canCeilingCrawl));
+            LoggerCustom.DEBUG(string.Format("{0}|{1}", "isHorizontalMovementInAirAllowed", _movementCapabilities.isHorizontalMovementInAirAllowed));
             LoggerCustom.INFO("**********************************************************************************");
         }
         private void WriteDebugInfoToUi()
