@@ -28,24 +28,26 @@ namespace Assets.Scripts.CharacterControl
         private bool _isDebugModeOn = false;
         private bool _isClutchEngaged = false;
 
+        private float _currentCorneringCounter = 0f; //
+        private float _corneringTimeRequired;
+
 
         #region public methods
         public CharacterStateMachine(GameObject gameObject, PlatformCollisionTransforms collisionTransforms, 
-            float maxJumpThrust, CharacterOrienter characterOrienter, bool isDebugModeOn)
+            CharacterOrienter characterOrienter, bool isDebugModeOn)
         {
             _isDebugModeOn = isDebugModeOn;
 
             _gameObject = gameObject;
             _collisionTransforms = collisionTransforms;
-            _maxJumpThrust = maxJumpThrust;
+            
             _characterOrienter = characterOrienter;
 
             playerStateCurrentFrame = CharacterState.IDLE;
             playerStatePriorFrame = CharacterState.IDLE;
         }
-        public void CheckState(CharacterMovementCapabilities movementCapabilities,
-            UserInputCollection userInput,
-            float currentJumpThrust)
+        public void CheckState(CharacterMovementCapabilities movementCapabilities, UserInputCollection userInput, 
+            float currentJumpThrust, float maxJumpThrust, float corneringTimeRequired)
         {
             /*
              * check the "state" of the player every frame. This means to check whether
@@ -63,6 +65,8 @@ namespace Assets.Scripts.CharacterControl
             _movementCapabilities = movementCapabilities;
             _userInput = userInput;
 
+            _corneringTimeRequired = corneringTimeRequired;
+
             bool wasTouchingNothing = _isTouchingNothing;
             bool wasTouchingPlatformWithBelly = _isTouchingPlatformWithBelly;
             bool wasTouchingPlatformForward = _isTouchingPlatformForward;
@@ -73,7 +77,9 @@ namespace Assets.Scripts.CharacterControl
 
             // figure out if we're beginning a jump, feuling an 
             // existing jump, or reading to start falling again
+            _maxJumpThrust = maxJumpThrust;
             CheckJumpStates(currentJumpThrust);
+            
 
             // determine whether we're landing or free falling
             if (_isTouchingNothing && wasTouchingNothing
@@ -83,6 +89,7 @@ namespace Assets.Scripts.CharacterControl
                 && playerStateCurrentFrame != CharacterState.TRIGGER_FALL)
             {
                 SetState(CharacterState.FALLING);
+                _currentCorneringCounter = 0;
             }
             else if (_isTouchingNothing && !wasTouchingNothing
                 && playerStateCurrentFrame != CharacterState.ADDIND_THRUST_TO_JUMP
@@ -93,15 +100,15 @@ namespace Assets.Scripts.CharacterControl
             {
                 SetState(CharacterState.TRIGGER_FALL);
             }
-            else if (_isTouchingNothing && !wasTouchingNothing
-                && playerStateCurrentFrame != CharacterState.ADDIND_THRUST_TO_JUMP
-                && playerStateCurrentFrame != CharacterState.TRIGGER_JUMP
-                && playerStateCurrentFrame != CharacterState.EARLY_JUMP_CYCLE
-                && playerStateCurrentFrame != CharacterState.EARLY_LANDING_CYCLE_H
-                && playerStateCurrentFrame != CharacterState.EARLY_LANDING_CYCLE_V)
-            {
-                SetState(CharacterState.FALLING);
-            }
+            //else if (_isTouchingNothing && !wasTouchingNothing
+            //    && playerStateCurrentFrame != CharacterState.ADDIND_THRUST_TO_JUMP
+            //    && playerStateCurrentFrame != CharacterState.TRIGGER_JUMP
+            //    && playerStateCurrentFrame != CharacterState.EARLY_JUMP_CYCLE
+            //    && playerStateCurrentFrame != CharacterState.EARLY_LANDING_CYCLE_H
+            //    && playerStateCurrentFrame != CharacterState.EARLY_LANDING_CYCLE_V)
+            //{
+            //    SetState(CharacterState.FALLING);
+            //}
             else if (wasTouchingNothing && _isTouchingPlatformWithBelly
                 && playerStateCurrentFrame != CharacterState.EARLY_JUMP_CYCLE
                 && _characterOrienter.thrustingDirection == FacingDirection.UP
@@ -113,14 +120,14 @@ namespace Assets.Scripts.CharacterControl
             else if (wasTouchingNothing && _isTouchingPlatformForward
                 && playerStateCurrentFrame != CharacterState.EARLY_JUMP_CYCLE
                 && _characterOrienter.thrustingDirection == FacingDirection.UP
-                && movementCapabilities.canWallCrawl)
+                && _movementCapabilities.canWallCrawl)
             {
                 SetState(CharacterState.TRIGGER_LANDING_V);
             }
             else if (wasTouchingNothing && _isTouchingPlatformWithBack
                 && playerStateCurrentFrame != CharacterState.EARLY_JUMP_CYCLE
                 && _characterOrienter.thrustingDirection == FacingDirection.UP
-                && movementCapabilities.canCeilingCrawl)
+                && _movementCapabilities.canCeilingCrawl)
             {
                 SetState(CharacterState.TRIGGER_LANDING_CEILING);
             }
@@ -129,7 +136,7 @@ namespace Assets.Scripts.CharacterControl
                 && playerStateCurrentFrame != CharacterState.EARLY_LANDING_CYCLE_V
                 && playerStateCurrentFrame != CharacterState.EARLY_JUMP_CYCLE
                 && _characterOrienter.thrustingDirection == FacingDirection.UP
-                && !movementCapabilities.canWallCrawl)
+                && !_movementCapabilities.canWallCrawl)
             {
                 SetState(CharacterState.TRIGGER_FALL);
             }
@@ -138,6 +145,7 @@ namespace Assets.Scripts.CharacterControl
                 && playerStateCurrentFrame != CharacterState.EARLY_JUMP_CYCLE
                 && playerStateCurrentFrame != CharacterState.ADDIND_THRUST_TO_JUMP
                 && _isTouchingPlatformWithBelly
+                && !_isTouchingPlatformForward // make sure we're not trying to corner
                 && (
                         // facing left/right + moveHPressure
                         ((_characterOrienter.headingDirection == FacingDirection.LEFT 
@@ -153,6 +161,47 @@ namespace Assets.Scripts.CharacterControl
             {
                 SetState(CharacterState.RUNNING);
             }
+            // figure out if we're at a corner, trying to climb a call
+            else if (_movementCapabilities.canWallCrawl
+                && playerStateCurrentFrame != CharacterState.TRIGGER_JUMP
+                && playerStateCurrentFrame != CharacterState.EARLY_JUMP_CYCLE
+                && playerStateCurrentFrame != CharacterState.ADDIND_THRUST_TO_JUMP
+                && _isTouchingPlatformWithBelly && _isTouchingPlatformForward
+                && (
+                        // can wall crawl and moving toward a wall
+                        (_movementCapabilities.canWallCrawl
+                        && (
+                            // facing right + positive moveHPressure
+                            (_characterOrienter.headingDirection == FacingDirection.RIGHT
+                            && userInput.moveHPressure > 0)
+                            || // facing left + negative moveHPressure
+                            (_characterOrienter.headingDirection == FacingDirection.LEFT
+                            && userInput.moveHPressure < 0)
+                        ))
+                        || // can ceiling crawl and moving toward a ceiling
+                        (_movementCapabilities.canCeilingCrawl
+                        && (
+                            // facing up + positive moveVPressure
+                            (_characterOrienter.headingDirection == FacingDirection.UP
+                            && userInput.moveVPressure > 0)
+                        ))
+                        || // facing down + negative moveVPressure. no special capability req'd
+                        (_characterOrienter.headingDirection == FacingDirection.DOWN
+                        && userInput.moveVPressure < 0)
+                    )
+                )
+            {
+                // check if we've done this enough time
+                _currentCorneringCounter += Time.deltaTime;
+                LoggerCustom.DEBUG("At a corner. Current counter: " + _currentCorneringCounter);
+                if (_currentCorneringCounter >= corneringTimeRequired)
+                {
+                    LoggerCustom.DEBUG("triggering a corner");
+                    // begin a corner
+                    SetState(CharacterState.TRIGGER_CORNER);
+                    _currentCorneringCounter = 0;
+                }
+            }
             // figure out if we're idle
             // check we're not jumping before we put it in idle
             else if (playerStateCurrentFrame != CharacterState.ADDIND_THRUST_TO_JUMP
@@ -163,8 +212,9 @@ namespace Assets.Scripts.CharacterControl
                 && playerStateCurrentFrame != CharacterState.TRIGGER_FALL)
             {
                 SetState(CharacterState.IDLE);
-
+                _currentCorneringCounter = 0;
             }
+
 
 
 

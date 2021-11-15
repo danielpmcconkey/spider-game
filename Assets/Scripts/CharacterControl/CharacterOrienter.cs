@@ -7,7 +7,7 @@ using System.Threading.Tasks;
 
 namespace Assets.Scripts.CharacterControl
 {
-    public enum FacingDirection { RIGHT, LEFT, UP, DOWN }
+    public enum FacingDirection { RIGHT = 0, UP = 1, LEFT = 2, DOWN = 3 }
 
     public class CharacterOrienter
     {
@@ -27,6 +27,14 @@ namespace Assets.Scripts.CharacterControl
             _headingDirection = FacingDirection.RIGHT;
             _thrustingDirection = FacingDirection.UP;
             _gravityDirection = FacingDirection.DOWN;
+        }
+        public FacingDirection GetOppositeDirection(FacingDirection direction)
+        {
+            int directionInt = (int)direction;
+            int oppositeDirectionInt = directionInt + 2;
+            if (oppositeDirectionInt > 3) oppositeDirectionInt -= 4;
+            FacingDirection oppositeDirection = (FacingDirection)oppositeDirectionInt;
+            return oppositeDirection;
         }
         public void SetGravityDirection(FacingDirection newDir)
         {

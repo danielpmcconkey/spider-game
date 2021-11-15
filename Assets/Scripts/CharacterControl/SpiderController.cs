@@ -29,6 +29,7 @@ namespace Assets.Scripts.CharacterControl
         [Range(0, .3f)] [SerializeField] public float movementSmoothing = .05f;  // How much to smooth out the movement
         [SerializeField] public float gravityOnPlayer = 40f;
         [SerializeField] public float rotationDegreesPerSecond = 720;
+        [SerializeField] public float corneringTimeRequired = 0.5f; // time it takes in seconds to begin to crawl up a wall
 
         [Header("Movement abilities")]
         [Space(10)]
@@ -85,7 +86,7 @@ namespace Assets.Scripts.CharacterControl
                 ceilingCheckTransform = ceilingCheckTransform,
                 whatIsPlatform = whatIsPlatform
             };
-            _stateMachine = new CharacterStateMachine(gameObject, collisionTransforms, maxJumpThrust, 
+            _stateMachine = new CharacterStateMachine(gameObject, collisionTransforms, 
                 _characterOrienter, isDebugModeOn);
             
             _characterAnimationController = new CharacterAnimationController(animator, isDebugModeOn);
@@ -105,7 +106,17 @@ namespace Assets.Scripts.CharacterControl
         {
             LoggerCustom.SetFrameCount(Time.frameCount);
             CheckUserInupt();
-            _stateMachine.CheckState(_movementCapabilities, _userInput, _currentJumpThrust);
+
+            // update _movementCapabilities in case Unity updated them
+            // this may not be needed for final code, but it makes 
+            // testing easier
+            _movementCapabilities = new CharacterMovementCapabilities()
+            {
+                canWallCrawl = this.canWallCrawl,
+                canCeilingCrawl = this.canCeilingCrawl,
+                isHorizontalMovementInAirAllowed = this.isHorizontalMovementInAirAllowed,
+            };
+            _stateMachine.CheckState(_movementCapabilities, _userInput, _currentJumpThrust, maxJumpThrust, corneringTimeRequired);
             _characterAnimationController.SetState(_stateMachine.playerStateCurrentFrame, _characterOrienter);
             // act on the trigger states. these states
             // shouldn't move the character. Just trigger
@@ -113,11 +124,11 @@ namespace Assets.Scripts.CharacterControl
             // next FixedUpdate()
             if (_stateMachine.playerStateCurrentFrame == CharacterState.TRIGGER_JUMP)
             {
-                BeginJump();
+                TriggerJump();
             }
             if (_stateMachine.playerStateCurrentFrame == CharacterState.TRIGGER_FALL)
             {
-                BeginFall();
+                TriggerFall();
             }
             if (_stateMachine.playerStateCurrentFrame == CharacterState.TRIGGER_LANDING_H)
             {
@@ -130,6 +141,10 @@ namespace Assets.Scripts.CharacterControl
             if (_stateMachine.playerStateCurrentFrame == CharacterState.TRIGGER_LANDING_CEILING)
             {
                 LandCeiling();
+            }
+            if (_stateMachine.playerStateCurrentFrame == CharacterState.TRIGGER_CORNER)
+            {
+                TriggerCorner();
             }
 
             if (_clutchCountDown > 0f)
@@ -184,7 +199,10 @@ namespace Assets.Scripts.CharacterControl
             ApplyArtificalGravity();
 
             // slowly rotatate character towards target
-            RotateCharacterByStep();
+            // keep this code as a reference. We're going to rotate 
+            // the character immediately so that we don't have to fuss
+            // with the clutch any more. But keep this here as a reference
+            // RotateCharacterByStep();
 
             if (isDebugModeOn) WriteDebugInfoToUi();
         }
@@ -243,6 +261,7 @@ namespace Assets.Scripts.CharacterControl
         }
         private void ApplyDirectionalMovementForceH()
         {
+            if (_userInput.moveHPressure == 0) return;
             if (_characterOrienter.headingDirection == FacingDirection.RIGHT
                 || _characterOrienter.headingDirection == FacingDirection.LEFT)
             {
@@ -281,40 +300,6 @@ namespace Assets.Scripts.CharacterControl
             }
             //rigidBody2D.AddForce(thrust);
             rigidBody2D.velocity += thrust;
-        }
-        private void BeginFall()
-        {
-            LoggerCustom.DEBUG("Begin falling");
-
-            FacingDirection targetHeading = _characterOrienter.headingDirection;
-            if (_characterOrienter.headingDirection == FacingDirection.UP && _characterOrienter.thrustingDirection == FacingDirection.LEFT)
-            {
-                targetHeading = FacingDirection.RIGHT;
-            }
-            if (_characterOrienter.headingDirection == FacingDirection.UP && _characterOrienter.thrustingDirection == FacingDirection.RIGHT)
-            {
-                targetHeading = FacingDirection.LEFT;
-            }
-            if (_characterOrienter.headingDirection == FacingDirection.DOWN && _characterOrienter.thrustingDirection == FacingDirection.LEFT)
-            {
-                targetHeading = FacingDirection.LEFT;
-            }
-            if (_characterOrienter.headingDirection == FacingDirection.DOWN && _characterOrienter.thrustingDirection == FacingDirection.RIGHT)
-            {
-                targetHeading = FacingDirection.RIGHT;
-            }
-            SetFacingDirections(targetHeading, FacingDirection.UP);
-
-
-            _currentJumpThrust = 0f;
-            _stateMachine.SetState(CharacterState.FALLING);
-        }
-        private void BeginJump()
-        {
-            LoggerCustom.DEBUG("Begin jump");
-            _currentJumpThrust = 0;
-            ApplyJumpForce(initialJumpThrust);
-            _stateMachine.SetState(CharacterState.EARLY_JUMP_CYCLE);
         }
         private void CheckUserInupt()
         {
@@ -427,6 +412,9 @@ namespace Assets.Scripts.CharacterControl
         }
         private void RotateCharacterByStep()
         {
+            // keep this code as a reference. We're going to rotate 
+            // the character immediately so that we don't have to fuss
+            // with the clutch any more. But keep this here as a reference
             float degreesNow = rotationDegreesPerSecond * Time.deltaTime;
             Quaternion targetQuaternion = Quaternion.Euler(_targetRotation);
             transform.localRotation = Quaternion.RotateTowards(transform.localRotation, targetQuaternion, degreesNow);
@@ -451,12 +439,14 @@ namespace Assets.Scripts.CharacterControl
             _startRotation = rotator.startingRotation;
             _targetRotation = rotator.targetRotation;
 
+            transform.localRotation = Quaternion.Euler(_targetRotation);
+
             _characterOrienter.SetHeadingDirection(heading);
             _characterOrienter.SetThrustingDirection(thrusting);
 
             // set the clutch to ensure we don't have any state
             // transitions while rotating
-            _clutchCountDown = _numSecondsToEngageClutch;
+            //_clutchCountDown = _numSecondsToEngageClutch;
         }
         private void StopH()
         {
@@ -465,6 +455,65 @@ namespace Assets.Scripts.CharacterControl
         private void StopV()
         {
             rigidBody2D.velocity = new Vector2(rigidBody2D.velocity.x, 0);
+        }
+        private void TriggerCorner()
+        {
+            LoggerCustom.DEBUG("Begin cornering");
+
+            // calculate target orientation and gravity
+            // new heading should be old thrusting direction
+            // new thrusting should be the opposite of old
+            // heading direction. gravity should be old 
+            // heading direction
+            FacingDirection oldHeading = _characterOrienter.headingDirection;
+            FacingDirection oldThrusting = _characterOrienter.thrustingDirection;
+            FacingDirection newHeading = oldThrusting;
+            FacingDirection newThrusting = _characterOrienter.GetOppositeDirection(oldHeading);
+            FacingDirection newGravity = oldHeading;
+
+            // update orientation
+            SetFacingDirections(newHeading, newThrusting);
+
+            // change gravity
+
+
+            // change state to falling
+            _stateMachine.SetState(CharacterState.FALLING);
+
+        }
+        private void TriggerFall()
+        {
+            LoggerCustom.DEBUG("Begin falling");
+
+            FacingDirection targetHeading = _characterOrienter.headingDirection;
+            if (_characterOrienter.headingDirection == FacingDirection.UP && _characterOrienter.thrustingDirection == FacingDirection.LEFT)
+            {
+                targetHeading = FacingDirection.RIGHT;
+            }
+            if (_characterOrienter.headingDirection == FacingDirection.UP && _characterOrienter.thrustingDirection == FacingDirection.RIGHT)
+            {
+                targetHeading = FacingDirection.LEFT;
+            }
+            if (_characterOrienter.headingDirection == FacingDirection.DOWN && _characterOrienter.thrustingDirection == FacingDirection.LEFT)
+            {
+                targetHeading = FacingDirection.LEFT;
+            }
+            if (_characterOrienter.headingDirection == FacingDirection.DOWN && _characterOrienter.thrustingDirection == FacingDirection.RIGHT)
+            {
+                targetHeading = FacingDirection.RIGHT;
+            }
+            SetFacingDirections(targetHeading, FacingDirection.UP);
+
+
+            _currentJumpThrust = 0f;
+            _stateMachine.SetState(CharacterState.FALLING);
+        }
+        private void TriggerJump()
+        {
+            LoggerCustom.DEBUG("Begin jump");
+            _currentJumpThrust = 0;
+            ApplyJumpForce(initialJumpThrust);
+            _stateMachine.SetState(CharacterState.EARLY_JUMP_CYCLE);
         }
         #endregion
 

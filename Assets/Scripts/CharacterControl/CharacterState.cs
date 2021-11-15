@@ -22,5 +22,6 @@ namespace Assets.Scripts.CharacterControl
         TRIGGER_LANDING_V,          // the single frame that starts landing activities
         TRIGGER_LANDING_CEILING,    // the single frame that starts landing activities
         TRIGGER_FALL,               // the single frame that starts fall activities
+        TRIGGER_CORNER,             // We're about to start wall crawling
     }
 }
