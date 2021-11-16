@@ -13,5 +13,6 @@ namespace Assets.Scripts.CharacterControl
         public bool isJumpPressed;
         public bool isJumpReleased;
         public bool isJumpHeldDown;
+        public bool isHookShotButtonPressed;
     }
 }

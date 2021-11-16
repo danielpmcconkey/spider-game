@@ -80,9 +80,15 @@ namespace Assets.Scripts.CharacterControl
             _maxJumpThrust = maxJumpThrust;
             CheckJumpStates(currentJumpThrust);
             
+            // determine hookshot trigger
+            if(_userInput.isHookShotButtonPressed)
+            {
+                SetState(CharacterState.TRIGGER_HOOKSHOT);
+                _currentCorneringCounter = 0;
+            }
 
             // determine whether we're landing or free falling
-            if (_isTouchingNothing && wasTouchingNothing
+            else if (_isTouchingNothing && wasTouchingNothing
                 && playerStateCurrentFrame != CharacterState.ADDIND_THRUST_TO_JUMP
                 && playerStateCurrentFrame != CharacterState.TRIGGER_JUMP
                 && playerStateCurrentFrame != CharacterState.EARLY_JUMP_CYCLE

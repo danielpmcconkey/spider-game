@@ -30,6 +30,8 @@ namespace Assets.Scripts.CharacterControl
         [SerializeField] public float gravityOnPlayer = 40f;
         [SerializeField] public float rotationDegreesPerSecond = 720;
         [SerializeField] public float corneringTimeRequired = 0.5f; // time it takes in seconds to begin to crawl up a wall
+        [SerializeField] public float hookshotForce = 35f;
+        [SerializeField] public float hookshotMaxDistance = 8f;
 
         [Header("Movement abilities")]
         [Space(10)]
@@ -45,6 +47,8 @@ namespace Assets.Scripts.CharacterControl
         [SerializeField] public Transform forwardCheckTransform;
         [SerializeField] public Transform ceilingCheckTransform;
         [SerializeField] public LayerMask whatIsPlatform;  // A mask determining what is ground to the character 
+        [SerializeField] public Transform targetingReticuleTransform;
+        [SerializeField] public LineRenderer hookshotBeam;
         #endregion
 
         // private movement vars
@@ -58,7 +62,7 @@ namespace Assets.Scripts.CharacterControl
         private Vector3 _startRotation;
         private Vector3 _targetRotation;
         private float _clutchCountDown = 0f; // when > 0, then the clutch is engaged, disallowing state transitions
-        private float _numSecondsToEngageClutch = 0.25f;
+        //private float _numSecondsToEngageClutch = 0.25f;
 
         #region overrides of the base class
         private void Awake()
@@ -146,6 +150,10 @@ namespace Assets.Scripts.CharacterControl
             {
                 TriggerCorner();
             }
+            if (_stateMachine.playerStateCurrentFrame == CharacterState.TRIGGER_HOOKSHOT)
+            {
+                StartCoroutine(TriggerHookshot());
+            }
 
             if (_clutchCountDown > 0f)
             {
@@ -204,7 +212,10 @@ namespace Assets.Scripts.CharacterControl
             // with the clutch any more. But keep this here as a reference
             // RotateCharacterByStep();
 
+            TrackTargetingReticlueToMousePosition();
+
             if (isDebugModeOn) WriteDebugInfoToUi();
+
         }
         void OnDestroy()
         {
@@ -309,7 +320,7 @@ namespace Assets.Scripts.CharacterControl
             _userInput.isJumpPressed = Input.GetButtonDown("Jump");
             _userInput.isJumpReleased = Input.GetButtonUp("Jump");
             _userInput.isJumpHeldDown = Input.GetButton("Jump");
-
+            _userInput.isHookShotButtonPressed = Input.GetButtonDown("Fire3");
 
             if (_userInput.isJumpPressed)
             {
@@ -319,6 +330,12 @@ namespace Assets.Scripts.CharacterControl
             {
                 LoggerCustom.DEBUG("Released jump");
             }
+            if (_userInput.isHookShotButtonPressed)
+            {
+                LoggerCustom.DEBUG(string.Format("Pressed hookshot button at {0}, {1}", 
+                    targetingReticuleTransform.position.x, targetingReticuleTransform.position.y));
+            }
+            
         }
         private void Land()
         {
@@ -456,6 +473,12 @@ namespace Assets.Scripts.CharacterControl
         {
             rigidBody2D.velocity = new Vector2(rigidBody2D.velocity.x, 0);
         }
+        private void TrackTargetingReticlueToMousePosition()
+        {
+            Vector3 mousePosition = Camera.main.ScreenToWorldPoint(Input.mousePosition);
+            mousePosition.z = 0;
+            targetingReticuleTransform.position = mousePosition;
+        }
         private void TriggerCorner()
         {
             LoggerCustom.DEBUG("Begin cornering");
@@ -514,6 +537,51 @@ namespace Assets.Scripts.CharacterControl
             _currentJumpThrust = 0;
             ApplyJumpForce(initialJumpThrust);
             _stateMachine.SetState(CharacterState.EARLY_JUMP_CYCLE);
+        }
+        private IEnumerator TriggerHookshot()
+        {
+            LoggerCustom.DEBUG("Begin hookshot");
+            _currentJumpThrust = 0;
+            //Vector2 directionOfThrust = (targetingReticuleTransform.position - transform.position).normalized;
+            
+            // how to raycast https://www.youtube.com/watch?v=wkKsl1Mfp5M
+            // raycasting starts at 13:38 
+
+            // set up the ray cast
+            Vector2 firePoint = ceilingCheckTransform.position;
+            Vector2 targetDirection = new Vector2(targetingReticuleTransform.position.x, targetingReticuleTransform.position.y)
+                - firePoint;
+            float distanceBetween = targetDirection.magnitude;
+            Vector2 normalizedDirection = targetDirection / distanceBetween;
+
+            // fire it and see what it hit
+            RaycastHit2D hitInfo = Physics2D.Raycast(firePoint, normalizedDirection, 
+                hookshotMaxDistance, whatIsPlatform.value);
+            if(hitInfo)
+            {
+                LoggerCustom.DEBUG(string.Format("Hookshot hit {0} at {1}, {2}", hitInfo.transform.name,
+                    hitInfo.transform.position.x, hitInfo.transform.position.y));
+
+                // thrust out in that direction too
+                Vector2 thrust = normalizedDirection * hookshotForce;
+                rigidBody2D.velocity += thrust;
+
+                // now draw the grapple beam
+                hookshotBeam.SetPosition(0, firePoint);
+                hookshotBeam.SetPosition(1, hitInfo.point);
+                
+            }
+            else
+            {
+                hookshotBeam.SetPosition(0, firePoint);
+                // todo: figure out how to make the hookshot "miss" look right
+                hookshotBeam.SetPosition(1, normalizedDirection * hookshotMaxDistance); 
+            }
+            // remember to make the beam display
+            hookshotBeam.enabled = true;
+            yield return new WaitForSeconds(0.25f);
+
+            hookshotBeam.enabled = false;
         }
         #endregion
 
