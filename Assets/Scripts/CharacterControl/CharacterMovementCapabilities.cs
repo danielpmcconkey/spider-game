@@ -9,7 +9,8 @@ namespace Assets.Scripts.CharacterControl
     public class CharacterMovementCapabilities
     {
         public bool canWallCrawl;
-        public bool canCeilingCrawl = true;
+        public bool canCeilingCrawl;
         public bool isHorizontalMovementInAirAllowed;
+        public bool canGrapple;
     }
 }

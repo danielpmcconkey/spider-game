@@ -20,7 +20,11 @@ namespace Assets.Scripts.Animation
             _animator = animator;
             _isDebugModeOn = isDebugModeOn;
         }
-        public void SetState(CharacterState characterState, CharacterOrienter characterOrienter)
+        public void SetState()
+        {
+            throw new NotImplementedException();
+        }
+        public void SetState(DEPRECATED_CharacterState characterState, CharacterOrienter characterOrienter)
         {
             AnimationState priorState = currentState;
             AnimationState newState = AnimationState.IDLE_RIGHT;
@@ -29,26 +33,26 @@ namespace Assets.Scripts.Animation
             bool isStarboardFacingCamera = IsStarboardFacingCamera(characterState, characterOrienter);
             switch (characterState)
             {
-                case CharacterState.FALLING:
-                case CharacterState.TRIGGER_FALL:
+                case DEPRECATED_CharacterState.DEPRECATED_FALLING:
+                case DEPRECATED_CharacterState.TRIGGER_FALL:
                     newState = (isStarboardFacingCamera) ? AnimationState.FALLING_RIGHT : AnimationState.FALLING_LEFT;
                     break;
-                case CharacterState.RUNNING:
+                case DEPRECATED_CharacterState.RUNNING:
                     newState = (isStarboardFacingCamera) ? AnimationState.RUNNING_RIGHT : AnimationState.RUNNING_LEFT;
                     break;
-                case CharacterState.TRIGGER_JUMP:
-                case CharacterState.EARLY_JUMP_CYCLE:
-                case CharacterState.ADDIND_THRUST_TO_JUMP:
+                case DEPRECATED_CharacterState.TRIGGER_JUMP:
+                case DEPRECATED_CharacterState.EARLY_JUMP_CYCLE:
+                case DEPRECATED_CharacterState.ADDIND_THRUST_TO_JUMP:
                     newState = (isStarboardFacingCamera) ? AnimationState.JUMPING_RIGHT : AnimationState.JUMPING_LEFT;
                     break;
-                case CharacterState.TRIGGER_LANDING_H:
-                case CharacterState.TRIGGER_LANDING_V:
-                case CharacterState.TRIGGER_LANDING_CEILING:
-                case CharacterState.EARLY_LANDING_CYCLE_H:
-                case CharacterState.EARLY_LANDING_CYCLE_V:
+                case DEPRECATED_CharacterState.TRIGGER_LANDING_H:
+                case DEPRECATED_CharacterState.TRIGGER_LANDING_V:
+                case DEPRECATED_CharacterState.TRIGGER_LANDING_CEILING:
+                case DEPRECATED_CharacterState.EARLY_LANDING_CYCLE_H:
+                case DEPRECATED_CharacterState.EARLY_LANDING_CYCLE_V:
                     newState = (isStarboardFacingCamera) ? AnimationState.IDLE_RIGHT : AnimationState.IDLE_LEFT;
                     break;
-                case CharacterState.IDLE:
+                case DEPRECATED_CharacterState.DEPRECATED_IDLE:
                 default:
                     newState = (isStarboardFacingCamera) ? AnimationState.IDLE_RIGHT : AnimationState.IDLE_LEFT;
                     break;
@@ -62,7 +66,7 @@ namespace Assets.Scripts.Animation
             currentState = newState;
             SetAnimatorVariables();
         }
-        private bool IsStarboardFacingCamera(CharacterState characterState, CharacterOrienter characterOrienter)
+        private bool IsStarboardFacingCamera(DEPRECATED_CharacterState characterState, CharacterOrienter characterOrienter)
         {
             switch (characterOrienter.headingDirection)
             {
@@ -156,5 +160,6 @@ namespace Assets.Scripts.Animation
             }
         }
 
+        
     }
 }
