@@ -99,7 +99,7 @@ namespace Assets.Scripts.CharacterControl
             LoggerCustom.INFO("**********************************************************************************");
             LoggerCustom.DEBUG(string.Format("{0}|{1}", "isDebugModeOn", isDebugModeOn));
             LoggerCustom.DEBUG(string.Format("{0}|{1}", "debugLogFileDirectory", debugLogFileDirectory));
-            LoggerCustom.DEBUG(string.Format("{0}|{1}", "runSpeed", runSpeed));
+            LoggerCustom.DEBUG(string.Format("{0}|{1}", "runSpeed", horizontalAcceleration));
             LoggerCustom.DEBUG(string.Format("{0}|{1}", "jumpThrustPerSecond", jumpThrustPerSecond));
             LoggerCustom.DEBUG(string.Format("{0}|{1}", "maxJumpThrust", maxJumpThrust));
             LoggerCustom.DEBUG(string.Format("{0}|{1}", "initialJumpThrust", initialJumpThrust));
@@ -116,11 +116,13 @@ namespace Assets.Scripts.CharacterControl
         private void WriteDebugInfoToUi()
         {
             StringBuilder sb = new StringBuilder();
-            sb.AppendLine(string.Format("Heading direction: {0}", characterOrienter.headingDirection));
-            sb.AppendLine(string.Format("Thrusting direction: {0}", characterOrienter.thrustingDirection));
-            sb.AppendLine(string.Format("Gravity direction: {0}", characterOrienter.gravityDirection));
-            sb.AppendLine(string.Format("Current jump thrust: {0}", currentJumpThrust));
+            //sb.AppendLine(string.Format("Heading direction: {0}", characterOrienter.headingDirection));
+            //sb.AppendLine(string.Format("Thrusting direction: {0}", characterOrienter.thrustingDirection));
+            //sb.AppendLine(string.Format("Gravity direction: {0}", characterOrienter.gravityDirection));
+            //sb.AppendLine(string.Format("Current jump thrust: {0}", currentJumpThrust));
+            sb.AppendLine(string.Format("Current state: {0}", _stateController.currentMovementState));
             sb.AppendLine(string.Format("Animation: {0}", characterAnimationController.currentState));
+            sb.AppendLine(string.Format("velocity: {0}", rigidBody2D.velocity));
 
             debugTextBox.text = sb.ToString();
         }

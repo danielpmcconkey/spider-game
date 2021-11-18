@@ -33,6 +33,7 @@ namespace Assets.Scripts.CharacterControl
         FLOATING,
         GROUNDED,
         TETHERED,
+        JUMP_ACCELERATING,
         //CORNERING,  // the state of transitioning between walking on the floor and walking on a wall (or vice versa)
     }
     

@@ -22,7 +22,9 @@ namespace Assets.Scripts.Animation
         }
         public void SetState()
         {
-            throw new NotImplementedException();
+            currentState = AnimationState.IDLE_RIGHT;
+            // todo: rework the animator state to match our new states
+            SetAnimatorVariables();
         }
         public void SetState(DEPRECATED_CharacterState characterState, CharacterOrienter characterOrienter)
         {

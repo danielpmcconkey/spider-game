@@ -18,7 +18,7 @@ namespace Assets.Scripts.CharacterControl
         [SerializeField] public string debugLogFileDirectory = string.Empty; // C:\Users\Dan\AppData\LocalLow\SpiderController\
         [Header("Movement parameters")]
         [Space(10)]
-        [SerializeField] public float runSpeed = 55f;
+        [SerializeField] public float horizontalAcceleration = 5.5f;
         [SerializeField] public float initialJumpThrust = 10f;
         [SerializeField] public float jumpThrustPerSecond = 80f;
         [SerializeField] public float maxJumpThrust = 30f;
@@ -28,6 +28,7 @@ namespace Assets.Scripts.CharacterControl
         [SerializeField] public float corneringTimeRequired = 0.5f; // time it takes in seconds to begin to crawl up a wall
         [SerializeField] public float grappleBeamForce = 35f;
         [SerializeField] public float grappleBeamMaxDistance = 8f;
+        [SerializeField] public float horizontalVelocityLimit = 6f;
 
         [Header("Movement abilities")]
         [Space(10)]
@@ -53,23 +54,229 @@ namespace Assets.Scripts.CharacterControl
         #region fields not set in unity
         // publically exposed read-only values
         public CharacterContacts characterContactsCurrentFrame { get; private set; }
-        public CharacterContacts characterContactsPriorFrame { get; private set; }
         public UserInputCollection userInput { get {return _userInput; } }
         public CharacterOrienter characterOrienter { get; private set; }
         public float currentJumpThrust { get; private set; }
         public CharacterAnimationController characterAnimationController { get; private set; }
 
         // private and protected members
-        private CharacterMovementStateController _stateController;
+        protected CharacterMovementStateController _stateController;
         private const float _platformContactCheckRadius = .2f; // Radius of the overlap circle to determine if touching a platform
         protected UserInputCollection _userInput;
-        
-        private Vector3 _velocity = Vector3.zero; // I don't know what it was but it was in the script I copied from
-        private Vector3 _startRotation;
+        protected Vector2 _forcesAccumulated;
         private Vector3 _targetRotation;
+        const float moveHValueNormalizer = 1000f; // multiply this value by the Horizontal acceleration parameter to make the force and velocity values seem on the same scale
 
         #endregion
 
+
+
+        #region Unity implementation methods
+        protected virtual void Awake()
+        {
+            _userInput = new UserInputCollection()
+            {
+                moveHPressure = 0f,
+                moveVPressure = 0f,
+                isJumpPressed = false,
+                isJumpReleased = false,
+                isJumpHeldDown = false,
+            };
+
+            characterOrienter = new CharacterOrienter(isDebugModeOn);
+
+            //PlatformCollisionTransforms collisionTransforms = new PlatformCollisionTransforms()
+            //{
+            //    bellyCheckTransform = bellyCheckTransform,
+            //    forwardCheckTransform = forwardCheckTransform,
+            //    ceilingCheckTransform = ceilingCheckTransform,
+            //    whatIsPlatform = whatIsPlatform
+            //};
+            _stateController = new CharacterMovementStateController(this, MovementState.FLOATING);
+
+            characterAnimationController = new CharacterAnimationController(animator, isDebugModeOn);
+
+            _forcesAccumulated = Vector2.zero;
+
+
+        }
+        protected virtual void FixedUpdate()
+        {
+            // apply the accumulation of physical forces
+            rigidBody2D.velocity += _forcesAccumulated;
+            if(rigidBody2D.velocity.x > horizontalVelocityLimit)
+            {
+                rigidBody2D.velocity = new Vector2(horizontalVelocityLimit, rigidBody2D.velocity.y);
+            }
+            if (rigidBody2D.velocity.x < (horizontalVelocityLimit * - 1))
+            {
+                rigidBody2D.velocity = new Vector2((horizontalVelocityLimit * -1), rigidBody2D.velocity.y);
+            }
+            // reset the accumulation
+            _forcesAccumulated = Vector2.zero;
+
+
+        }
+        private void Update()
+        {
+            if (isDebugModeOn) LoggerCustom.SetFrameCount(Time.frameCount);
+            CheckUserInput();
+            PopulatePlatformCollisionVars();
+            _stateController.UpdateCurrentState();
+            characterAnimationController.SetState();
+
+            // respond to H and V movement inputs
+            if (
+                _stateController.currentMovementState == MovementState.GROUNDED
+                || _stateController.currentMovementState == MovementState.TETHERED
+                || (_stateController.currentMovementState == MovementState.FLOATING && isHorizontalMovementInAirAllowed)
+                || (_stateController.currentMovementState == MovementState.JUMP_ACCELERATING && isHorizontalMovementInAirAllowed)
+                )
+            {
+                AddDirectionalMovementForceH();
+            }
+            if (_stateController.currentMovementState == MovementState.GROUNDED
+                || _stateController.currentMovementState == MovementState.TETHERED)
+            {
+                AddDirectionalMovementForceV();
+            }
+
+            // respond to jump button held down
+            if(_stateController.currentMovementState == MovementState.JUMP_ACCELERATING)
+            {
+                if (_userInput.isJumpHeldDown)
+                {
+                    if (currentJumpThrust < maxJumpThrust)
+                    {
+                        AddJumpForce((jumpThrustPerSecond * Time.deltaTime));
+                    }
+                }
+            }
+
+            // make sure the grapple beam's position zero stays with the character
+            if (_stateController.currentMovementState == MovementState.TETHERED)
+                UpdateGrappleBeamLine();
+
+            // apply artifical gravity based on which way we're facing
+            AddArtificalGravity();
+        }
+        #endregion
+
+
+
+        protected virtual void CheckUserInput()
+        {
+
+        }
+        private void AddArtificalGravity()
+        {
+            FacingDirection formerGravityDirection = characterOrienter.gravityDirection;
+            float thrustMultiplier = gravityOnCharacter * Time.deltaTime;
+
+            if (characterOrienter.headingDirection == FacingDirection.RIGHT
+                || characterOrienter.headingDirection == FacingDirection.LEFT)
+            {
+                if (characterOrienter.thrustingDirection == FacingDirection.UP)
+                {
+                    characterOrienter.SetGravityDirection(FacingDirection.DOWN);
+                    thrustMultiplier *= -1f;
+                }
+                else if (characterOrienter.thrustingDirection == FacingDirection.DOWN)
+                {
+                    characterOrienter.SetGravityDirection(FacingDirection.UP);
+                    thrustMultiplier *= 1f;
+                }
+                _forcesAccumulated += new Vector2(0, thrustMultiplier);
+            }
+            if (characterOrienter.headingDirection == FacingDirection.UP
+                || characterOrienter.headingDirection == FacingDirection.DOWN)
+            {
+                if (characterOrienter.thrustingDirection == FacingDirection.LEFT)
+                {
+                    characterOrienter.SetGravityDirection(FacingDirection.RIGHT);
+                    thrustMultiplier *= 1f;
+                }
+                else if (characterOrienter.thrustingDirection == FacingDirection.RIGHT)
+                {
+                    characterOrienter.SetGravityDirection(FacingDirection.LEFT);
+                    thrustMultiplier *= -1f;
+                }
+                _forcesAccumulated += new Vector2(thrustMultiplier, 0);
+            }
+        }
+        private void AddDirectionalMovementForceH()
+        {
+            if (_userInput.moveHPressure == 0) return;
+            if (characterOrienter.headingDirection == FacingDirection.RIGHT
+                || characterOrienter.headingDirection == FacingDirection.LEFT)
+            {
+                MoveH(_userInput.moveHPressure * horizontalAcceleration * moveHValueNormalizer * Time.deltaTime);
+            }
+        }
+        private void AddDirectionalMovementForceV()
+        {
+            if (characterOrienter.headingDirection == FacingDirection.UP
+                || characterOrienter.headingDirection == FacingDirection.DOWN)
+            {
+                MoveV(_userInput.moveVPressure * horizontalAcceleration * moveHValueNormalizer * Time.deltaTime);
+            }
+        }
+        private void AddJumpForce(float force)
+        {
+            currentJumpThrust += force;
+
+            LoggerCustom.DEBUG(string.Format("Adding jump force of {0}. Current total thrust of {1}.", force, currentJumpThrust));
+
+            Vector2 thrust = new Vector2(0f, force);
+            switch (characterOrienter.thrustingDirection)
+            {
+                case FacingDirection.UP:
+                    thrust = new Vector2(0f, force);
+                    break;
+                case FacingDirection.DOWN:
+                    thrust = new Vector2(0f, -force);
+                    break;
+                case FacingDirection.RIGHT:
+                    thrust = new Vector2(force, 0f);
+                    break;
+                case FacingDirection.LEFT:
+                    thrust = new Vector2(-force, 0f);
+                    break;
+            }
+            _forcesAccumulated += thrust;
+        }
+        internal bool HandleTrigger(MovementTrigger t)
+        {
+            bool success = false;
+            switch(t)
+            {
+                case MovementTrigger.TRIGGER_JUMP:
+                    success = TriggerJump();
+                    break;
+                case MovementTrigger.TRIGGER_LANDING:
+                    success = TriggerLanding();
+                    break;
+                case MovementTrigger.TRIGGER_FALL:
+                    success = TriggerFall();
+                    break;
+                case MovementTrigger.TRIGGER_CORNER:
+                    success = TriggerCorner();
+                    break;
+                case MovementTrigger.TRIGGER_GRAPPLE_ATTEMPT:
+                    success = TriggerGrappleAttempt();
+                    break;
+                case MovementTrigger.TRIGGER_GRAPPLE_SUCCESS:
+                    success = true; // nothing to do here as action was already done in the attempt
+                    break;
+                case MovementTrigger.TRIGGER_GRAPPLE_RELEASE:
+                    success = TriggerGrappleRelease();
+                    break;
+                case MovementTrigger.TRIGGER_GRAPPLE_REACHED_ANCHOR:
+                    success = TriggerGrappleReachedAnchor();
+                    break;
+            }
+            return success;
+        }
         private bool IsCollidingWithPlatform(Transform checkingTransform)
         {
             Collider2D[] collisions = Physics2D.OverlapCircleAll(
@@ -85,9 +292,89 @@ namespace Assets.Scripts.CharacterControl
 
             return false;
         }
+        private void LandFloor()
+        {
+            LoggerCustom.DEBUG("LandH");
+            
+            //StopH();
+            //StopV();
+            SetFacingDirections(characterOrienter.headingDirection, FacingDirection.UP);
+            currentJumpThrust = 0f;
+        }
+        private void LandWall()
+        {
+            LoggerCustom.DEBUG("LandV");
+            //StopH();
+            //StopV();
+
+            if (characterOrienter.headingDirection == FacingDirection.RIGHT)
+            {
+                SetFacingDirections(FacingDirection.UP, FacingDirection.LEFT);
+            }
+            else if (characterOrienter.headingDirection == FacingDirection.LEFT)
+            {
+                SetFacingDirections(FacingDirection.UP, FacingDirection.RIGHT);
+            }
+
+            currentJumpThrust = 0f;
+            //_stateMachine.SetState(DEPRECATED_CharacterState.EARLY_LANDING_CYCLE_V);
+        }
+        private void LandCeiling()
+        {
+            LoggerCustom.DEBUG("LandCeiling");
+            //StopH();
+            //StopV();
+
+            SetFacingDirections(characterOrienter.headingDirection, FacingDirection.DOWN);
+
+            currentJumpThrust = 0f;
+            //_stateMachine.SetState(DEPRECATED_CharacterState.EARLY_LANDING_CYCLE_V);
+        }
+        private void MoveH(float movementValue)
+        {
+            //LogDebugMessage("MoveH: " + movementValue);
+            
+
+            // Move the character by finding the target velocity
+            Vector2 targetVelocity = new Vector2(movementValue, 0);
+            // And then smoothing it out and applying it to the character
+            _forcesAccumulated += targetVelocity * Time.deltaTime;
+
+            // If the input is moving the player right and the player is facing left...
+            if (movementValue > 0 && characterOrienter.headingDirection == FacingDirection.LEFT)
+            {
+                // ... flip the player.
+                SetFacingDirections(FacingDirection.RIGHT, characterOrienter.thrustingDirection);
+            }
+            // Otherwise if the input is moving the player left and the player is facing right...
+            else if (movementValue < 0 && characterOrienter.headingDirection == FacingDirection.RIGHT)
+            {
+                // ... flip the player.
+                SetFacingDirections(FacingDirection.LEFT, characterOrienter.thrustingDirection);
+            }
+        }
+        private void MoveV(float movementValue)
+        {
+            // Move the character by finding the target velocity
+            Vector2 targetVelocity = new Vector2(0, movementValue);
+            _forcesAccumulated += targetVelocity * Time.deltaTime;
+
+            // If the input is moving the player right and the player is facing left...
+            if (movementValue < 0 && characterOrienter.headingDirection == FacingDirection.UP)
+            {
+                // ... flip the player.
+                SetFacingDirections(FacingDirection.DOWN, characterOrienter.thrustingDirection);
+            }
+            // Otherwise if the input is moving the player left and the player is facing right...
+            else if (movementValue > 0 && characterOrienter.headingDirection == FacingDirection.DOWN)
+            {
+                // ... flip the player.
+                SetFacingDirections(FacingDirection.UP, characterOrienter.thrustingDirection);
+            }
+        }
         private void PopulatePlatformCollisionVars()
         {
-            characterContactsPriorFrame = characterContactsCurrentFrame;
+            //characterContactsPriorFrame = characterContactsCurrentFrame;
             characterContactsCurrentFrame = new CharacterContacts();
             if (IsCollidingWithPlatform(bellyCheckTransform))
             {
@@ -113,7 +400,7 @@ namespace Assets.Scripts.CharacterControl
             {
                 characterContactsCurrentFrame.isTouchingPlatformWithTop = false;
             }
-            if(!characterContactsCurrentFrame.isTouchingPlatformWithBase
+            if (!characterContactsCurrentFrame.isTouchingPlatformWithBase
                 && !characterContactsCurrentFrame.isTouchingPlatformForward
                 && !characterContactsCurrentFrame.isTouchingPlatformWithTop)
             {
@@ -122,275 +409,6 @@ namespace Assets.Scripts.CharacterControl
             else
             {
                 characterContactsCurrentFrame.isTouchingNothing = false;
-            }
-        }
-
-        #region Unity implementation methods
-        protected virtual void Awake()
-        {
-            _userInput = new UserInputCollection()
-            {
-                moveHPressure = 0f,
-                moveVPressure = 0f,
-                isJumpPressed = false,
-                isJumpReleased = false,
-                isJumpHeldDown = false,
-            };
-
-            characterOrienter = new CharacterOrienter(isDebugModeOn);
-
-            PlatformCollisionTransforms collisionTransforms = new PlatformCollisionTransforms()
-            {
-                bellyCheckTransform = bellyCheckTransform,
-                forwardCheckTransform = forwardCheckTransform,
-                ceilingCheckTransform = ceilingCheckTransform,
-                whatIsPlatform = whatIsPlatform
-            };
-            _stateController = new CharacterMovementStateController(this, MovementState.FLOATING);
-
-            characterAnimationController = new CharacterAnimationController(animator, isDebugModeOn);
-
-
-
-        }
-        protected virtual void FixedUpdate()
-        {
-            //// here is where we check the state and perform the appropriate 
-            //// action
-
-            //float thrustWeMightAdd = (jumpThrustPerSecond * Time.deltaTime);
-
-            //if (_stateMachine.playerStateCurrentFrame == DEPRECATED_CharacterState.ADDIND_THRUST_TO_JUMP)
-            //{
-            //    ApplyJumpForce(thrustWeMightAdd);
-            //}
-
-
-            //if (_stateMachine.playerStateCurrentFrame == DEPRECATED_CharacterState.RUNNING)
-            //{
-            //    ApplyDirectionalMovementForceH();
-            //    ApplyDirectionalMovementForceV();
-            //}
-            //if (
-            //    (_stateMachine.playerStateCurrentFrame == DEPRECATED_CharacterState.DEPRECATED_FALLING
-            //    || _stateMachine.playerStateCurrentFrame == DEPRECATED_CharacterState.ADDIND_THRUST_TO_JUMP)
-            //    && _movementCapabilities.isHorizontalMovementInAirAllowed)
-            //{
-            //    ApplyDirectionalMovementForceH();
-            //}
-            //if (_stateMachine.playerStateCurrentFrame == DEPRECATED_CharacterState.DEPRECATED_IDLE)
-            //{
-            //    // apply 0 force to stop sliding
-            //    if (_characterOrienter.headingDirection == FacingDirection.RIGHT
-            //        || _characterOrienter.headingDirection == FacingDirection.LEFT)
-            //    {
-            //        ApplyDirectionalMovementForceH();
-            //    }
-            //    if (_characterOrienter.headingDirection == FacingDirection.UP
-            //        || _characterOrienter.headingDirection == FacingDirection.DOWN)
-            //    {
-            //        ApplyDirectionalMovementForceV();
-            //    }
-            //}
-            //if (_stateMachine.playerStateCurrentFrame == DEPRECATED_CharacterState.GRAPPLING)
-            //{
-            //    // make sure the grapple beam's position zero stays with the character
-            //    UpdateGrappleBeamLine();
-            //}
-
-            // apply artifical gravity based on which way we're facing
-            ApplyArtificalGravity();
-
-            // slowly rotatate character towards target
-            // keep this code as a reference. We're going to rotate 
-            // the character immediately so that we don't have to fuss
-            // with the clutch any more. But keep this here as a reference
-            // RotateCharacterByStep();
-
-            
-
-            
-
-        }
-        private void Update()
-        {
-            if (isDebugModeOn) LoggerCustom.SetFrameCount(Time.frameCount);
-            CheckUserInput();
-            _stateController.UpdateCurrentState();
-            characterAnimationController.SetState();
-        } 
-        #endregion
-
-        protected virtual void CheckUserInput()
-        {
-
-        }
-        private void ApplyArtificalGravity()
-        {
-            FacingDirection formerGravityDirection = characterOrienter.gravityDirection;
-            float thrustMultiplier = gravityOnCharacter * Time.deltaTime;
-
-            if (characterOrienter.headingDirection == FacingDirection.RIGHT
-                || characterOrienter.headingDirection == FacingDirection.LEFT)
-            {
-                if (characterOrienter.thrustingDirection == FacingDirection.UP)
-                {
-                    characterOrienter.SetGravityDirection(FacingDirection.DOWN);
-                    thrustMultiplier *= -1f;
-                }
-                else if (characterOrienter.thrustingDirection == FacingDirection.DOWN)
-                {
-                    characterOrienter.SetGravityDirection(FacingDirection.UP);
-                    thrustMultiplier *= 1f;
-                }
-                rigidBody2D.velocity += new Vector2(0, thrustMultiplier);
-            }
-            if (characterOrienter.headingDirection == FacingDirection.UP
-                || characterOrienter.headingDirection == FacingDirection.DOWN)
-            {
-                if (characterOrienter.thrustingDirection == FacingDirection.LEFT)
-                {
-                    characterOrienter.SetGravityDirection(FacingDirection.RIGHT);
-                    thrustMultiplier *= 1f;
-                }
-                else if (characterOrienter.thrustingDirection == FacingDirection.RIGHT)
-                {
-                    characterOrienter.SetGravityDirection(FacingDirection.LEFT);
-                    thrustMultiplier *= -1f;
-                }
-                rigidBody2D.velocity += new Vector2(thrustMultiplier, 0);
-            }
-        }
-        private void ApplyDirectionalMovementForceH()
-        {
-            if (_userInput.moveHPressure == 0) return;
-            if (characterOrienter.headingDirection == FacingDirection.RIGHT
-                || characterOrienter.headingDirection == FacingDirection.LEFT)
-            {
-                MoveH(_userInput.moveHPressure * runSpeed * Time.deltaTime);
-            }
-        }
-        private void ApplyDirectionalMovementForceV()
-        {
-            if (characterOrienter.headingDirection == FacingDirection.UP
-                || characterOrienter.headingDirection == FacingDirection.DOWN)
-            {
-                MoveV(_userInput.moveVPressure * runSpeed * Time.deltaTime);
-            }
-        }
-        private void ApplyJumpForce(float force)
-        {
-            currentJumpThrust += force;
-
-            LoggerCustom.DEBUG(string.Format("Adding jump force of {0}. Current total thrust of {1}.", force, currentJumpThrust));
-
-            Vector2 thrust = new Vector2(0f, force);
-            switch (characterOrienter.thrustingDirection)
-            {
-                case FacingDirection.UP:
-                    thrust = new Vector2(0f, force);
-                    break;
-                case FacingDirection.DOWN:
-                    thrust = new Vector2(0f, -force);
-                    break;
-                case FacingDirection.RIGHT:
-                    thrust = new Vector2(force, 0f);
-                    break;
-                case FacingDirection.LEFT:
-                    thrust = new Vector2(-force, 0f);
-                    break;
-            }
-            //rigidBody2D.AddForce(thrust);
-            rigidBody2D.velocity += thrust;
-        }
-        private void Land()
-        {
-            LoggerCustom.DEBUG("LandH");
-            FacingDirection priorHeading = characterOrienter.headingDirection;
-
-            StopH();
-            StopV();
-            SetFacingDirections(characterOrienter.headingDirection, FacingDirection.UP);
-            currentJumpThrust = 0f;
-
-            if (priorHeading == FacingDirection.LEFT || priorHeading == FacingDirection.RIGHT)
-            {
-                //_stateMachine.SetState(DEPRECATED_CharacterState.DEPRECATED_IDLE);
-            }
-            else
-            {
-                //_stateMachine.SetState(DEPRECATED_CharacterState.EARLY_LANDING_CYCLE_H);
-            }
-        }
-        private void LandV()
-        {
-            LoggerCustom.DEBUG("LandV");
-            StopH();
-            StopV();
-
-            if (characterOrienter.headingDirection == FacingDirection.RIGHT)
-            {
-                SetFacingDirections(FacingDirection.UP, FacingDirection.LEFT);
-            }
-            else if (characterOrienter.headingDirection == FacingDirection.LEFT)
-            {
-                SetFacingDirections(FacingDirection.UP, FacingDirection.RIGHT);
-            }
-
-            currentJumpThrust = 0f;
-            //_stateMachine.SetState(DEPRECATED_CharacterState.EARLY_LANDING_CYCLE_V);
-        }
-        private void LandCeiling()
-        {
-            LoggerCustom.DEBUG("LandCeiling");
-            StopH();
-            StopV();
-
-            SetFacingDirections(characterOrienter.headingDirection, FacingDirection.DOWN);
-
-            currentJumpThrust = 0f;
-            //_stateMachine.SetState(DEPRECATED_CharacterState.EARLY_LANDING_CYCLE_V);
-        }
-        private void MoveH(float movementValue)
-        {
-            //LogDebugMessage("MoveH: " + movementValue);
-
-            // Move the character by finding the target velocity
-            Vector3 targetVelocity = new Vector2(movementValue * 10f, rigidBody2D.velocity.y);
-            // And then smoothing it out and applying it to the character
-            rigidBody2D.velocity = Vector3.SmoothDamp(rigidBody2D.velocity, targetVelocity, ref _velocity, movementSmoothing);
-
-            // If the input is moving the player right and the player is facing left...
-            if (movementValue > 0 && characterOrienter.headingDirection == FacingDirection.LEFT)
-            {
-                // ... flip the player.
-                SetFacingDirections(FacingDirection.RIGHT, characterOrienter.thrustingDirection);
-            }
-            // Otherwise if the input is moving the player left and the player is facing right...
-            else if (movementValue < 0 && characterOrienter.headingDirection == FacingDirection.RIGHT)
-            {
-                // ... flip the player.
-                SetFacingDirections(FacingDirection.LEFT, characterOrienter.thrustingDirection);
-            }
-        }
-        private void MoveV(float movementValue)
-        {
-            // Move the character by finding the target velocity
-            Vector3 targetVelocity = new Vector2(rigidBody2D.velocity.x, movementValue * 10f);
-            // And then smoothing it out and applying it to the character
-            rigidBody2D.velocity = Vector3.SmoothDamp(rigidBody2D.velocity, targetVelocity, ref _velocity, movementSmoothing);
-
-            // If the input is moving the player right and the player is facing left...
-            if (movementValue < 0 && characterOrienter.headingDirection == FacingDirection.UP)
-            {
-                // ... flip the player.
-                SetFacingDirections(FacingDirection.DOWN, characterOrienter.thrustingDirection);
-            }
-            // Otherwise if the input is moving the player left and the player is facing right...
-            else if (movementValue > 0 && characterOrienter.headingDirection == FacingDirection.DOWN)
-            {
-                // ... flip the player.
-                SetFacingDirections(FacingDirection.UP, characterOrienter.thrustingDirection);
             }
         }
         private void SetFacingDirections(FacingDirection heading, FacingDirection thrusting)
@@ -411,7 +429,7 @@ namespace Assets.Scripts.CharacterControl
             rotator = RotationHelper.getRotationVectors(rotator);
             // update our starting rotation so we
             // have a baseline for timing rotations
-            _startRotation = rotator.startingRotation;
+            //_startRotation = rotator.startingRotation;
             _targetRotation = rotator.targetRotation;
 
             transform.localRotation = Quaternion.Euler(_targetRotation);
@@ -423,16 +441,16 @@ namespace Assets.Scripts.CharacterControl
             // transitions while rotating
             //_clutchCountDown = _numSecondsToEngageClutch;
         }
-        private void StopH()
-        {
-            LoggerCustom.DEBUG("StopH");
-            rigidBody2D.velocity = new Vector2(0, rigidBody2D.velocity.y);
-        }
-        private void StopV()
-        {
-            LoggerCustom.DEBUG("StopV");
-            rigidBody2D.velocity = new Vector2(rigidBody2D.velocity.x, 0);
-        }
+        //private void StopH()
+        //{
+        //    LoggerCustom.DEBUG("StopH");
+        //    rigidBody2D.velocity = new Vector2(0, rigidBody2D.velocity.y);
+        //}
+        //private void StopV()
+        //{
+        //    LoggerCustom.DEBUG("StopV");
+        //    rigidBody2D.velocity = new Vector2(rigidBody2D.velocity.x, 0);
+        //}
         private void RotateCharacterByStep()
         {
             // keep this code as a reference. We're going to rotate 
@@ -443,7 +461,7 @@ namespace Assets.Scripts.CharacterControl
             transform.localRotation = Quaternion.RotateTowards(transform.localRotation, targetQuaternion, degreesNow);
         }
         
-        private void TriggerCorner()
+        private bool TriggerCorner()
         {
             LoggerCustom.DEBUG("Begin cornering");
 
@@ -461,14 +479,9 @@ namespace Assets.Scripts.CharacterControl
             // update orientation
             SetFacingDirections(newHeading, newThrusting);
 
-            // change gravity
-
-
-            // change state to falling
-            //_stateMachine.SetState(DEPRECATED_CharacterState.DEPRECATED_FALLING);
-
+            return true;
         }
-        private void TriggerFall()
+        private bool TriggerFall()
         {
             LoggerCustom.DEBUG("Begin falling");
 
@@ -494,17 +507,18 @@ namespace Assets.Scripts.CharacterControl
 
             currentJumpThrust = 0f;
             //_stateMachine.SetState(DEPRECATED_CharacterState.DEPRECATED_FALLING);
+            return true;
         }
-        private void TriggerJump()
+        private bool TriggerJump()
         {
             LoggerCustom.DEBUG("Begin jump");
             currentJumpThrust = 0;
-            ApplyJumpForce(initialJumpThrust);
-            //_stateMachine.SetState(DEPRECATED_CharacterState.EARLY_JUMP_CYCLE);
+            AddJumpForce(initialJumpThrust);
+            return true;
         }
-        private void TriggerGrappleBeam()
+        private bool TriggerGrappleAttempt()
         {
-            LoggerCustom.DEBUG("Begin grapple beam");
+            LoggerCustom.DEBUG("Begin grapple beam attempt");
             currentJumpThrust = 0;
 
             // how to raycast https://www.youtube.com/watch?v=wkKsl1Mfp5M
@@ -549,11 +563,7 @@ namespace Assets.Scripts.CharacterControl
 
                     // now give a push in that direction
                     Vector2 thrust = normalizedDirection * grappleBeamForce * 10;
-                    rigidBody2D.velocity += thrust;
-
-                    // finally set our state to grappling
-                    //_stateMachine.SetState(DEPRECATED_CharacterState.GRAPPLING);
-
+                    _forcesAccumulated += thrust;
                 }
 
 
@@ -563,7 +573,38 @@ namespace Assets.Scripts.CharacterControl
                 // draw the "miss" line
             }
 
-
+            return didHit;
+        }
+        private bool TriggerGrappleReachedAnchor()
+        {
+            grappleBeam.enabled = false;
+            FacingDirection newHeading = characterOrienter.thrustingDirection;
+            SetFacingDirections(newHeading, FacingDirection.DOWN);
+            return true;
+        }
+        private bool TriggerGrappleRelease()
+        {
+            grappleBeam.enabled = false;
+            return true;
+        }
+        private bool TriggerLanding()
+        {
+            if (characterContactsCurrentFrame.isTouchingPlatformWithBase)
+            {
+                LandFloor();
+                return true;
+            }
+            if (characterContactsCurrentFrame.isTouchingPlatformForward)
+            {
+                LandWall();
+                return true;
+            }
+            if (characterContactsCurrentFrame.isTouchingPlatformWithTop)
+            {
+                LandCeiling();
+                return true;
+            }
+            return false;
         }
         private void UpdateGrappleBeamLine()
         {
