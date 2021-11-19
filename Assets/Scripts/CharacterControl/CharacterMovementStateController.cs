@@ -136,7 +136,7 @@ namespace Assets.Scripts.CharacterControl
                     && _character.characterContactsCurrentFrame.isTouchingNothing)
                     // or running out of jump juice
                     || (currentMovementState == MovementState.JUMP_ACCELERATING
-                    && _character.currentJumpThrust >= _character.maxJumpThrust)
+                    && _character.currentJumpThrust >= _character.jumpThrustLimit)
                     // or releasing the jump button while jump accellerating
                     || (currentMovementState == MovementState.JUMP_ACCELERATING
                     && _character.userInput.isJumpReleased)

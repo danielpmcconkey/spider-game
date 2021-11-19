@@ -18,17 +18,42 @@ namespace Assets.Scripts.CharacterControl
         [SerializeField] public string debugLogFileDirectory = string.Empty; // C:\Users\Dan\AppData\LocalLow\SpiderController\
         [Header("Movement parameters")]
         [Space(10)]
-        [SerializeField] public float horizontalAcceleration = 5.5f;
-        [SerializeField] public float initialJumpThrust = 10f;
-        [SerializeField] public float jumpThrustPerSecond = 80f;
-        [SerializeField] public float maxJumpThrust = 30f;
-        [Range(0, .3f)] [SerializeField] public float movementSmoothing = .05f;  // How much to smooth out the movement
-        [SerializeField] public float gravityOnCharacter = 40f;
-        [SerializeField] public float rotationDegreesPerSecond = 720;
-        [SerializeField] public float corneringTimeRequired = 0.5f; // time it takes in seconds to begin to crawl up a wall
-        [SerializeField] public float grappleBeamForce = 35f;
-        [SerializeField] public float grappleBeamMaxDistance = 8f;
-        [SerializeField] public float horizontalVelocityLimit = 6f;
+
+        const float maxHorizontalAcceleration = 50000f;
+        const float minHorizontalAcceleration = 5000f;
+        [Range(0, 1f)] [SerializeField] public float horizontalAccelerationPercent = 0.5f;
+
+        const float maxHorizontalVelocityLimit = 25f;
+        const float minHorizontalVelocityLimit = 3f;
+        [Range(0, 1f)] [SerializeField] public float horizontalVelocityLimitPercent = 0.5f;
+
+        const float maxInitialJumpThrust = 30f;
+        const float minInitialJumpThrust = 5f;
+        [Range(0, 1f)] [SerializeField] public float initialJumpThrustPercent = 0.65f;
+
+        const float maxJumpThrustOverTime = 160f;
+        const float minJumpThrustOverTime = 10f;
+        [Range(0, 1f)] [SerializeField] public float jumpThrustOverTimePercent = 0.5f;
+
+        const float maxJumpThrustLimit = 160f;
+        const float minJumpThrustLimit = 10f;
+        [Range(0, 1f)] [SerializeField] public float jumpThrustLimitPercent = 0.238f;
+
+        const float maxGravityOnCharacter = 100f;
+        const float minGravityOnCharacter = 10f;
+        [Range(0, 1f)] [SerializeField] public float gravityOnCharacterPercent = 0.793f;
+
+        const float maxGrappleBeamForce = 60;
+        const float minGrappleBeamForce = 5f;
+        [Range(0, 1f)] [SerializeField] public float grappleBeamForcePercent = 0.5f;
+
+        const float maxGrappleBeamMaxDistance = 12f;
+        const float minGrappleBeamMaxDistance = 1f;
+        [Range(0, 1f)] [SerializeField] public float grappleBeamMaxDistancePercent = 0.5f;
+
+        const float maxCorneringTimeRequired = 5f;
+        const float minCorneringTimeRequired = 0.5f;
+        [Range(0, 1f)] [SerializeField] public float corneringTimeRequiredPercent = 0.263f; // time it takes in seconds to begin to crawl up a wall
 
         [Header("Movement abilities")]
         [Space(10)]
@@ -58,15 +83,15 @@ namespace Assets.Scripts.CharacterControl
         public CharacterOrienter characterOrienter { get; private set; }
         public float currentJumpThrust { get; private set; }
         public CharacterAnimationController characterAnimationController { get; private set; }
+        public float jumpThrustLimit { get; private set; }  // this is calculated every frame. we make it a member var because the state controller needs access
+        public float corneringTimeRequired { get; private set; }  // this is calculated every frame. we make it a member var because the state controller needs access
 
         // private and protected members
         protected CharacterMovementStateController _stateController;
         private const float _platformContactCheckRadius = .2f; // Radius of the overlap circle to determine if touching a platform
         protected UserInputCollection _userInput;
         protected Vector2 _forcesAccumulated;
-        private Vector3 _targetRotation;
-        const float moveHValueNormalizer = 1000f; // multiply this value by the Horizontal acceleration parameter to make the force and velocity values seem on the same scale
-
+        
         #endregion
 
 
@@ -85,18 +110,13 @@ namespace Assets.Scripts.CharacterControl
 
             characterOrienter = new CharacterOrienter(isDebugModeOn);
 
-            //PlatformCollisionTransforms collisionTransforms = new PlatformCollisionTransforms()
-            //{
-            //    bellyCheckTransform = bellyCheckTransform,
-            //    forwardCheckTransform = forwardCheckTransform,
-            //    ceilingCheckTransform = ceilingCheckTransform,
-            //    whatIsPlatform = whatIsPlatform
-            //};
             _stateController = new CharacterMovementStateController(this, MovementState.FLOATING);
 
             characterAnimationController = new CharacterAnimationController(animator, isDebugModeOn);
 
             _forcesAccumulated = Vector2.zero;
+
+            grappleBeamJoint.enabled = false;
 
 
         }
@@ -104,7 +124,11 @@ namespace Assets.Scripts.CharacterControl
         {
             // apply the accumulation of physical forces
             rigidBody2D.velocity += _forcesAccumulated;
-            if(rigidBody2D.velocity.x > horizontalVelocityLimit)
+            // constrain H velocity to speed limit
+            float horizontalVelocityLimit = minHorizontalVelocityLimit +
+                (horizontalVelocityLimitPercent * (maxHorizontalVelocityLimit - minHorizontalVelocityLimit));
+
+            if (rigidBody2D.velocity.x > horizontalVelocityLimit)
             {
                 rigidBody2D.velocity = new Vector2(horizontalVelocityLimit, rigidBody2D.velocity.y);
             }
@@ -122,6 +146,15 @@ namespace Assets.Scripts.CharacterControl
             if (isDebugModeOn) LoggerCustom.SetFrameCount(Time.frameCount);
             CheckUserInput();
             PopulatePlatformCollisionVars();
+            
+            // calculate jump thrust limit every frame in case it updated outside of the script
+            jumpThrustLimit = minJumpThrustLimit +
+                (jumpThrustLimitPercent * (maxJumpThrustLimit - minJumpThrustLimit));
+            
+            // calculate cornering time required every frame in case it updated outside of the script
+            corneringTimeRequired = minCorneringTimeRequired +
+                (corneringTimeRequiredPercent * (maxCorneringTimeRequired - minCorneringTimeRequired));
+
             _stateController.UpdateCurrentState();
             characterAnimationController.SetState();
 
@@ -146,9 +179,13 @@ namespace Assets.Scripts.CharacterControl
             {
                 if (_userInput.isJumpHeldDown)
                 {
-                    if (currentJumpThrust < maxJumpThrust)
+                    float jumpThrustLimit = minJumpThrustLimit +
+                        (jumpThrustLimitPercent * (maxJumpThrustLimit - minJumpThrustLimit));
+                    if (currentJumpThrust < jumpThrustLimit)
                     {
-                        AddJumpForce((jumpThrustPerSecond * Time.deltaTime));
+                        float jumpThrustOverTime = minJumpThrustOverTime +
+                            (jumpThrustOverTimePercent * (maxJumpThrustOverTime - minJumpThrustOverTime));
+                        AddJumpForce((jumpThrustOverTime * Time.deltaTime));
                     }
                 }
             }
@@ -171,6 +208,10 @@ namespace Assets.Scripts.CharacterControl
         private void AddArtificalGravity()
         {
             FacingDirection formerGravityDirection = characterOrienter.gravityDirection;
+
+            float gravityOnCharacter = minGravityOnCharacter +
+                (gravityOnCharacterPercent * (maxGravityOnCharacter - minGravityOnCharacter));
+
             float thrustMultiplier = gravityOnCharacter * Time.deltaTime;
 
             if (characterOrienter.headingDirection == FacingDirection.RIGHT
@@ -210,7 +251,9 @@ namespace Assets.Scripts.CharacterControl
             if (characterOrienter.headingDirection == FacingDirection.RIGHT
                 || characterOrienter.headingDirection == FacingDirection.LEFT)
             {
-                MoveH(_userInput.moveHPressure * horizontalAcceleration * moveHValueNormalizer * Time.deltaTime);
+                float acceleration = minHorizontalAcceleration +
+                    (horizontalAccelerationPercent * (maxHorizontalAcceleration - minHorizontalAcceleration));
+                MoveH(_userInput.moveHPressure * acceleration * Time.deltaTime);
             }
         }
         private void AddDirectionalMovementForceV()
@@ -218,7 +261,9 @@ namespace Assets.Scripts.CharacterControl
             if (characterOrienter.headingDirection == FacingDirection.UP
                 || characterOrienter.headingDirection == FacingDirection.DOWN)
             {
-                MoveV(_userInput.moveVPressure * horizontalAcceleration * moveHValueNormalizer * Time.deltaTime);
+                float acceleration = minHorizontalAcceleration +
+                    (horizontalAccelerationPercent * (maxHorizontalAcceleration - minHorizontalAcceleration));
+                MoveV(_userInput.moveVPressure * acceleration * Time.deltaTime);
             }
         }
         private void AddJumpForce(float force)
@@ -296,17 +341,13 @@ namespace Assets.Scripts.CharacterControl
         {
             LoggerCustom.DEBUG("LandH");
             
-            //StopH();
-            //StopV();
             SetFacingDirections(characterOrienter.headingDirection, FacingDirection.UP);
             currentJumpThrust = 0f;
         }
         private void LandWall()
         {
             LoggerCustom.DEBUG("LandV");
-            //StopH();
-            //StopV();
-
+            
             if (characterOrienter.headingDirection == FacingDirection.RIGHT)
             {
                 SetFacingDirections(FacingDirection.UP, FacingDirection.LEFT);
@@ -317,24 +358,16 @@ namespace Assets.Scripts.CharacterControl
             }
 
             currentJumpThrust = 0f;
-            //_stateMachine.SetState(DEPRECATED_CharacterState.EARLY_LANDING_CYCLE_V);
         }
         private void LandCeiling()
         {
             LoggerCustom.DEBUG("LandCeiling");
-            //StopH();
-            //StopV();
 
             SetFacingDirections(characterOrienter.headingDirection, FacingDirection.DOWN);
-
             currentJumpThrust = 0f;
-            //_stateMachine.SetState(DEPRECATED_CharacterState.EARLY_LANDING_CYCLE_V);
         }
         private void MoveH(float movementValue)
         {
-            //LogDebugMessage("MoveH: " + movementValue);
-            
-
             // Move the character by finding the target velocity
             Vector2 targetVelocity = new Vector2(movementValue, 0);
             // And then smoothing it out and applying it to the character
@@ -427,43 +460,31 @@ namespace Assets.Scripts.CharacterControl
                 targetThrustingDirection = thrusting,
             };
             rotator = RotationHelper.getRotationVectors(rotator);
-            // update our starting rotation so we
-            // have a baseline for timing rotations
-            //_startRotation = rotator.startingRotation;
-            _targetRotation = rotator.targetRotation;
-
-            transform.localRotation = Quaternion.Euler(_targetRotation);
+            transform.localRotation = Quaternion.Euler(rotator.targetRotation);
 
             characterOrienter.SetHeadingDirection(heading);
             characterOrienter.SetThrustingDirection(thrusting);
-
-            // set the clutch to ensure we don't have any state
-            // transitions while rotating
-            //_clutchCountDown = _numSecondsToEngageClutch;
         }
-        //private void StopH()
-        //{
-        //    LoggerCustom.DEBUG("StopH");
-        //    rigidBody2D.velocity = new Vector2(0, rigidBody2D.velocity.y);
-        //}
-        //private void StopV()
-        //{
-        //    LoggerCustom.DEBUG("StopV");
-        //    rigidBody2D.velocity = new Vector2(rigidBody2D.velocity.x, 0);
-        //}
-        private void RotateCharacterByStep()
-        {
-            // keep this code as a reference. We're going to rotate 
-            // the character immediately so that we don't have to fuss
-            // with the clutch any more. But keep this here as a reference
-            float degreesNow = rotationDegreesPerSecond * Time.deltaTime;
-            Quaternion targetQuaternion = Quaternion.Euler(_targetRotation);
-            transform.localRotation = Quaternion.RotateTowards(transform.localRotation, targetQuaternion, degreesNow);
-        }
+        
         
         private bool TriggerCorner()
         {
             LoggerCustom.DEBUG("Begin cornering");
+
+            // move the game object toward the wall so that
+            // rotation doesn't cause all the collision check
+            // objects to be touching nothing
+            float distance = Vector2.Distance(ceilingCheckTransform.position, transform.position);
+            Vector3 movement = Vector3.zero;
+            if(characterOrienter.headingDirection == FacingDirection.RIGHT)
+                movement.x = distance;
+            else if (characterOrienter.headingDirection == FacingDirection.LEFT)
+                movement.x = -distance;
+            if (characterOrienter.headingDirection == FacingDirection.UP)
+                movement.y = distance;
+            else if (characterOrienter.headingDirection == FacingDirection.DOWN)
+                movement.y = -distance;
+            transform.position += movement;
 
             // calculate target orientation and gravity
             // new heading should be old thrusting direction
@@ -478,6 +499,8 @@ namespace Assets.Scripts.CharacterControl
 
             // update orientation
             SetFacingDirections(newHeading, newThrusting);
+
+            
 
             return true;
         }
@@ -504,15 +527,15 @@ namespace Assets.Scripts.CharacterControl
             }
             SetFacingDirections(targetHeading, FacingDirection.UP);
 
-
             currentJumpThrust = 0f;
-            //_stateMachine.SetState(DEPRECATED_CharacterState.DEPRECATED_FALLING);
             return true;
         }
         private bool TriggerJump()
         {
             LoggerCustom.DEBUG("Begin jump");
             currentJumpThrust = 0;
+            float initialJumpThrust = minInitialJumpThrust +
+                (initialJumpThrustPercent * (maxInitialJumpThrust - minInitialJumpThrust));
             AddJumpForce(initialJumpThrust);
             return true;
         }
@@ -536,6 +559,8 @@ namespace Assets.Scripts.CharacterControl
             Vector2 normalizedDirection = targetDirection / distanceBetween;
 
             // fire it and see what it hit
+            float grappleBeamMaxDistance = minGrappleBeamMaxDistance +
+                (grappleBeamMaxDistancePercent * (maxGrappleBeamMaxDistance - minGrappleBeamMaxDistance));
             RaycastHit2D hitInfo = Physics2D.Raycast(firePoint, normalizedDirection,
                 grappleBeamMaxDistance, whatIsPlatform.value);
 
@@ -562,7 +587,9 @@ namespace Assets.Scripts.CharacterControl
                     grappleBeam.SetPosition(1, hitInfo.point);
 
                     // now give a push in that direction
-                    Vector2 thrust = normalizedDirection * grappleBeamForce * 10;
+                    float grappleBeamForce = minGrappleBeamForce +
+                        (grappleBeamForcePercent * (maxGrappleBeamForce - minGrappleBeamForce));
+                    Vector2 thrust = normalizedDirection * grappleBeamForce;
                     _forcesAccumulated += thrust;
                 }
 
@@ -570,6 +597,7 @@ namespace Assets.Scripts.CharacterControl
             }
             if (!didHit)
             {
+                // todo: draw the grapple miss line
                 // draw the "miss" line
             }
 
@@ -609,7 +637,6 @@ namespace Assets.Scripts.CharacterControl
         private void UpdateGrappleBeamLine()
         {
             grappleBeam.SetPosition(0, ceilingCheckTransform.position);
-
         }
     }
 }

@@ -99,13 +99,11 @@ namespace Assets.Scripts.CharacterControl
             LoggerCustom.INFO("**********************************************************************************");
             LoggerCustom.DEBUG(string.Format("{0}|{1}", "isDebugModeOn", isDebugModeOn));
             LoggerCustom.DEBUG(string.Format("{0}|{1}", "debugLogFileDirectory", debugLogFileDirectory));
-            LoggerCustom.DEBUG(string.Format("{0}|{1}", "runSpeed", horizontalAcceleration));
-            LoggerCustom.DEBUG(string.Format("{0}|{1}", "jumpThrustPerSecond", jumpThrustPerSecond));
-            LoggerCustom.DEBUG(string.Format("{0}|{1}", "maxJumpThrust", maxJumpThrust));
-            LoggerCustom.DEBUG(string.Format("{0}|{1}", "initialJumpThrust", initialJumpThrust));
-            LoggerCustom.DEBUG(string.Format("{0}|{1}", "rotationDegreesPerSecond", rotationDegreesPerSecond));
-            LoggerCustom.DEBUG(string.Format("{0}|{1}", "movementSmoothing", movementSmoothing));
-            LoggerCustom.DEBUG(string.Format("{0}|{1}", "gravityOnPlayer", gravityOnCharacter));
+            LoggerCustom.DEBUG(string.Format("{0}|{1}", "runSpeed", horizontalAccelerationPercent));
+            LoggerCustom.DEBUG(string.Format("{0}|{1}", "jumpThrustPerSecond", jumpThrustOverTimePercent));
+            LoggerCustom.DEBUG(string.Format("{0}|{1}", "maxJumpThrust", jumpThrustLimitPercent));
+            LoggerCustom.DEBUG(string.Format("{0}|{1}", "initialJumpThrust", initialJumpThrustPercent));
+            LoggerCustom.DEBUG(string.Format("{0}|{1}", "gravityOnPlayer", gravityOnCharacterPercent));
             LoggerCustom.DEBUG(string.Format("{0}|{1}", "isHorizontalMovementInAirAllowed", isHorizontalMovementInAirAllowed));
             LoggerCustom.DEBUG(string.Format("{0}|{1}", "canWallCrall", canWallCrawl));
             LoggerCustom.DEBUG(string.Format("{0}|{1}", "canCeilingCrawl", canCeilingCrawl));
