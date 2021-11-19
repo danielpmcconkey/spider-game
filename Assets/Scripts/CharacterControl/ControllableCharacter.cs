@@ -347,7 +347,10 @@ namespace Assets.Scripts.CharacterControl
         private void LandWall()
         {
             LoggerCustom.DEBUG("LandV");
-            
+
+            PushTowardRotation();
+
+
             if (characterOrienter.headingDirection == FacingDirection.RIGHT)
             {
                 SetFacingDirections(FacingDirection.UP, FacingDirection.LEFT);
@@ -444,6 +447,20 @@ namespace Assets.Scripts.CharacterControl
                 characterContactsCurrentFrame.isTouchingNothing = false;
             }
         }
+        private void PushTowardRotation()
+        {
+            float distance = Vector2.Distance(ceilingCheckTransform.position, transform.position);
+            Vector3 movement = Vector3.zero;
+            if (characterOrienter.headingDirection == FacingDirection.RIGHT)
+                movement.x = distance;
+            else if (characterOrienter.headingDirection == FacingDirection.LEFT)
+                movement.x = -distance;
+            if (characterOrienter.headingDirection == FacingDirection.UP)
+                movement.y = distance;
+            else if (characterOrienter.headingDirection == FacingDirection.DOWN)
+                movement.y = -distance;
+            transform.position += movement;
+        }
         private void SetFacingDirections(FacingDirection heading, FacingDirection thrusting)
         {
             if (characterOrienter.headingDirection == heading && characterOrienter.thrustingDirection == thrusting)
@@ -465,8 +482,6 @@ namespace Assets.Scripts.CharacterControl
             characterOrienter.SetHeadingDirection(heading);
             characterOrienter.SetThrustingDirection(thrusting);
         }
-        
-        
         private bool TriggerCorner()
         {
             LoggerCustom.DEBUG("Begin cornering");
@@ -474,17 +489,7 @@ namespace Assets.Scripts.CharacterControl
             // move the game object toward the wall so that
             // rotation doesn't cause all the collision check
             // objects to be touching nothing
-            float distance = Vector2.Distance(ceilingCheckTransform.position, transform.position);
-            Vector3 movement = Vector3.zero;
-            if(characterOrienter.headingDirection == FacingDirection.RIGHT)
-                movement.x = distance;
-            else if (characterOrienter.headingDirection == FacingDirection.LEFT)
-                movement.x = -distance;
-            if (characterOrienter.headingDirection == FacingDirection.UP)
-                movement.y = distance;
-            else if (characterOrienter.headingDirection == FacingDirection.DOWN)
-                movement.y = -distance;
-            transform.position += movement;
+            PushTowardRotation();
 
             // calculate target orientation and gravity
             // new heading should be old thrusting direction
