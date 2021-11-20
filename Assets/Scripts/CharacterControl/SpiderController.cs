@@ -86,7 +86,7 @@ namespace Assets.Scripts.CharacterControl
         }
         private void TrackTargetingReticlueToMousePosition()
         {
-            Vector3 mousePosition = Camera.main.ScreenToWorldPoint(Input.mousePosition);
+            Vector3 mousePosition = UnityEngine.Camera.main.ScreenToWorldPoint(Input.mousePosition);    // had to specify UnityEngine to deconflict w/ my Camera namespace
             mousePosition.z = 0;
             targetingReticuleTransform.position = mousePosition;
         }
