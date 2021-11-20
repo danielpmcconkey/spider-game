@@ -345,5 +345,32 @@ namespace Assets.Scripts.Camera
             activeTracking = true;
         }
 
+        #region Code I added
+        // note: this is code I added to the class to write 
+        // Unity-set camera vals out to the debug log 
+        public bool isDebugModeOn = false;
+        public void LogAllVarsState()
+        {
+            if (isDebugModeOn)
+            {
+                Assets.Scripts.Utility.LoggerCustom.INFO("**********************************************************************************");
+                Assets.Scripts.Utility.LoggerCustom.DEBUG("Camera controller parameters");
+                Assets.Scripts.Utility.LoggerCustom.INFO("**********************************************************************************");
+                Assets.Scripts.Utility.LoggerCustom.DEBUG(string.Format("{0}|{1}", "scrollMultiplier", scrollMultiplier));
+                Assets.Scripts.Utility.LoggerCustom.DEBUG(string.Format("{0}|{1}, {2}", "movementWindowSize", movementWindowSize.x, movementWindowSize.y));
+                Assets.Scripts.Utility.LoggerCustom.DEBUG(string.Format("{0}|{1}, {2}", "windowOffset", windowOffset.x, windowOffset.y));
+                Assets.Scripts.Utility.LoggerCustom.DEBUG(string.Format("{0}|{1}", "limitCameraMovement", limitCameraMovement));
+                Assets.Scripts.Utility.LoggerCustom.DEBUG(string.Format("{0}|{1}", "limitLeft", limitLeft));
+                Assets.Scripts.Utility.LoggerCustom.DEBUG(string.Format("{0}|{1}", "limitRight", limitRight));
+                Assets.Scripts.Utility.LoggerCustom.DEBUG(string.Format("{0}|{1}", "limitBottom", limitBottom));
+                Assets.Scripts.Utility.LoggerCustom.DEBUG(string.Format("{0}|{1}", "limitTop", limitTop));
+            }
+        }
+        void OnDestroy()
+        {
+            LogAllVarsState();
+        } 
+        #endregion
+
     }
 }

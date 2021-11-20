@@ -43,10 +43,10 @@ namespace Assets.Scripts.CharacterControl
         {
             if (isDebugModeOn)
             {
-                LogAllVarsState();
                 LoggerCustom.INFO("**********************************************************************************");
                 LoggerCustom.INFO("GAME OVER");
                 LoggerCustom.INFO("**********************************************************************************");
+                LogAllVarsState();
 
                 // write out the log to a log file
                 LoggerCustom.WriteLogToFile();
@@ -95,21 +95,39 @@ namespace Assets.Scripts.CharacterControl
         #region utilities
         private void LogAllVarsState()
         {
-            LoggerCustom.DEBUG("Logging state of all controller variables");
             LoggerCustom.INFO("**********************************************************************************");
-            LoggerCustom.DEBUG(string.Format("{0}|{1}", "isDebugModeOn", isDebugModeOn));
-            LoggerCustom.DEBUG(string.Format("{0}|{1}", "debugLogFileDirectory", debugLogFileDirectory));
-            LoggerCustom.DEBUG(string.Format("{0}|{1}", "runSpeed", horizontalAccelerationPercent));
-            LoggerCustom.DEBUG(string.Format("{0}|{1}", "jumpThrustPerSecond", jumpThrustOverTimePercent));
-            LoggerCustom.DEBUG(string.Format("{0}|{1}", "maxJumpThrust", jumpThrustLimitPercent));
-            LoggerCustom.DEBUG(string.Format("{0}|{1}", "initialJumpThrust", initialJumpThrustPercent));
-            LoggerCustom.DEBUG(string.Format("{0}|{1}", "gravityOnPlayer", gravityOnCharacterPercent));
+            LoggerCustom.DEBUG("Movement parameters");
+            LoggerCustom.INFO("**********************************************************************************");
+            LoggerCustom.DEBUG(string.Format("{0}|{1}", "horizontalAccelerationPercent", horizontalAccelerationPercent));
+            LoggerCustom.DEBUG(string.Format("{0}|{1}", "horizontalVelocityLimitPercent", horizontalVelocityLimitPercent));
+            LoggerCustom.DEBUG(string.Format("{0}|{1}", "initialJumpThrustPercent", initialJumpThrustPercent));
+            LoggerCustom.DEBUG(string.Format("{0}|{1}", "jumpThrustOverTimePercent", jumpThrustOverTimePercent));
+            LoggerCustom.DEBUG(string.Format("{0}|{1}", "jumpThrustLimitPercent", jumpThrustLimitPercent));
+            LoggerCustom.DEBUG(string.Format("{0}|{1}", "gravityOnCharacterPercent", gravityOnCharacterPercent));
+            LoggerCustom.DEBUG(string.Format("{0}|{1}", "grappleBeamForcePercent", grappleBeamForcePercent));
+            LoggerCustom.DEBUG(string.Format("{0}|{1}", "grappleBeamMaxDistancePercent", grappleBeamMaxDistancePercent));
+            LoggerCustom.DEBUG(string.Format("{0}|{1}", "corneringTimeRequiredPercent", corneringTimeRequiredPercent));
+
+            // log camera control
+            if (UnityEngine.Camera.main != null)
+            {
+                Camera.CameraControl cam = UnityEngine.Camera.main.GetComponent<Camera.CameraControl>();
+                if (cam != null)
+                {
+                    cam.isDebugModeOn = isDebugModeOn;
+                    cam.LogAllVarsState();
+                }
+            }
+
+            LoggerCustom.INFO("**********************************************************************************");
+            LoggerCustom.DEBUG("Movement abilities");
+            LoggerCustom.INFO("**********************************************************************************");
             LoggerCustom.DEBUG(string.Format("{0}|{1}", "isHorizontalMovementInAirAllowed", isHorizontalMovementInAirAllowed));
             LoggerCustom.DEBUG(string.Format("{0}|{1}", "canWallCrall", canWallCrawl));
             LoggerCustom.DEBUG(string.Format("{0}|{1}", "canCeilingCrawl", canCeilingCrawl));
             LoggerCustom.DEBUG(string.Format("{0}|{1}", "canGrapple", canGrapple));
-            LoggerCustom.DEBUG(string.Format("{0}|{1}", "isHorizontalMovementInAirAllowed", isHorizontalMovementInAirAllowed));
             LoggerCustom.INFO("**********************************************************************************");
+
         }
         private void WriteDebugInfoToUi()
         {
