@@ -9,7 +9,7 @@ using UnityEngine;
 
 namespace Assets.Scripts.CharacterControl
 {
-    public class ControllableCharacter : MonoBehaviour
+    internal class ControllableCharacter : MonoBehaviour
     {
         #region unity properties
         [Header("Debug")]
@@ -18,41 +18,12 @@ namespace Assets.Scripts.CharacterControl
         [SerializeField] public string debugLogFileDirectory = string.Empty; // C:\Users\Dan\AppData\LocalLow\SpiderController\
         [Header("Movement parameters")]
         [Space(10)]
-
-        const float maxHorizontalAcceleration = 50000f;
-        const float minHorizontalAcceleration = 5000f;
         [Range(0, 1f)] [SerializeField] public float horizontalAccelerationPercent = 0.5f;
-
-        const float maxHorizontalVelocityLimit = 25f;
-        const float minHorizontalVelocityLimit = 3f;
         [Range(0, 1f)] [SerializeField] public float horizontalVelocityLimitPercent = 0.5f;
-
-        const float maxInitialJumpThrust = 30f;
-        const float minInitialJumpThrust = 5f;
         [Range(0, 1f)] [SerializeField] public float initialJumpThrustPercent = 0.65f;
-
-        const float maxJumpThrustOverTime = 160f;
-        const float minJumpThrustOverTime = 10f;
         [Range(0, 1f)] [SerializeField] public float jumpThrustOverTimePercent = 0.5f;
-
-        const float maxJumpThrustLimit = 160f;
-        const float minJumpThrustLimit = 10f;
         [Range(0, 1f)] [SerializeField] public float jumpThrustLimitPercent = 0.238f;
-
-        const float maxGravityOnCharacter = 100f;
-        const float minGravityOnCharacter = 10f;
         [Range(0, 1f)] [SerializeField] public float gravityOnCharacterPercent = 0.793f;
-
-        const float maxGrappleBeamForce = 60;
-        const float minGrappleBeamForce = 5f;
-        [Range(0, 1f)] [SerializeField] public float grappleBeamForcePercent = 0.5f;
-
-        const float maxGrappleBeamMaxDistance = 12f;
-        const float minGrappleBeamMaxDistance = 1f;
-        [Range(0, 1f)] [SerializeField] public float grappleBeamMaxDistancePercent = 0.5f;
-
-        const float maxCorneringTimeRequired = 5f;
-        const float minCorneringTimeRequired = 0.5f;
         [Range(0, 1f)] [SerializeField] public float corneringTimeRequiredPercent = 0.263f; // time it takes in seconds to begin to crawl up a wall
 
         [Header("Movement abilities")]
@@ -72,8 +43,6 @@ namespace Assets.Scripts.CharacterControl
         [SerializeField] public LayerMask whatIsPlatform;  // A mask determining what is ground to the character 
         //todo: consider moving grapple beam stuff into the spider controller class
         [SerializeField] public Transform targetingReticuleTransform;
-        [SerializeField] public LineRenderer grappleBeam;
-        [SerializeField] public DistanceJoint2D grappleBeamJoint;
         #endregion unity properties
 
         #region fields not set in unity
@@ -81,7 +50,7 @@ namespace Assets.Scripts.CharacterControl
         public CharacterContacts characterContactsCurrentFrame { get; private set; }
         public UserInputCollection userInput { get {return _userInput; } }
         public CharacterOrienter characterOrienter { get; private set; }
-        public float currentJumpThrust { get; private set; }
+        public float currentJumpThrust { get; protected set; }
         public CharacterAnimationController characterAnimationController { get; private set; }
         public float jumpThrustLimit { get; private set; }  // this is calculated every frame. we make it a member var because the state controller needs access
         public float corneringTimeRequired { get; private set; }  // this is calculated every frame. we make it a member var because the state controller needs access
@@ -91,7 +60,23 @@ namespace Assets.Scripts.CharacterControl
         private const float _platformContactCheckRadius = .2f; // Radius of the overlap circle to determine if touching a platform
         protected UserInputCollection _userInput;
         protected Vector2 _forcesAccumulated;
-        
+
+        // min and max limiters on movement parameters
+        const float maxHorizontalAcceleration = 50000f;
+        const float minHorizontalAcceleration = 5000f;
+        const float maxHorizontalVelocityLimit = 25f;
+        const float minHorizontalVelocityLimit = 3f;
+        const float maxInitialJumpThrust = 30f;
+        const float minInitialJumpThrust = 5f;
+        const float maxJumpThrustOverTime = 160f;
+        const float minJumpThrustOverTime = 10f;
+        const float maxJumpThrustLimit = 160f;
+        const float minJumpThrustLimit = 10f;
+        const float maxGravityOnCharacter = 100f;
+        const float minGravityOnCharacter = 10f;        
+        const float maxCorneringTimeRequired = 5f;
+        const float minCorneringTimeRequired = 0.5f;
+
         #endregion
 
 
@@ -115,10 +100,6 @@ namespace Assets.Scripts.CharacterControl
             characterAnimationController = new CharacterAnimationController(animator, isDebugModeOn);
 
             _forcesAccumulated = Vector2.zero;
-
-            grappleBeamJoint.enabled = false;
-
-
         }
         protected virtual void FixedUpdate()
         {
@@ -141,7 +122,7 @@ namespace Assets.Scripts.CharacterControl
 
 
         }
-        private void Update()
+        protected virtual void Update()
         {
             if (isDebugModeOn) LoggerCustom.SetFrameCount(Time.frameCount);
             CheckUserInput();
@@ -168,11 +149,11 @@ namespace Assets.Scripts.CharacterControl
             {
                 AddDirectionalMovementForceH();
             }
-            if (_stateController.currentMovementState == MovementState.GROUNDED
-                || _stateController.currentMovementState == MovementState.TETHERED)
+            if (_stateController.currentMovementState == MovementState.GROUNDED)
             {
                 AddDirectionalMovementForceV();
             }
+            
 
             // respond to jump button held down
             if(_stateController.currentMovementState == MovementState.JUMP_ACCELERATING)
@@ -190,9 +171,7 @@ namespace Assets.Scripts.CharacterControl
                 }
             }
 
-            // make sure the grapple beam's position zero stays with the character
-            if (_stateController.currentMovementState == MovementState.TETHERED)
-                UpdateGrappleBeamLine();
+            
 
             // apply artifical gravity based on which way we're facing
             AddArtificalGravity();
@@ -290,7 +269,7 @@ namespace Assets.Scripts.CharacterControl
             }
             _forcesAccumulated += thrust;
         }
-        internal bool HandleTrigger(MovementTrigger t)
+        internal virtual bool HandleTrigger(MovementTrigger t)
         {
             bool success = false;
             switch(t)
@@ -306,18 +285,6 @@ namespace Assets.Scripts.CharacterControl
                     break;
                 case MovementTrigger.TRIGGER_CORNER:
                     success = TriggerCorner();
-                    break;
-                case MovementTrigger.TRIGGER_GRAPPLE_ATTEMPT:
-                    success = TriggerGrappleAttempt();
-                    break;
-                case MovementTrigger.TRIGGER_GRAPPLE_SUCCESS:
-                    success = true; // nothing to do here as action was already done in the attempt
-                    break;
-                case MovementTrigger.TRIGGER_GRAPPLE_RELEASE:
-                    success = TriggerGrappleRelease();
-                    break;
-                case MovementTrigger.TRIGGER_GRAPPLE_REACHED_ANCHOR:
-                    success = TriggerGrappleReachedAnchor();
                     break;
             }
             return success;
@@ -461,7 +428,7 @@ namespace Assets.Scripts.CharacterControl
                 movement.y = -distance;
             transform.position += movement;
         }
-        private void SetFacingDirections(FacingDirection heading, FacingDirection thrusting)
+        protected void SetFacingDirections(FacingDirection heading, FacingDirection thrusting)
         {
             if (characterOrienter.headingDirection == heading && characterOrienter.thrustingDirection == thrusting)
             {
@@ -544,82 +511,6 @@ namespace Assets.Scripts.CharacterControl
             AddJumpForce(initialJumpThrust);
             return true;
         }
-        private bool TriggerGrappleAttempt()
-        {
-            LoggerCustom.DEBUG("Begin grapple beam attempt");
-            currentJumpThrust = 0;
-
-            // how to raycast https://www.youtube.com/watch?v=wkKsl1Mfp5M
-            // raycasting starts at 13:38 
-
-            // grapple tutorial:
-            // part 1: https://www.youtube.com/watch?v=sHhzWlrTgJo&t=791s
-            // part 2: https://www.youtube.com/watch?v=DTFgQIs5iMY&t=183s
-
-            // set up the ray cast
-            Vector2 firePoint = ceilingCheckTransform.position;
-            Vector2 targetDirection = new Vector2(targetingReticuleTransform.position.x, targetingReticuleTransform.position.y)
-                - firePoint;
-            float distanceBetween = targetDirection.magnitude;
-            Vector2 normalizedDirection = targetDirection / distanceBetween;
-
-            // fire it and see what it hit
-            float grappleBeamMaxDistance = minGrappleBeamMaxDistance +
-                (grappleBeamMaxDistancePercent * (maxGrappleBeamMaxDistance - minGrappleBeamMaxDistance));
-            RaycastHit2D hitInfo = Physics2D.Raycast(firePoint, normalizedDirection,
-                grappleBeamMaxDistance, whatIsPlatform.value);
-
-            bool didHit = false;
-            if (hitInfo)
-            {
-                Rigidbody2D anchor = hitInfo.collider.gameObject.GetComponent<Rigidbody2D>();
-                if (anchor != null)
-                {
-                    LoggerCustom.DEBUG(string.Format("Grapple hit {0} at {1}, {2}", hitInfo.transform.name,
-                        hitInfo.transform.position.x, hitInfo.transform.position.y));
-
-                    grappleBeamJoint.enabled = true;
-                    grappleBeamJoint.connectedBody = anchor;
-                    grappleBeamJoint.connectedAnchor = hitInfo.point - new Vector2(
-                        hitInfo.collider.transform.position.x, hitInfo.collider.transform.position.y);
-                    grappleBeamJoint.distance = Vector2.Distance(transform.position, hitInfo.point);
-
-                    didHit = true;
-
-                    // draw our line
-                    grappleBeam.enabled = true;
-                    grappleBeam.SetPosition(0, firePoint);
-                    grappleBeam.SetPosition(1, hitInfo.point);
-
-                    // now give a push in that direction
-                    float grappleBeamForce = minGrappleBeamForce +
-                        (grappleBeamForcePercent * (maxGrappleBeamForce - minGrappleBeamForce));
-                    Vector2 thrust = normalizedDirection * grappleBeamForce;
-                    _forcesAccumulated += thrust;
-                }
-
-
-            }
-            if (!didHit)
-            {
-                // todo: draw the grapple miss line
-                // draw the "miss" line
-            }
-
-            return didHit;
-        }
-        private bool TriggerGrappleReachedAnchor()
-        {
-            grappleBeam.enabled = false;
-            FacingDirection newHeading = characterOrienter.thrustingDirection;
-            SetFacingDirections(newHeading, FacingDirection.DOWN);
-            return true;
-        }
-        private bool TriggerGrappleRelease()
-        {
-            grappleBeam.enabled = false;
-            return true;
-        }
         private bool TriggerLanding()
         {
             if (characterContactsCurrentFrame.isTouchingPlatformWithBase)
@@ -639,9 +530,7 @@ namespace Assets.Scripts.CharacterControl
             }
             return false;
         }
-        private void UpdateGrappleBeamLine()
-        {
-            grappleBeam.SetPosition(0, ceilingCheckTransform.position);
-        }
+        
+        
     }
 }

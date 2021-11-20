@@ -11,7 +11,7 @@ using UnityEngine;
 
 namespace Assets.Scripts.CharacterControl
 {
-    public class SpiderController : ControllableCharacter
+    internal class SpiderController : GrapplingCharacter
     {
         #region Vars set in Unity
         public UnityEngine.UI.Text debugTextBox;
@@ -22,8 +22,7 @@ namespace Assets.Scripts.CharacterControl
         protected override void Awake()
         {
             base.Awake();
-            // hide scene elements that shouldn't be there at the beginning
-            grappleBeam.enabled = false;
+            
 
             LoggerCustom.Init(isDebugModeOn, debugLogFileDirectory, Time.frameCount);
 

@@ -8,17 +8,17 @@ using UnityEngine;
 
 namespace Assets.Scripts.CharacterControl
 {
-    public class CharacterMovementStateController
+    internal class CharacterMovementStateController
     {
-        public MovementState currentMovementState { get; private set; }
-        public List<MovementTrigger> processedTriggers { get; private set; }
+        internal MovementState currentMovementState { get; private set; }
+        internal List<MovementTrigger> processedTriggers { get; private set; }
 
         private ControllableCharacter _character;
         private bool _isDebugModeOn;
         private float _currentCorneringCounter;
 
 
-        public CharacterMovementStateController(ControllableCharacter character, MovementState initialMovementState)
+        internal CharacterMovementStateController(ControllableCharacter character, MovementState initialMovementState)
         {
             _character = character;
             currentMovementState = initialMovementState;
@@ -26,12 +26,12 @@ namespace Assets.Scripts.CharacterControl
             processedTriggers = new List<MovementTrigger>();
             _currentCorneringCounter = 0f;
         }
-        public void UpdateCurrentState()
+        internal void UpdateCurrentState()
         {
             // call this once per frame. it updates the current state
             // and triggers the controllable character to act
 
-            ProcessTriggers();
+            DetermineTriggers();
 
             // cycle through each active trigger and set the state in order
             foreach (MovementTrigger t in processedTriggers)
@@ -83,7 +83,7 @@ namespace Assets.Scripts.CharacterControl
                         if (t == MovementTrigger.TRIGGER_GRAPPLE_RELEASE)
                             newState = MovementState.FLOATING;
                         // 080
-                        if (t == MovementTrigger.TRIGGER_GRAPPLE_REACHED_ANCHOR)
+                        if (t == MovementTrigger.TRIGGER_GRAPPLE_STRUCK_GROUND)
                             newState = MovementState.GROUNDED;
                         // 090
                         if (t == MovementTrigger.TRIGGER_JUMP)
@@ -107,7 +107,7 @@ namespace Assets.Scripts.CharacterControl
 
         
 
-        private void ProcessTriggers()
+        private void DetermineTriggers()
         {
             processedTriggers = new List<MovementTrigger>();
             // todo: need to check for movement capabilities in the ProcessTriggers() method
@@ -179,12 +179,12 @@ namespace Assets.Scripts.CharacterControl
                 processedTriggers.Add(MovementTrigger.TRIGGER_GRAPPLE_RELEASE);
                 ResetCorneringCounter();
             }
-            // check for TRIGGER_GRAPPLE_REACHED_ANCHOR
+            // check for TRIGGER_GRAPPLE_STRUCK_GROUND
             if (currentMovementState == MovementState.TETHERED 
-                && _character.characterContactsCurrentFrame.isTouchingPlatformForward)
+                && !_character.characterContactsCurrentFrame.isTouchingNothing)
             {
-                _character.HandleTrigger(MovementTrigger.TRIGGER_GRAPPLE_REACHED_ANCHOR);
-                processedTriggers.Add(MovementTrigger.TRIGGER_GRAPPLE_REACHED_ANCHOR);
+                _character.HandleTrigger(MovementTrigger.TRIGGER_GRAPPLE_STRUCK_GROUND);
+                processedTriggers.Add(MovementTrigger.TRIGGER_GRAPPLE_STRUCK_GROUND);
                 ResetCorneringCounter();
             }
         }

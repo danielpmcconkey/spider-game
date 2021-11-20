@@ -15,6 +15,6 @@ namespace Assets.Scripts.CharacterControl
         TRIGGER_GRAPPLE_ATTEMPT,
         TRIGGER_GRAPPLE_SUCCESS,
         TRIGGER_GRAPPLE_RELEASE,
-        TRIGGER_GRAPPLE_REACHED_ANCHOR,
+        TRIGGER_GRAPPLE_STRUCK_GROUND,
     }
 }
