@@ -20,6 +20,7 @@ namespace Assets.Scripts.CharacterControl
         [Space(10)]
         [Range(0, 1f)] [SerializeField] public float horizontalAccelerationPercent = 0.5f;
         [Range(0, 1f)] [SerializeField] public float horizontalVelocityLimitPercent = 0.5f;
+        [Range(0, 1f)] [SerializeField] public float breaksPressurePercent = 0.5f;
         [Range(0, 1f)] [SerializeField] public float initialJumpThrustPercent = 0.65f;
         [Range(0, 1f)] [SerializeField] public float jumpThrustOverTimePercent = 0.5f;
         [Range(0, 1f)] [SerializeField] public float jumpThrustLimitPercent = 0.238f;
@@ -61,6 +62,8 @@ namespace Assets.Scripts.CharacterControl
         protected UserInputCollection _userInput;
         protected Vector2 _forcesAccumulated;
         protected const float pushOffAmount = 0.5f;
+        const float breaksThreshold = 0.1f; // kick in the breaks when velocity is greater than this and no move pressure
+        
 
         // min and max limiters on movement parameters
         const float maxHorizontalAcceleration = 50000f;
@@ -77,6 +80,8 @@ namespace Assets.Scripts.CharacterControl
         const float minGravityOnCharacter = 10f;        
         const float maxCorneringTimeRequired = 5f;
         const float minCorneringTimeRequired = 0.5f;
+        const float maxBreaksPressure = 60.0f;
+        const float minBreaksPressure = 0.0f;
 
         #endregion
 
@@ -241,7 +246,37 @@ namespace Assets.Scripts.CharacterControl
         }
         private void AddDirectionalMovementForceH()
         {
-            if (_userInput.moveHPressure == 0) return;
+            if (_userInput.moveHPressure == 0)
+            {
+                // if the character has velocity in the X
+                // axis, add force in the opposite direction
+                // to make stopping more forceful
+
+                
+                
+
+                if (_stateController.currentMovementState == MovementState.TETHERED)
+                {
+                    // don't disrupt the swinging effect
+                    return;
+                }
+                float breaksPressure = minBreaksPressure +
+                    (breaksPressurePercent * (maxBreaksPressure - minBreaksPressure));
+
+                float pressureToApply = breaksPressure * Time.deltaTime;
+                if (rigidBody2D.velocity.x > breaksThreshold)
+                {
+                    if (pressureToApply < rigidBody2D.velocity.x) 
+                        _forcesAccumulated += new Vector2(-pressureToApply, 0);
+                }
+                else if (rigidBody2D.velocity.x < -breaksThreshold)
+                {
+                    if (pressureToApply < (rigidBody2D.velocity.x * -1))
+                        _forcesAccumulated += new Vector2(pressureToApply, 0);
+                }
+                else return;
+
+            }
             if (characterOrienter.headingDirection == FacingDirection.RIGHT
                 || characterOrienter.headingDirection == FacingDirection.LEFT)
             {

@@ -73,14 +73,6 @@ namespace Assets.Scripts.Animation
                     newState = (isStarboardFacingCamera) ? AnimationState.IDLE_RIGHT : AnimationState.IDLE_LEFT;
                     break;
             }
-            if (_character.GetCurrentState() == MovementState.GROUNDED)
-            {
-                LoggerCustom.DEBUG(string.Format("{0}|{1}|{2}|{3}|",
-                    _character.userInput.moveHPressure,
-                    _character.GetCurrentState(),
-                    _character.characterOrienter.headingDirection,
-                    newState));
-            }
             // end new state logic
 
             if (_isDebugModeOn && newState != priorState)

@@ -136,17 +136,43 @@ namespace Assets.Scripts.CharacterControl
             // grapple tutorial:
             // part 1: https://www.youtube.com/watch?v=sHhzWlrTgJo
             // part 2: https://www.youtube.com/watch?v=DTFgQIs5iMY
+            
 
+            // new code
             // calculate our max distance
             float grappleBeamMaxDistance = minGrappleBeamMaxDistance +
                 (grappleBeamMaxDistancePercent * (maxGrappleBeamMaxDistance - minGrappleBeamMaxDistance));
+    
+            RaycastHit2D hitInfo = Raycaster.FireAtTargetPoint(ceilingCheckTransform.position,
+                targetingReticuleTransform.position, grappleBeamMaxDistance, whatIsPlatform);
 
-            RaycastHit2D hitInfo = Raycaster.FireAtTargetPoint(
-                new Vector2(ceilingCheckTransform.position.x, ceilingCheckTransform.position.x),
-                new Vector2(targetingReticuleTransform.position.x, targetingReticuleTransform.position.y),
-                grappleBeamMaxDistance, whatIsPlatform);
+            // end new code
+
+
+
+            //////// old code
+            //////// set up the ray cast
+            //////Vector2 firePoint = ceilingCheckTransform.position;
+            //////Vector2 targetDirection = new Vector2(targetingReticuleTransform.position.x,
+            //////    targetingReticuleTransform.position.y)
+            //////    - firePoint;
+            //////float distanceBetween = targetDirection.magnitude;
+            //////Vector2 normalizedDirection = targetDirection / distanceBetween;
 
             
+            
+
+            //////// fire it and see what it hit
+            //////RaycastHit2D hitInfo = Physics2D.Raycast(firePoint, normalizedDirection,
+            //////    grappleBeamMaxDistance, whatIsPlatform.value);
+
+            //////// end old code
+
+            //////if(hitInfo && !hitInfo2)
+            //////{
+            //////    string burp = "true";
+            //////}
+
 
             bool didHit = false;
             if (hitInfo)
@@ -183,8 +209,7 @@ namespace Assets.Scripts.CharacterControl
             if (!didHit)
             {
                 Vector2 normalizedDirection = Raycaster.GetNormalizedDirectionBetweenPoints(
-                    new Vector2(ceilingCheckTransform.position.x, ceilingCheckTransform.position.x),
-                    new Vector2(targetingReticuleTransform.position.x, targetingReticuleTransform.position.y));
+                    ceilingCheckTransform.position, targetingReticuleTransform.position);
 
                 // draw the "miss" line
                 grappleBeamLineRenderer.enabled = true;
