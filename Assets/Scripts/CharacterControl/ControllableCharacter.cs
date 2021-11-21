@@ -105,7 +105,8 @@ namespace Assets.Scripts.CharacterControl
         {
             // apply the accumulation of physical forces
             rigidBody2D.velocity += _forcesAccumulated;
-            // constrain H velocity to speed limit
+            
+            // constrain velocities to speed limit
             float horizontalVelocityLimit = minHorizontalVelocityLimit +
                 (horizontalVelocityLimitPercent * (maxHorizontalVelocityLimit - minHorizontalVelocityLimit));
 
@@ -117,10 +118,20 @@ namespace Assets.Scripts.CharacterControl
             {
                 rigidBody2D.velocity = new Vector2((horizontalVelocityLimit * -1), rigidBody2D.velocity.y);
             }
+            if (_stateController.currentMovementState == MovementState.GROUNDED)
+            {
+                // also constrain the vertical
+                if (rigidBody2D.velocity.y > horizontalVelocityLimit)
+                {
+                    rigidBody2D.velocity = new Vector2(rigidBody2D.velocity.x, horizontalVelocityLimit);
+                }
+                if (rigidBody2D.velocity.y < (horizontalVelocityLimit * -1))
+                {
+                    rigidBody2D.velocity = new Vector2(rigidBody2D.velocity.x, (horizontalVelocityLimit * -1));
+                }
+            }
             // reset the accumulation
             _forcesAccumulated = Vector2.zero;
-
-
         }
         protected virtual void Update()
         {

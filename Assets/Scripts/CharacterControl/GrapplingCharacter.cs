@@ -25,6 +25,8 @@ namespace Assets.Scripts.CharacterControl
 
         // private members
         private bool _shouldStopReelingIn;
+        private float _missLineCountdown;
+        private const float _missLineDuration = 0.25f;  // measured in seconds
 
         #region Unity implementation methods
         protected override void Awake()
@@ -50,9 +52,11 @@ namespace Assets.Scripts.CharacterControl
                 && grappleBeamLineRenderer.enabled)
             {
                 UpdateGrappleBeam();
-                //Color m_color = Color.Lerp(new Color(0.5f, 0.5f, 0.5f, 0.5f), new Color(0f, 0f, 0f, 0f));
-                //Debug.Log(m_color);
-                //grappleBeamLineRenderer.materials[0].SetColor("_TintColor", m_color);
+                _missLineCountdown -= Time.deltaTime;
+                if(_missLineCountdown < 0.01f)
+                {
+                    DisableGrapple();
+                }
             }
         }
         #endregion
@@ -114,6 +118,46 @@ namespace Assets.Scripts.CharacterControl
             grappleBeamJoint.enabled = true;
             _shouldStopReelingIn = false;
         }
+        private void PushOff()
+        {
+            // move the character away from the ground and 
+            // shorten the distance a little to keep collision 
+            // detection to think that we struck ground. don't
+            // do this with physics as sometimes the next
+            // check happens while we're still too close to the
+            // ground
+            const float pushOffAmount = 0.5f;
+            Vector3 positionAddition = Vector3.zero;
+            if(characterContactsCurrentFrame.isTouchingPlatformWithBase)
+            {
+                // move in the direction of thrust
+                if (characterOrienter.thrustingDirection == FacingDirection.UP)
+                    positionAddition.y = pushOffAmount;
+                if (characterOrienter.thrustingDirection == FacingDirection.DOWN)
+                    positionAddition.y = -pushOffAmount;
+                if (characterOrienter.thrustingDirection == FacingDirection.RIGHT)
+                    positionAddition.x = pushOffAmount;
+                if (characterOrienter.thrustingDirection == FacingDirection.LEFT)
+                    positionAddition.x = -pushOffAmount;
+            }
+            if (characterContactsCurrentFrame.isTouchingPlatformForward)
+            {
+                // move away from the heading direction
+                if (characterOrienter.headingDirection == FacingDirection.UP)
+                    positionAddition.y = -pushOffAmount;
+                if (characterOrienter.headingDirection == FacingDirection.DOWN)
+                    positionAddition.y = pushOffAmount;
+                if (characterOrienter.headingDirection == FacingDirection.RIGHT)
+                    positionAddition.x = -pushOffAmount;
+                if (characterOrienter.headingDirection == FacingDirection.LEFT)
+                    positionAddition.x = pushOffAmount;
+            }
+            LoggerCustom.DEBUG(string.Format("Position before push-off: {0}, {1}.", transform.position.x, transform.position.y));
+            transform.position += positionAddition;
+            grappleBeamJoint.distance -= pushOffAmount;
+            LoggerCustom.DEBUG(string.Format("Position after push-off: {0}, {1}.", transform.position.x, transform.position.y));
+
+        }
         private bool TriggerGrappleAttempt()
         {
             LoggerCustom.DEBUG("Begin grapple beam attempt");
@@ -160,9 +204,9 @@ namespace Assets.Scripts.CharacterControl
                     grappleBeamJoint.connectedAnchor = hitInfo.point - new Vector2(
                         hitInfo.collider.transform.position.x, hitInfo.collider.transform.position.y);
                     grappleBeamJoint.distance = Vector2.Distance(transform.position, hitInfo.point);
-                    // shorten the distance a little to keep collision detection
-                    // to think that we struck ground
-                    grappleBeamJoint.distance -= 0.5f;
+
+                    // push off the ground so we don't retrigger a landing
+                    PushOff();
 
                     didHit = true;
 
@@ -184,6 +228,8 @@ namespace Assets.Scripts.CharacterControl
 
                 grappleBeamLineRenderer.SetPosition(0, transform.position);
                 grappleBeamLineRenderer.SetPosition(1, targetPositionForPoint1);
+
+                _missLineCountdown = _missLineDuration;
             }
 
             return didHit;
@@ -229,14 +275,19 @@ namespace Assets.Scripts.CharacterControl
         }
         private void UpdateGrappleBeam()
         {
-            // if the distance between character and anchor > 0.5f
+            // if the distance between character and anchor > 2.5f
             // then retract the beam a little
             // todo: create a trigger to change _shouldStopReelingIn to true and allow the character to move up and down the grapple
-            if (!_shouldStopReelingIn && grappleBeamJoint.distance > 0.5f)
+            const float maxScroll = 2.5f;
+            if (!_shouldStopReelingIn && grappleBeamJoint.distance > maxScroll)
             {
                 float grappleBeamForce = minGrappleBeamForce +
                     (grappleBeamForcePercent * (maxGrappleBeamForce - minGrappleBeamForce));
                 grappleBeamJoint.distance -= (grappleBeamForce * Time.deltaTime);
+            }
+            if(!_shouldStopReelingIn && grappleBeamJoint.distance < maxScroll)
+            {
+                _shouldStopReelingIn = true;
             }
             // regardless of how far we are, update the line's 
             // position 0 to keep up with swinging and such
