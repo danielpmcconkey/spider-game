@@ -138,7 +138,7 @@ namespace Assets.Scripts.CharacterControl
             // part 2: https://www.youtube.com/watch?v=DTFgQIs5iMY
             
 
-            // new code
+            
             // calculate our max distance
             float grappleBeamMaxDistance = minGrappleBeamMaxDistance +
                 (grappleBeamMaxDistancePercent * (maxGrappleBeamMaxDistance - minGrappleBeamMaxDistance));
@@ -146,34 +146,7 @@ namespace Assets.Scripts.CharacterControl
             RaycastHit2D hitInfo = Raycaster.FireAtTargetPoint(ceilingCheckTransform.position,
                 targetingReticuleTransform.position, grappleBeamMaxDistance, whatIsPlatform);
 
-            // end new code
-
-
-
-            //////// old code
-            //////// set up the ray cast
-            //////Vector2 firePoint = ceilingCheckTransform.position;
-            //////Vector2 targetDirection = new Vector2(targetingReticuleTransform.position.x,
-            //////    targetingReticuleTransform.position.y)
-            //////    - firePoint;
-            //////float distanceBetween = targetDirection.magnitude;
-            //////Vector2 normalizedDirection = targetDirection / distanceBetween;
-
             
-            
-
-            //////// fire it and see what it hit
-            //////RaycastHit2D hitInfo = Physics2D.Raycast(firePoint, normalizedDirection,
-            //////    grappleBeamMaxDistance, whatIsPlatform.value);
-
-            //////// end old code
-
-            //////if(hitInfo && !hitInfo2)
-            //////{
-            //////    string burp = "true";
-            //////}
-
-
             bool didHit = false;
             if (hitInfo)
             {
@@ -267,7 +240,6 @@ namespace Assets.Scripts.CharacterControl
         {
             // if the distance between character and anchor > 2.5f
             // then retract the beam a little
-            // todo: create a trigger to change _shouldStopReelingIn to true and allow the character to move up and down the grapple
             const float maxScroll = 2.5f;
             if (!_shouldStopReelingIn && grappleBeamJoint.distance > maxScroll)
             {

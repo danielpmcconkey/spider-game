@@ -42,14 +42,13 @@ namespace Assets.Scripts.CharacterControl
         [SerializeField] public Transform forwardCheckTransform;
         [SerializeField] public Transform ceilingCheckTransform;
         [SerializeField] public LayerMask whatIsPlatform;  // A mask determining what is ground to the character 
-        //todo: consider moving grapple beam stuff into the spider controller class
         [SerializeField] public Transform targetingReticuleTransform;
         #endregion unity properties
 
         #region fields not set in unity
         // publically exposed read-only values
         public CharacterContacts characterContactsCurrentFrame { get; private set; }
-        public UserInputCollection userInput { get {return _userInput; } }
+        public UserInputCollection userInput { get { return _userInput; } }
         public CharacterOrienter characterOrienter { get; private set; }
         public float currentJumpThrust { get; protected set; }
         public CharacterAnimationController characterAnimationController { get; private set; }
@@ -63,7 +62,7 @@ namespace Assets.Scripts.CharacterControl
         protected Vector2 _forcesAccumulated;
         protected const float pushOffAmount = 0.5f;
         const float breaksThreshold = 0.1f; // kick in the breaks when velocity is greater than this and no move pressure
-        
+
 
         // min and max limiters on movement parameters
         const float maxHorizontalAcceleration = 50000f;
@@ -77,15 +76,13 @@ namespace Assets.Scripts.CharacterControl
         const float maxJumpThrustLimit = 160f;
         const float minJumpThrustLimit = 10f;
         const float maxGravityOnCharacter = 100f;
-        const float minGravityOnCharacter = 10f;        
+        const float minGravityOnCharacter = 10f;
         const float maxCorneringTimeRequired = 5f;
         const float minCorneringTimeRequired = 0.5f;
         const float maxBreaksPressure = 60.0f;
         const float minBreaksPressure = 0.0f;
 
         #endregion
-
-
 
         #region Unity implementation methods
         protected virtual void Awake()
@@ -111,7 +108,7 @@ namespace Assets.Scripts.CharacterControl
         {
             // apply the accumulation of physical forces
             rigidBody2D.velocity += _forcesAccumulated;
-            
+
             // constrain velocities to speed limit
             float horizontalVelocityLimit = minHorizontalVelocityLimit +
                 (horizontalVelocityLimitPercent * (maxHorizontalVelocityLimit - minHorizontalVelocityLimit));
@@ -120,7 +117,7 @@ namespace Assets.Scripts.CharacterControl
             {
                 rigidBody2D.velocity = new Vector2(horizontalVelocityLimit, rigidBody2D.velocity.y);
             }
-            if (rigidBody2D.velocity.x < (horizontalVelocityLimit * - 1))
+            if (rigidBody2D.velocity.x < (horizontalVelocityLimit * -1))
             {
                 rigidBody2D.velocity = new Vector2((horizontalVelocityLimit * -1), rigidBody2D.velocity.y);
             }
@@ -144,11 +141,11 @@ namespace Assets.Scripts.CharacterControl
             if (isDebugModeOn) LoggerCustom.SetFrameCount(Time.frameCount);
             CheckUserInput();
             PopulatePlatformCollisionVars();
-            
+
             // calculate jump thrust limit every frame in case it updated outside of the script
             jumpThrustLimit = minJumpThrustLimit +
                 (jumpThrustLimitPercent * (maxJumpThrustLimit - minJumpThrustLimit));
-            
+
             // calculate cornering time required every frame in case it updated outside of the script
             corneringTimeRequired = minCorneringTimeRequired +
                 (corneringTimeRequiredPercent * (maxCorneringTimeRequired - minCorneringTimeRequired));
@@ -170,10 +167,10 @@ namespace Assets.Scripts.CharacterControl
             {
                 AddDirectionalMovementForceV();
             }
-            
+
 
             // respond to jump button held down
-            if(_stateController.currentMovementState == MovementState.JUMP_ACCELERATING)
+            if (_stateController.currentMovementState == MovementState.JUMP_ACCELERATING)
             {
                 if (_userInput.isJumpHeldDown)
                 {
@@ -188,18 +185,41 @@ namespace Assets.Scripts.CharacterControl
                 }
             }
 
-            
+
 
             // apply artifical gravity based on which way we're facing
             AddArtificalGravity();
         }
         #endregion
 
+        #region public methods
         public MovementState GetCurrentState()
         {
             return _stateController.currentMovementState;
         }
+        internal virtual bool HandleTrigger(MovementTrigger t)
+        {
+            bool success = false;
+            switch (t)
+            {
+                case MovementTrigger.TRIGGER_JUMP:
+                    success = TriggerJump();
+                    break;
+                case MovementTrigger.TRIGGER_LANDING:
+                    success = TriggerLanding();
+                    break;
+                case MovementTrigger.TRIGGER_FALL:
+                    success = TriggerFall();
+                    break;
+                case MovementTrigger.TRIGGER_CORNER:
+                    success = TriggerCorner();
+                    break;
+            }
+            return success;
+        }
+        #endregion
 
+        #region private / protected methods
         protected virtual void CheckUserInput()
         {
 
@@ -252,8 +272,8 @@ namespace Assets.Scripts.CharacterControl
                 // axis, add force in the opposite direction
                 // to make stopping more forceful
 
-                
-                
+
+
 
                 if (_stateController.currentMovementState == MovementState.TETHERED)
                 {
@@ -266,7 +286,7 @@ namespace Assets.Scripts.CharacterControl
                 float pressureToApply = breaksPressure * Time.deltaTime;
                 if (rigidBody2D.velocity.x > breaksThreshold)
                 {
-                    if (pressureToApply < rigidBody2D.velocity.x) 
+                    if (pressureToApply < rigidBody2D.velocity.x)
                         _forcesAccumulated += new Vector2(-pressureToApply, 0);
                 }
                 else if (rigidBody2D.velocity.x < -breaksThreshold)
@@ -319,26 +339,6 @@ namespace Assets.Scripts.CharacterControl
             }
             _forcesAccumulated += thrust;
         }
-        internal virtual bool HandleTrigger(MovementTrigger t)
-        {
-            bool success = false;
-            switch(t)
-            {
-                case MovementTrigger.TRIGGER_JUMP:
-                    success = TriggerJump();
-                    break;
-                case MovementTrigger.TRIGGER_LANDING:
-                    success = TriggerLanding();
-                    break;
-                case MovementTrigger.TRIGGER_FALL:
-                    success = TriggerFall();
-                    break;
-                case MovementTrigger.TRIGGER_CORNER:
-                    success = TriggerCorner();
-                    break;
-            }
-            return success;
-        }
         private bool IsCollidingWithPlatform(Transform checkingTransform)
         {
             Collider2D[] collisions = Physics2D.OverlapCircleAll(
@@ -373,14 +373,14 @@ namespace Assets.Scripts.CharacterControl
             Vector2 targetPoint1 = Vector2.zero;
             Vector2 firePoint2 = Vector2.zero;
             Vector2 targetPoint2 = Vector2.zero;
-            
+
 
             if (characterOrienter.thrustingDirection == FacingDirection.UP)
             {
                 firePoint1 = bellyCheckTransform.position;
                 targetPoint1 = firePoint1 + new Vector2(0, -distanceToCheck);
 
-                if(characterOrienter.headingDirection == FacingDirection.RIGHT)
+                if (characterOrienter.headingDirection == FacingDirection.RIGHT)
                 {
                     // aft is left
                     firePoint2 = firePoint1 + new Vector2(-distanceWidth, 0);
@@ -418,7 +418,7 @@ namespace Assets.Scripts.CharacterControl
             if (characterOrienter.thrustingDirection == FacingDirection.RIGHT)
             {
                 firePoint1 = bellyCheckTransform.position;
-                targetPoint1 = firePoint1 + new Vector2(-distanceToCheck,0);
+                targetPoint1 = firePoint1 + new Vector2(-distanceToCheck, 0);
 
                 if (characterOrienter.headingDirection == FacingDirection.UP)
                 {
@@ -458,7 +458,7 @@ namespace Assets.Scripts.CharacterControl
 
             RaycastHit2D hitInfo1 = Raycaster.FireAtTargetPoint(firePoint1, targetPoint1, distanceToCheck, whatIsPlatform);
             RaycastHit2D hitInfo2 = Raycaster.FireAtTargetPoint(firePoint2, targetPoint2, distanceToCheck, whatIsPlatform);
-            
+
             int hitCount = 0;
             if (hitInfo1) hitCount++;
             if (hitInfo2) hitCount++;
@@ -469,7 +469,7 @@ namespace Assets.Scripts.CharacterControl
         private void LandFloor()
         {
             LoggerCustom.DEBUG("LandH");
-            
+
             SetFacingDirections(characterOrienter.headingDirection, FacingDirection.UP);
             currentJumpThrust = 0f;
         }
@@ -585,7 +585,7 @@ namespace Assets.Scripts.CharacterControl
             // do this with physics as sometimes the next
             // check happens while we're still too close to the
             // ground
-            
+
             Vector3 positionAddition = Vector3.zero;
             if (characterContactsCurrentFrame.isTouchingPlatformWithBase)
             {
@@ -671,7 +671,7 @@ namespace Assets.Scripts.CharacterControl
             // update orientation
             SetFacingDirections(newHeading, newThrusting);
 
-            
+
 
             return true;
         }
@@ -729,7 +729,6 @@ namespace Assets.Scripts.CharacterControl
             }
             return false;
         }
-        
-        
+        #endregion
     }
 }

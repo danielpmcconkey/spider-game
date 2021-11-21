@@ -11,19 +11,18 @@ namespace Assets.Scripts.CharacterControl
     public class CharacterMovementStateController
     {
         internal MovementState currentMovementState { get; private set; }
-        internal List<MovementTrigger> processedTriggers { get; private set; }
+        internal List<MovementTrigger> triggers { get; private set; }
 
         private ControllableCharacter _character;
         private bool _isDebugModeOn;
         private float _currentCorneringCounter;
-
 
         internal CharacterMovementStateController(ControllableCharacter character, MovementState initialMovementState)
         {
             _character = character;
             currentMovementState = initialMovementState;
             _isDebugModeOn = character.isDebugModeOn;
-            processedTriggers = new List<MovementTrigger>();
+            triggers = new List<MovementTrigger>();
             _currentCorneringCounter = 0f;
         }
         internal void UpdateCurrentState()
@@ -34,7 +33,7 @@ namespace Assets.Scripts.CharacterControl
             DetermineTriggers();
 
             // cycle through each active trigger and set the state in order
-            foreach (MovementTrigger t in processedTriggers)
+            foreach (MovementTrigger t in triggers)
             {
                 /*
                  * possible state transitions:
@@ -105,19 +104,17 @@ namespace Assets.Scripts.CharacterControl
             }
         }
 
-        
-
         private void DetermineTriggers()
         {
-            processedTriggers = new List<MovementTrigger>();
-            // todo: need to check for movement capabilities in the ProcessTriggers() method
+            triggers = new List<MovementTrigger>();
+            
             // check for TRIGGER_JUMP
             if (_character.userInput.isJumpPressed
                  && (currentMovementState == MovementState.GROUNDED 
                  || currentMovementState == MovementState.TETHERED))
             {
                 _character.HandleTrigger(MovementTrigger.TRIGGER_JUMP);
-                processedTriggers.Add(MovementTrigger.TRIGGER_JUMP);
+                triggers.Add(MovementTrigger.TRIGGER_JUMP);
                 ResetCorneringCounter();
             }
             // check for TRIGGER_LANDING
@@ -146,7 +143,7 @@ namespace Assets.Scripts.CharacterControl
                 if (canLand)
                 {
                     _character.HandleTrigger(MovementTrigger.TRIGGER_LANDING);
-                    processedTriggers.Add(MovementTrigger.TRIGGER_LANDING);
+                    triggers.Add(MovementTrigger.TRIGGER_LANDING);
                     ResetCorneringCounter();
                 }
                 
@@ -165,14 +162,14 @@ namespace Assets.Scripts.CharacterControl
                 )
             {
                 _character.HandleTrigger(MovementTrigger.TRIGGER_FALL);
-                processedTriggers.Add(MovementTrigger.TRIGGER_FALL);
+                triggers.Add(MovementTrigger.TRIGGER_FALL);
                 ResetCorneringCounter();
             }
             // check for TRIGGER_CORNER
             if (ShouldTriggerCornering())
             {
                 _character.HandleTrigger(MovementTrigger.TRIGGER_CORNER);
-                processedTriggers.Add(MovementTrigger.TRIGGER_CORNER);
+                triggers.Add(MovementTrigger.TRIGGER_CORNER);
                 ResetCorneringCounter();
             }
             if (_character.canGrapple)
@@ -185,14 +182,14 @@ namespace Assets.Scripts.CharacterControl
                      || currentMovementState == MovementState.JUMP_ACCELERATING))
                 {
                     grappleSuccess = _character.HandleTrigger(MovementTrigger.TRIGGER_GRAPPLE_ATTEMPT);
-                    processedTriggers.Add(MovementTrigger.TRIGGER_GRAPPLE_ATTEMPT);
+                    triggers.Add(MovementTrigger.TRIGGER_GRAPPLE_ATTEMPT);
                     ResetCorneringCounter();
                 }
                 // check for TRIGGER_GRAPPLE_SUCCESS
                 if (grappleSuccess)
                 {
                     _character.HandleTrigger(MovementTrigger.TRIGGER_GRAPPLE_SUCCESS);
-                    processedTriggers.Add(MovementTrigger.TRIGGER_GRAPPLE_SUCCESS);
+                    triggers.Add(MovementTrigger.TRIGGER_GRAPPLE_SUCCESS);
                     ResetCorneringCounter();
                 }
                 // check for TRIGGER_GRAPPLE_RELEASE
@@ -200,7 +197,7 @@ namespace Assets.Scripts.CharacterControl
                     && _character.userInput.isGrappleButtonReleased)
                 {
                     _character.HandleTrigger(MovementTrigger.TRIGGER_GRAPPLE_RELEASE);
-                    processedTriggers.Add(MovementTrigger.TRIGGER_GRAPPLE_RELEASE);
+                    triggers.Add(MovementTrigger.TRIGGER_GRAPPLE_RELEASE);
                     ResetCorneringCounter();
                 }
                 // check for TRIGGER_GRAPPLE_STRUCK_GROUND
@@ -208,7 +205,7 @@ namespace Assets.Scripts.CharacterControl
                     && !_character.characterContactsCurrentFrame.isTouchingNothing)
                 {
                     _character.HandleTrigger(MovementTrigger.TRIGGER_GRAPPLE_STRUCK_GROUND);
-                    processedTriggers.Add(MovementTrigger.TRIGGER_GRAPPLE_STRUCK_GROUND);
+                    triggers.Add(MovementTrigger.TRIGGER_GRAPPLE_STRUCK_GROUND);
                     ResetCorneringCounter();
                 }
             }
