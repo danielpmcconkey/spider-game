@@ -124,9 +124,31 @@ namespace Assets.Scripts.CharacterControl
             if (currentMovementState == MovementState.FLOATING
                 && !_character.characterContactsCurrentFrame.isTouchingNothing)
             {
-                _character.HandleTrigger(MovementTrigger.TRIGGER_LANDING);
-                processedTriggers.Add(MovementTrigger.TRIGGER_LANDING);
-                ResetCorneringCounter();
+                // you can't always land. you either need to be touching 
+                // with the character's base, or you need to be able to 
+                // have a special ability
+                bool canLand = false;
+                if (_character.characterContactsCurrentFrame.isTouchingPlatformWithBase)
+                {
+                    // you can always land on your base
+                    canLand = true;
+                }
+                else if (_character.characterContactsCurrentFrame.isTouchingPlatformForward
+                    && _character.canWallCrawl)
+                {
+                    canLand = true;
+                }
+                else if (_character.characterContactsCurrentFrame.isTouchingPlatformWithTop
+                    && _character.canCeilingCrawl)
+                {
+                    canLand = true;
+                }
+                if (canLand)
+                {
+                    _character.HandleTrigger(MovementTrigger.TRIGGER_LANDING);
+                    processedTriggers.Add(MovementTrigger.TRIGGER_LANDING);
+                    ResetCorneringCounter();
+                }
                 
             }
             // check for TRIGGER_FALL
@@ -153,39 +175,42 @@ namespace Assets.Scripts.CharacterControl
                 processedTriggers.Add(MovementTrigger.TRIGGER_CORNER);
                 ResetCorneringCounter();
             }
-            bool grappleSuccess = false;
-            // check for TRIGGER_GRAPPLE_ATTEMPT
-            if (_character.userInput.isGrappleButtonPressed
-                 && (currentMovementState == MovementState.GROUNDED
-                 || currentMovementState == MovementState.FLOATING
-                 || currentMovementState == MovementState.JUMP_ACCELERATING))
+            if (_character.canGrapple)
             {
-                grappleSuccess = _character.HandleTrigger(MovementTrigger.TRIGGER_GRAPPLE_ATTEMPT);
-                processedTriggers.Add(MovementTrigger.TRIGGER_GRAPPLE_ATTEMPT);
-                ResetCorneringCounter();
-            }
-            // check for TRIGGER_GRAPPLE_SUCCESS
-            if (grappleSuccess)
-            {
-                _character.HandleTrigger(MovementTrigger.TRIGGER_GRAPPLE_SUCCESS);
-                processedTriggers.Add(MovementTrigger.TRIGGER_GRAPPLE_SUCCESS);
-                ResetCorneringCounter();
-            }
-            // check for TRIGGER_GRAPPLE_RELEASE
-            if (currentMovementState == MovementState.TETHERED 
-                && _character.userInput.isGrappleButtonReleased)
-            {
-                _character.HandleTrigger(MovementTrigger.TRIGGER_GRAPPLE_RELEASE);
-                processedTriggers.Add(MovementTrigger.TRIGGER_GRAPPLE_RELEASE);
-                ResetCorneringCounter();
-            }
-            // check for TRIGGER_GRAPPLE_STRUCK_GROUND
-            if (currentMovementState == MovementState.TETHERED 
-                && !_character.characterContactsCurrentFrame.isTouchingNothing)
-            {
-                _character.HandleTrigger(MovementTrigger.TRIGGER_GRAPPLE_STRUCK_GROUND);
-                processedTriggers.Add(MovementTrigger.TRIGGER_GRAPPLE_STRUCK_GROUND);
-                ResetCorneringCounter();
+                bool grappleSuccess = false;
+                // check for TRIGGER_GRAPPLE_ATTEMPT
+                if (_character.userInput.isGrappleButtonPressed
+                     && (currentMovementState == MovementState.GROUNDED
+                     || currentMovementState == MovementState.FLOATING
+                     || currentMovementState == MovementState.JUMP_ACCELERATING))
+                {
+                    grappleSuccess = _character.HandleTrigger(MovementTrigger.TRIGGER_GRAPPLE_ATTEMPT);
+                    processedTriggers.Add(MovementTrigger.TRIGGER_GRAPPLE_ATTEMPT);
+                    ResetCorneringCounter();
+                }
+                // check for TRIGGER_GRAPPLE_SUCCESS
+                if (grappleSuccess)
+                {
+                    _character.HandleTrigger(MovementTrigger.TRIGGER_GRAPPLE_SUCCESS);
+                    processedTriggers.Add(MovementTrigger.TRIGGER_GRAPPLE_SUCCESS);
+                    ResetCorneringCounter();
+                }
+                // check for TRIGGER_GRAPPLE_RELEASE
+                if (currentMovementState == MovementState.TETHERED
+                    && _character.userInput.isGrappleButtonReleased)
+                {
+                    _character.HandleTrigger(MovementTrigger.TRIGGER_GRAPPLE_RELEASE);
+                    processedTriggers.Add(MovementTrigger.TRIGGER_GRAPPLE_RELEASE);
+                    ResetCorneringCounter();
+                }
+                // check for TRIGGER_GRAPPLE_STRUCK_GROUND
+                if (currentMovementState == MovementState.TETHERED
+                    && !_character.characterContactsCurrentFrame.isTouchingNothing)
+                {
+                    _character.HandleTrigger(MovementTrigger.TRIGGER_GRAPPLE_STRUCK_GROUND);
+                    processedTriggers.Add(MovementTrigger.TRIGGER_GRAPPLE_STRUCK_GROUND);
+                    ResetCorneringCounter();
+                }
             }
         }
         private void ResetCorneringCounter()
