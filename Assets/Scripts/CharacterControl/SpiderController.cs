@@ -4,6 +4,7 @@ using Assets.Scripts.Utility;
 using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.Reflection;
 using System.Text;
 using UnityEngine;
 
@@ -14,6 +15,7 @@ namespace Assets.Scripts.CharacterControl
     public class SpiderController : GrapplingCharacter
     {
         #region Vars set in Unity
+        [SerializeField] public string replayFile = string.Empty; // E:\Unity Projects\SpiderPocGit\Logs\CustomLogger\spiderReplay-2021-11-21.13.18.05.208.json
         public UnityEngine.UI.Text debugTextBox;
 
         #endregion
@@ -21,8 +23,19 @@ namespace Assets.Scripts.CharacterControl
         #region implementation of unity methods
         protected override void Awake()
         {
+            _gameVersion = Assembly.GetExecutingAssembly().GetName().Version.ToString();
+            if (isDebugModeOn)
+            {
+                Replay.InitializeReplay(_gameVersion, debugLogFileDirectory);
+            }
+
             base.Awake();
-            
+            if (replayFile != string.Empty)
+            {
+                Replay.DeSerializeFromReplayFile(replayFile);
+            }
+
+
 
             LoggerCustom.Init(isDebugModeOn, debugLogFileDirectory, Time.frameCount);
 
@@ -38,8 +51,20 @@ namespace Assets.Scripts.CharacterControl
             TrackTargetingReticlueToMousePosition();
             if (isDebugModeOn) WriteDebugInfoToUi();
         }
+        protected override void Update()
+        {
+            base.Update();
+            if (isDebugModeOn)
+            {
+                Replay.AddInputForFrame(Time.frameCount, _userInput);
+            }
+        }
         void OnDestroy()
         {
+            if (isDebugModeOn)
+            {
+                Replay.WriteReplayFile();
+            }
             if (isDebugModeOn)
             {
                 LoggerCustom.INFO("**********************************************************************************");
@@ -58,6 +83,11 @@ namespace Assets.Scripts.CharacterControl
         
         protected override void CheckUserInput()
         {
+            if(replayFile != string.Empty)
+            {
+                _userInput = Replay.GetInputForFrame(Time.frameCount);
+                return;
+            }
             // every frame check whether user has changed input
             _userInput.moveHPressure = Input.GetAxisRaw("Horizontal");
             _userInput.moveVPressure = Input.GetAxisRaw("Vertical");
@@ -94,6 +124,8 @@ namespace Assets.Scripts.CharacterControl
         #region utilities
         private void LogAllVarsState()
         {
+            LoggerCustom.INFO("**********************************************************************************");
+            LoggerCustom.INFO(string.Format("{0}|{1}", "_gameVersion", _gameVersion));
             LoggerCustom.INFO("**********************************************************************************");
             LoggerCustom.DEBUG("Movement parameters");
             LoggerCustom.INFO("**********************************************************************************");

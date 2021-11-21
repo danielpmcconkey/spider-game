@@ -8,13 +8,13 @@ namespace Assets.Scripts.CharacterControl
 {
     public struct UserInputCollection
     {
-        public float moveHPressure;
-        public float moveVPressure;
-        public bool isJumpPressed;
-        public bool isJumpReleased;
-        public bool isJumpHeldDown;
-        public bool isGrappleButtonPressed;
-        public bool isGrappleButtonReleased;
-        public bool isGrappleButtonHeldDown;
+        public float moveHPressure { get; set; }
+        public float moveVPressure { get; set; }
+        public bool isJumpPressed { get; set; }
+        public bool isJumpReleased { get; set; }
+        public bool isJumpHeldDown { get; set; }
+        public bool isGrappleButtonPressed { get; set; }
+        public bool isGrappleButtonReleased { get; set; }
+        public bool isGrappleButtonHeldDown { get; set; }
     }
 }

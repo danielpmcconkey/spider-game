@@ -1,10 +1,6 @@
 ﻿using Assets.Scripts.Animation;
 using Assets.Scripts.Utility;
 using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using UnityEngine;
 
 namespace Assets.Scripts.CharacterControl
@@ -62,6 +58,7 @@ namespace Assets.Scripts.CharacterControl
         protected Vector2 _forcesAccumulated;
         protected const float pushOffAmount = 0.5f;
         const float breaksThreshold = 0.1f; // kick in the breaks when velocity is greater than this and no move pressure
+        protected string _gameVersion;
 
 
         // min and max limiters on movement parameters
