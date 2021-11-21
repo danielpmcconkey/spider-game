@@ -118,45 +118,13 @@ namespace Assets.Scripts.CharacterControl
             grappleBeamJoint.enabled = true;
             _shouldStopReelingIn = false;
         }
-        private void PushOff()
+        protected override void PushOff()
         {
-            // move the character away from the ground and 
-            // shorten the distance a little to keep collision 
-            // detection to think that we struck ground. don't
-            // do this with physics as sometimes the next
-            // check happens while we're still too close to the
-            // ground
-            const float pushOffAmount = 0.5f;
-            Vector3 positionAddition = Vector3.zero;
-            if(characterContactsCurrentFrame.isTouchingPlatformWithBase)
-            {
-                // move in the direction of thrust
-                if (characterOrienter.thrustingDirection == FacingDirection.UP)
-                    positionAddition.y = pushOffAmount;
-                if (characterOrienter.thrustingDirection == FacingDirection.DOWN)
-                    positionAddition.y = -pushOffAmount;
-                if (characterOrienter.thrustingDirection == FacingDirection.RIGHT)
-                    positionAddition.x = pushOffAmount;
-                if (characterOrienter.thrustingDirection == FacingDirection.LEFT)
-                    positionAddition.x = -pushOffAmount;
-            }
-            if (characterContactsCurrentFrame.isTouchingPlatformForward)
-            {
-                // move away from the heading direction
-                if (characterOrienter.headingDirection == FacingDirection.UP)
-                    positionAddition.y = -pushOffAmount;
-                if (characterOrienter.headingDirection == FacingDirection.DOWN)
-                    positionAddition.y = pushOffAmount;
-                if (characterOrienter.headingDirection == FacingDirection.RIGHT)
-                    positionAddition.x = -pushOffAmount;
-                if (characterOrienter.headingDirection == FacingDirection.LEFT)
-                    positionAddition.x = pushOffAmount;
-            }
-            LoggerCustom.DEBUG(string.Format("Position before push-off: {0}, {1}.", transform.position.x, transform.position.y));
-            transform.position += positionAddition;
-            grappleBeamJoint.distance -= pushOffAmount;
-            LoggerCustom.DEBUG(string.Format("Position after push-off: {0}, {1}.", transform.position.x, transform.position.y));
-
+            base.PushOff();
+            // if we're also grappling, limit the distance of the 
+            // beam joint
+            if(grappleBeamJoint.enabled)
+                grappleBeamJoint.distance -= pushOffAmount;
         }
         private bool TriggerGrappleAttempt()
         {
@@ -164,28 +132,21 @@ namespace Assets.Scripts.CharacterControl
             currentJumpThrust = 0;
 
 
-            // how to raycast https://www.youtube.com/watch?v=wkKsl1Mfp5M
-            // raycasting starts at 13:38 
 
             // grapple tutorial:
             // part 1: https://www.youtube.com/watch?v=sHhzWlrTgJo
             // part 2: https://www.youtube.com/watch?v=DTFgQIs5iMY
 
-            // set up the ray cast
-            Vector2 firePoint = ceilingCheckTransform.position;
-            Vector2 targetDirection = new Vector2(targetingReticuleTransform.position.x,
-                targetingReticuleTransform.position.y)
-                - firePoint;
-            float distanceBetween = targetDirection.magnitude;
-            Vector2 normalizedDirection = targetDirection / distanceBetween;
-
             // calculate our max distance
             float grappleBeamMaxDistance = minGrappleBeamMaxDistance +
                 (grappleBeamMaxDistancePercent * (maxGrappleBeamMaxDistance - minGrappleBeamMaxDistance));
 
-            // fire it and see what it hit
-            RaycastHit2D hitInfo = Physics2D.Raycast(firePoint, normalizedDirection,
-                grappleBeamMaxDistance, whatIsPlatform.value);
+            RaycastHit2D hitInfo = Raycaster.FireAtTargetPoint(
+                new Vector2(ceilingCheckTransform.position.x, ceilingCheckTransform.position.x),
+                new Vector2(targetingReticuleTransform.position.x, targetingReticuleTransform.position.y),
+                grappleBeamMaxDistance, whatIsPlatform);
+
+            
 
             bool didHit = false;
             if (hitInfo)
@@ -221,6 +182,10 @@ namespace Assets.Scripts.CharacterControl
             }
             if (!didHit)
             {
+                Vector2 normalizedDirection = Raycaster.GetNormalizedDirectionBetweenPoints(
+                    new Vector2(ceilingCheckTransform.position.x, ceilingCheckTransform.position.x),
+                    new Vector2(targetingReticuleTransform.position.x, targetingReticuleTransform.position.y));
+
                 // draw the "miss" line
                 grappleBeamLineRenderer.enabled = true;
                 Vector3 finalDirection = normalizedDirection * grappleBeamMaxDistance;

@@ -60,6 +60,7 @@ namespace Assets.Scripts.CharacterControl
         private const float _platformContactCheckRadius = .2f; // Radius of the overlap circle to determine if touching a platform
         protected UserInputCollection _userInput;
         protected Vector2 _forcesAccumulated;
+        protected const float pushOffAmount = 0.5f;
 
         // min and max limiters on movement parameters
         const float maxHorizontalAcceleration = 50000f;
@@ -315,6 +316,118 @@ namespace Assets.Scripts.CharacterControl
 
             return false;
         }
+        private bool IsGroundedRayCast()
+        {
+            // the physics engine isn't always reliable. sometimes
+            // using platform collision makes it seem like we're
+            // not actually thouching and forces a transition
+            // to a floating state. Instead, we'll use raycasts 
+            // to see if we're close enough to the ground to be
+            // considered grounded
+
+            characterOrienter.GetOppositeDirection(characterOrienter.thrustingDirection);
+
+            float distanceToCheck = _platformContactCheckRadius * 2f;
+
+            float distanceWidth = Vector2.Distance(transform.position, forwardCheckTransform.position);
+
+            Vector2 firePoint1 = Vector2.zero;
+            Vector2 targetPoint1 = Vector2.zero;
+            Vector2 firePoint2 = Vector2.zero;
+            Vector2 targetPoint2 = Vector2.zero;
+            
+
+            if (characterOrienter.thrustingDirection == FacingDirection.UP)
+            {
+                firePoint1 = bellyCheckTransform.position;
+                targetPoint1 = firePoint1 + new Vector2(0, -distanceToCheck);
+
+                if(characterOrienter.headingDirection == FacingDirection.RIGHT)
+                {
+                    // aft is left
+                    firePoint2 = firePoint1 + new Vector2(-distanceWidth, 0);
+                    targetPoint2 = firePoint2 + new Vector2(-distanceToCheck, -distanceToCheck);
+
+                }
+                if (characterOrienter.headingDirection == FacingDirection.LEFT)
+                {
+                    // aft is right
+                    firePoint2 = firePoint1 + new Vector2(distanceWidth, 0);
+                    targetPoint2 = firePoint2 + new Vector2(distanceToCheck, -distanceToCheck);
+
+                }
+            }
+            if (characterOrienter.thrustingDirection == FacingDirection.DOWN)
+            {
+                firePoint1 = bellyCheckTransform.position;
+                targetPoint1 = firePoint1 + new Vector2(0, distanceToCheck);
+
+                if (characterOrienter.headingDirection == FacingDirection.RIGHT)
+                {
+                    // aft is left
+                    firePoint2 = firePoint1 + new Vector2(-distanceWidth, 0);
+                    targetPoint2 = firePoint2 + new Vector2(-distanceToCheck, distanceToCheck);
+
+                }
+                if (characterOrienter.headingDirection == FacingDirection.LEFT)
+                {
+                    // aft is right
+                    firePoint2 = firePoint1 + new Vector2(distanceWidth, 0);
+                    targetPoint2 = firePoint2 + new Vector2(distanceToCheck, distanceToCheck);
+
+                }
+            }
+            if (characterOrienter.thrustingDirection == FacingDirection.RIGHT)
+            {
+                firePoint1 = bellyCheckTransform.position;
+                targetPoint1 = firePoint1 + new Vector2(-distanceToCheck,0);
+
+                if (characterOrienter.headingDirection == FacingDirection.UP)
+                {
+                    // aft is down
+                    firePoint2 = firePoint1 + new Vector2(0, -distanceWidth);
+                    targetPoint2 = firePoint2 + new Vector2(-distanceToCheck, -distanceToCheck);
+
+                }
+                if (characterOrienter.headingDirection == FacingDirection.DOWN)
+                {
+                    // aft is up
+                    firePoint2 = firePoint1 + new Vector2(0, distanceWidth);
+                    targetPoint2 = firePoint2 + new Vector2(-distanceToCheck, distanceToCheck);
+
+                }
+            }
+            if (characterOrienter.thrustingDirection == FacingDirection.LEFT)
+            {
+                firePoint1 = bellyCheckTransform.position;
+                targetPoint1 = firePoint1 + new Vector2(distanceToCheck, 0);
+
+                if (characterOrienter.headingDirection == FacingDirection.UP)
+                {
+                    // aft is down
+                    firePoint2 = firePoint1 + new Vector2(0, -distanceWidth);
+                    targetPoint2 = firePoint2 + new Vector2(distanceToCheck, -distanceToCheck);
+
+                }
+                if (characterOrienter.headingDirection == FacingDirection.DOWN)
+                {
+                    // aft is up
+                    firePoint2 = firePoint1 + new Vector2(0, distanceWidth);
+                    targetPoint2 = firePoint2 + new Vector2(distanceToCheck, distanceToCheck);
+
+                }
+            }
+
+            RaycastHit2D hitInfo1 = Raycaster.FireAtTargetPoint(firePoint1, targetPoint1, distanceToCheck, whatIsPlatform);
+            RaycastHit2D hitInfo2 = Raycaster.FireAtTargetPoint(firePoint2, targetPoint2, distanceToCheck, whatIsPlatform);
+            
+            int hitCount = 0;
+            if (hitInfo1) hitCount++;
+            if (hitInfo2) hitCount++;
+
+            if (hitCount >= 1) return true;
+            return false;
+        }
         private void LandFloor()
         {
             LoggerCustom.DEBUG("LandH");
@@ -390,14 +503,15 @@ namespace Assets.Scripts.CharacterControl
         {
             //characterContactsPriorFrame = characterContactsCurrentFrame;
             characterContactsCurrentFrame = new CharacterContacts();
-            if (IsCollidingWithPlatform(bellyCheckTransform))
-            {
-                characterContactsCurrentFrame.isTouchingPlatformWithBase = true;
-            }
-            else
-            {
-                characterContactsCurrentFrame.isTouchingPlatformWithBase = false;
-            }
+            characterContactsCurrentFrame.isTouchingPlatformWithBase = IsGroundedRayCast();
+            //if (IsCollidingWithPlatform(bellyCheckTransform))
+            //{
+            //    characterContactsCurrentFrame.isTouchingPlatformWithBase = true;
+            //}
+            //else
+            //{
+            //    characterContactsCurrentFrame.isTouchingPlatformWithBase = false;
+            //}
             if (IsCollidingWithPlatform(forwardCheckTransform))
             {
                 characterContactsCurrentFrame.isTouchingPlatformForward = true;
@@ -424,6 +538,42 @@ namespace Assets.Scripts.CharacterControl
             {
                 characterContactsCurrentFrame.isTouchingNothing = false;
             }
+        }
+        protected virtual void PushOff()
+        {
+            // move the character away from the ground after
+            // the jump a little to keep collision detection
+            // from thinking that we struck ground. don't
+            // do this with physics as sometimes the next
+            // check happens while we're still too close to the
+            // ground
+            
+            Vector3 positionAddition = Vector3.zero;
+            if (characterContactsCurrentFrame.isTouchingPlatformWithBase)
+            {
+                // move in the direction of thrust
+                if (characterOrienter.thrustingDirection == FacingDirection.UP)
+                    positionAddition.y = pushOffAmount;
+                if (characterOrienter.thrustingDirection == FacingDirection.DOWN)
+                    positionAddition.y = -pushOffAmount;
+                if (characterOrienter.thrustingDirection == FacingDirection.RIGHT)
+                    positionAddition.x = pushOffAmount;
+                if (characterOrienter.thrustingDirection == FacingDirection.LEFT)
+                    positionAddition.x = -pushOffAmount;
+            }
+            if (characterContactsCurrentFrame.isTouchingPlatformForward)
+            {
+                // move away from the heading direction
+                if (characterOrienter.headingDirection == FacingDirection.UP)
+                    positionAddition.y = -pushOffAmount;
+                if (characterOrienter.headingDirection == FacingDirection.DOWN)
+                    positionAddition.y = pushOffAmount;
+                if (characterOrienter.headingDirection == FacingDirection.RIGHT)
+                    positionAddition.x = -pushOffAmount;
+                if (characterOrienter.headingDirection == FacingDirection.LEFT)
+                    positionAddition.x = pushOffAmount;
+            }
+            transform.position += positionAddition;
         }
         private void PushTowardRotation()
         {
