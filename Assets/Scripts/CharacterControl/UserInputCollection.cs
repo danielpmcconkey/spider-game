@@ -16,5 +16,7 @@ namespace Assets.Scripts.CharacterControl
         public bool isGrappleButtonPressed { get; set; }
         public bool isGrappleButtonReleased { get; set; }
         public bool isGrappleButtonHeldDown { get; set; }
+        public float mouseX { get; set; }
+        public float mouseY { get; set; }
     }
 }

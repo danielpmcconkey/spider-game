@@ -15,7 +15,7 @@ namespace Assets.Scripts.CharacterControl
     public class SpiderController : GrapplingCharacter
     {
         #region Vars set in Unity
-        [SerializeField] public string replayFile = string.Empty; // E:\Unity Projects\SpiderPocGit\Logs\CustomLogger\spiderReplay-2021-11-21.13.18.05.208.json
+        [SerializeField] public string replayFile = string.Empty; // E:\Unity Projects\SpiderPocGit\Logs\CustomLogger\spiderReplay-2021-11-21.14.42.14.490.json
         public UnityEngine.UI.Text debugTextBox;
 
         #endregion
@@ -97,6 +97,9 @@ namespace Assets.Scripts.CharacterControl
             _userInput.isGrappleButtonPressed = Input.GetButtonDown("Fire3");
             _userInput.isGrappleButtonReleased = Input.GetButtonUp("Fire3");
             _userInput.isGrappleButtonHeldDown = Input.GetButton("Fire3");
+            _userInput.mouseX = Input.mousePosition.x;
+            _userInput.mouseY = Input.mousePosition.y;
+
 
             if (_userInput.isJumpPressed)
             {
@@ -115,7 +118,8 @@ namespace Assets.Scripts.CharacterControl
         }
         private void TrackTargetingReticlueToMousePosition()
         {
-            Vector3 mousePosition = UnityEngine.Camera.main.ScreenToWorldPoint(Input.mousePosition);    // had to specify UnityEngine to deconflict w/ my Camera namespace
+            Vector3 mousePosition = UnityEngine.Camera.main.ScreenToWorldPoint(    // had to specify UnityEngine to deconflict w/ my Camera namespace
+                new Vector3(_userInput.mouseX, _userInput.mouseY, 0));
             mousePosition.z = 0;
             targetingReticuleTransform.position = mousePosition;
         }

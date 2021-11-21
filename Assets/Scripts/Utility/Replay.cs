@@ -86,6 +86,14 @@ namespace Assets.Scripts.Utility
                         {
                             currentCollection.moveHPressure = int.Parse(match.value);
                         }
+                        if (match.key == "mouseX")
+                        {
+                            currentCollection.mouseX = int.Parse(match.value);
+                        }
+                        if (match.key == "mouseY")
+                        {
+                            currentCollection.mouseY = int.Parse(match.value);
+                        }
                         if (match.key == "moveVPressure")
                         {
                             currentCollection.moveVPressure = int.Parse(match.value);
@@ -151,6 +159,8 @@ namespace Assets.Scripts.Utility
                 sb.AppendLine(string.Format("\"isGrappleButtonPressed\": {0},", row.Value.isGrappleButtonPressed ? "true" : "false"));
                 sb.AppendLine(string.Format("\"isGrappleButtonReleased\": {0},", row.Value.isGrappleButtonReleased ? "true" : "false"));
                 sb.AppendLine(string.Format("\"isGrappleButtonHeldDown\": {0},", row.Value.isGrappleButtonHeldDown ? "true" : "false"));
+                sb.AppendLine(string.Format("\"mouseX\": {0},", row.Value.mouseX.ToString()));
+                sb.AppendLine(string.Format("\"mouseY\": {0},", row.Value.mouseY.ToString()));
                 sb.AppendLine("}"); // end UserInputCollection for that row
             }
             sb.AppendLine("}"); // end dictionary
@@ -169,6 +179,8 @@ namespace Assets.Scripts.Utility
             if (input.isGrappleButtonPressed) return false;
             if (input.isGrappleButtonReleased) return false;
             if (input.isGrappleButtonHeldDown) return false;
+            if (input.mouseX != 0) return false;
+            if (input.mouseY != 0) return false;
             return true;
         }
     }
