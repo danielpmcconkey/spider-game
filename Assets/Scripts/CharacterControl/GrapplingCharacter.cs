@@ -8,7 +8,7 @@ using UnityEngine;
 
 namespace Assets.Scripts.CharacterControl
 {
-    internal class GrapplingCharacter  : ControllableCharacter
+    public class GrapplingCharacter  : ControllableCharacter
     {
         [Header("Grapple control")]
         [Space(10)]

@@ -9,7 +9,7 @@ using UnityEngine;
 
 namespace Assets.Scripts.CharacterControl
 {
-    internal class ControllableCharacter : MonoBehaviour
+    public class ControllableCharacter : MonoBehaviour
     {
         #region unity properties
         [Header("Debug")]
@@ -98,7 +98,7 @@ namespace Assets.Scripts.CharacterControl
 
             _stateController = new CharacterMovementStateController(this, MovementState.FLOATING);
 
-            characterAnimationController = new CharacterAnimationController(animator, isDebugModeOn);
+            characterAnimationController = new CharacterAnimationController(this, animator, isDebugModeOn);
 
             _forcesAccumulated = Vector2.zero;
         }
@@ -149,7 +149,7 @@ namespace Assets.Scripts.CharacterControl
                 (corneringTimeRequiredPercent * (maxCorneringTimeRequired - minCorneringTimeRequired));
 
             _stateController.UpdateCurrentState();
-            characterAnimationController.SetState();
+            characterAnimationController.UpdateCurrentState();
 
             // respond to H and V movement inputs
             if (
@@ -190,7 +190,10 @@ namespace Assets.Scripts.CharacterControl
         }
         #endregion
 
-
+        public MovementState GetCurrentState()
+        {
+            return _stateController.currentMovementState;
+        }
 
         protected virtual void CheckUserInput()
         {

@@ -8,7 +8,7 @@ using UnityEngine;
 
 namespace Assets.Scripts.CharacterControl
 {
-    internal class CharacterMovementStateController
+    public class CharacterMovementStateController
     {
         internal MovementState currentMovementState { get; private set; }
         internal List<MovementTrigger> processedTriggers { get; private set; }

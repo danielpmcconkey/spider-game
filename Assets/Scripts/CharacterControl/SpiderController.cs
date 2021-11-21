@@ -11,7 +11,7 @@ using UnityEngine;
 
 namespace Assets.Scripts.CharacterControl
 {
-    internal class SpiderController : GrapplingCharacter
+    public class SpiderController : GrapplingCharacter
     {
         #region Vars set in Unity
         public UnityEngine.UI.Text debugTextBox;
@@ -138,6 +138,7 @@ namespace Assets.Scripts.CharacterControl
             sb.AppendLine(string.Format("Current state: {0}", _stateController.currentMovementState));
             sb.AppendLine(string.Format("Animation: {0}", characterAnimationController.currentState));
             sb.AppendLine(string.Format("velocity: {0}", rigidBody2D.velocity));
+            sb.AppendLine(string.Format("Move pressure H: {0}", userInput.moveHPressure));
 
             debugTextBox.text = sb.ToString();
         }
