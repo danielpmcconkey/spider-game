@@ -29,6 +29,7 @@ namespace Assets.Scripts.CharacterControl
         [SerializeField] public bool canWallCrawl = true;
         [SerializeField] public bool canCeilingCrawl = true;
         [SerializeField] public bool canGrapple = true;
+        [SerializeField] public bool canFly = false;
 
         [Header("Movement references")]
         [Space(10)]
@@ -73,7 +74,7 @@ namespace Assets.Scripts.CharacterControl
         const float maxJumpThrustLimit = 160f;
         const float minJumpThrustLimit = 10f;
         const float maxGravityOnCharacter = 100f;
-        const float minGravityOnCharacter = 10f;
+        const float minGravityOnCharacter = 0f;
         const float maxCorneringTimeRequired = 5f;
         const float minCorneringTimeRequired = 0.5f;
         const float maxBreaksPressure = 60.0f;
@@ -160,7 +161,7 @@ namespace Assets.Scripts.CharacterControl
             {
                 AddDirectionalMovementForceH();
             }
-            if (_stateController.currentMovementState == MovementState.GROUNDED)
+            if (_stateController.currentMovementState == MovementState.GROUNDED || canFly)
             {
                 AddDirectionalMovementForceV();
             }
@@ -221,7 +222,7 @@ namespace Assets.Scripts.CharacterControl
         {
 
         }
-        private void AddArtificalGravity()
+        protected virtual void AddArtificalGravity()
         {
             FacingDirection formerGravityDirection = characterOrienter.gravityDirection;
 
@@ -305,7 +306,8 @@ namespace Assets.Scripts.CharacterControl
         private void AddDirectionalMovementForceV()
         {
             if (characterOrienter.headingDirection == FacingDirection.UP
-                || characterOrienter.headingDirection == FacingDirection.DOWN)
+                || characterOrienter.headingDirection == FacingDirection.DOWN
+                || canFly)
             {
                 float acceleration = minHorizontalAcceleration +
                     (horizontalAccelerationPercent * (maxHorizontalAcceleration - minHorizontalAcceleration));
