@@ -22,10 +22,6 @@ namespace Assets.Scripts.CharacterControl
 
 
         }
-        protected override void AddArtificalGravity()
-        {
-            base.AddArtificalGravity();
-        }
         protected virtual UserInputCollection GetNextMove()
         {
             UserInputCollection userInput = new UserInputCollection();

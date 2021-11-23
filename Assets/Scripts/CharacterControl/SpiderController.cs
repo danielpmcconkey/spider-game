@@ -1,5 +1,6 @@
 using Assets.Scripts;
 using Assets.Scripts.Animation;
+using Assets.Scripts.Camera;
 using Assets.Scripts.Utility;
 using System;
 using System.Collections;
@@ -7,8 +8,8 @@ using System.Collections.Generic;
 using System.Reflection;
 using System.Text;
 using UnityEngine;
-
-
+using Assets.Scripts.WorldBuilder;
+using UnityEngine.SceneManagement;
 
 namespace Assets.Scripts.CharacterControl
 {
@@ -16,7 +17,15 @@ namespace Assets.Scripts.CharacterControl
     {
         #region Vars set in Unity
         [SerializeField] public string replayFile = string.Empty; // E:\Unity Projects\SpiderPocGit\Logs\CustomLogger\spiderReplay-2021-11-21.14.42.14.490.json
+        [SerializeField] public GameObject builder;
         public UnityEngine.UI.Text debugTextBox;
+
+        public int currentRoom { get; private set; }
+
+        private CameraControl cameraControl;
+        private WorldBuilder.WorldBuilder worldBuilder;
+
+        
 
         #endregion
 
@@ -44,6 +53,11 @@ namespace Assets.Scripts.CharacterControl
             LoggerCustom.INFO("BEGINNING NEW GAME");
             LoggerCustom.INFO("**********************************************************************************");
             LogAllVarsState();
+
+            cameraControl = UnityEngine.Camera.main.GetComponent<CameraControl>();
+            
+            worldBuilder = builder.GetComponent<WorldBuilder.WorldBuilder>();
+            currentRoom = 0;
         }
         protected override void FixedUpdate()
         {
@@ -58,6 +72,15 @@ namespace Assets.Scripts.CharacterControl
             {
                 Replay.AddInputForFrame(Time.frameCount, _userInput);
             }
+
+            // todo: limit camera constraint to room transitions
+            const float camMargin = 6.0f;
+            (Vector2 upperLeft, Vector2 lowerRight) roomDimensions = worldBuilder.GetRoomDimensions(currentRoom);
+            cameraControl.ActivateLimits(
+                roomDimensions.upperLeft.x + camMargin, roomDimensions.lowerRight.x - camMargin,
+                roomDimensions.lowerRight.y + camMargin, roomDimensions.upperLeft.y - camMargin);
+                
+            
         }
         void OnDestroy()
         {
@@ -79,6 +102,7 @@ namespace Assets.Scripts.CharacterControl
         }
         #endregion
 
+        
         #region controller methods
         
         protected override void CheckUserInput()
@@ -147,11 +171,11 @@ namespace Assets.Scripts.CharacterControl
             // log camera control
             if (UnityEngine.Camera.main != null)
             {
-                Camera.CameraControl cam = UnityEngine.Camera.main.GetComponent<Camera.CameraControl>();
-                if (cam != null)
+                 
+                if (cameraControl != null)
                 {
-                    cam.isDebugModeOn = isDebugModeOn;
-                    cam.LogAllVarsState();
+                    cameraControl.isDebugModeOn = isDebugModeOn;
+                    cameraControl.LogAllVarsState();
                 }
             }
 

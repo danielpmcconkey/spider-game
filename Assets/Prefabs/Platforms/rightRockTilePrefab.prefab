@@ -11,7 +11,7 @@ GameObject:
   - component: {fileID: 4217276296775526}
   - component: {fileID: 212321017714434022}
   - component: {fileID: 61546406421355110}
-  m_Layer: 0
+  m_Layer: 6
   m_Name: rightRockTilePrefab
   m_TagString: Untagged
   m_Icon: {fileID: 0}

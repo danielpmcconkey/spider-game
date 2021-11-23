@@ -11,7 +11,7 @@ GameObject:
   - component: {fileID: 4916627148077144}
   - component: {fileID: 212034214484296708}
   - component: {fileID: 61302948004745082}
-  m_Layer: 0
+  m_Layer: 6
   m_Name: curve180to270TilePrefab
   m_TagString: Untagged
   m_Icon: {fileID: 0}

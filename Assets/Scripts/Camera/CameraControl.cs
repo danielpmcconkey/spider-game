@@ -1,5 +1,6 @@
 ﻿using UnityEngine;
 using System.Collections;
+using Assets.Scripts.CharacterControl;
 
 namespace Assets.Scripts.Camera
 {
@@ -69,6 +70,9 @@ namespace Assets.Scripts.Camera
         private Vector3 playerPosition;
         private Vector3 previousPlayerPosition;
         private Rect windowRect;
+
+
+        
 
         void Start()
         {
@@ -369,7 +373,8 @@ namespace Assets.Scripts.Camera
         void OnDestroy()
         {
             LogAllVarsState();
-        } 
+        }
+
         #endregion
 
     }

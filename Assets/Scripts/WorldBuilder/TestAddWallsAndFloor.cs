@@ -10,6 +10,7 @@ namespace Assets.Scripts.WorldBuilder
 
     public class TestAddWallsAndFloor : MonoBehaviour
     {
+        [SerializeField] public GameObject roomsParent;
 
         [SerializeField] public GameObject baseRockPrefab;
         [SerializeField] public GameObject baseRockAltPrefab;
@@ -35,7 +36,7 @@ namespace Assets.Scripts.WorldBuilder
 
 
             bool shouldBuildWorld = false;
-            // shouldBuildWorld = true;
+            shouldBuildWorld = true;
             if (shouldBuildWorld)
             {
 
@@ -122,14 +123,11 @@ namespace Assets.Scripts.WorldBuilder
                 }
 
             }
-            GameObject obj = Instantiate(prefab, position, rotation);
+            GameObject obj = Instantiate(prefab, position, rotation, roomsParent.transform);
+            
             //obj.transform.localScale = new Vector3(2, 2, 2);
         }
 
-        // Update is called once per frame
-        void Update()
-        {
-
-        }
+        
     }
 }

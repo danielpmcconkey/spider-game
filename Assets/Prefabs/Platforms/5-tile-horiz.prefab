@@ -12,7 +12,7 @@ GameObject:
   - component: {fileID: 3482200451875949768}
   - component: {fileID: 2784180524970270064}
   - component: {fileID: -8318089249866194243}
-  m_Layer: 0
+  m_Layer: 6
   m_Name: 5-tile-horiz
   m_TagString: Untagged
   m_Icon: {fileID: 0}

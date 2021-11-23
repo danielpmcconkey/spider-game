@@ -11,7 +11,7 @@ GameObject:
   - component: {fileID: 4617871490448370}
   - component: {fileID: 212415230409459746}
   - component: {fileID: 61265846898836536}
-  m_Layer: 0
+  m_Layer: 6
   m_Name: basicRockAlt2TilePrefab
   m_TagString: Untagged
   m_Icon: {fileID: 0}
