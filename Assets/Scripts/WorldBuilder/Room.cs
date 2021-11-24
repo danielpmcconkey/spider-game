@@ -21,14 +21,15 @@ namespace Assets.Scripts.WorldBuilder
         private TileSet _tileSet;
 
 
-        private Block[] _blocks;
-        private const float _blockWidthInUnityMeters = 0.96f;
-        private const float _blockHeightInUnityMeters = 0.96f;
+        private Tile[] _tiles;
+        private const float _tileWidthInUnityMeters = 0.96f;
+        private const float _tileHeightInUnityMeters = 0.96f;
         private GameObject _roomGameObject;
 
 
 
-        public Room(TileSet tileSet, int roomWidthInTiles, int roomHeightInTiles, 
+        #region public methods
+        public Room(TileSet tileSet, int roomWidthInTiles, int roomHeightInTiles,
             Vector2 upperLeftInGlobalSpace, GameObject roomsGameObject)
         {
             _tileSet = tileSet;
@@ -36,59 +37,84 @@ namespace Assets.Scripts.WorldBuilder
             this.roomHeightInTiles = roomHeightInTiles;
             this.upperLeftInGlobalSpace = upperLeftInGlobalSpace;
             lowerRightInGlobalSpace = new Vector2(
-                upperLeftInGlobalSpace.x + (_blockWidthInUnityMeters * roomWidthInTiles),
-                upperLeftInGlobalSpace.y - (_blockHeightInUnityMeters * roomHeightInTiles));
+                upperLeftInGlobalSpace.x + (_tileWidthInUnityMeters * roomWidthInTiles),
+                upperLeftInGlobalSpace.y - (_tileHeightInUnityMeters * roomHeightInTiles));
             _roomGameObject = roomsGameObject;
 
-            roomWidthInUnityMeters = roomWidthInTiles * _blockWidthInUnityMeters;
-            roomHeightInUnityMeters = roomHeightInTiles * _blockHeightInUnityMeters;
+            roomWidthInUnityMeters = roomWidthInTiles * _tileWidthInUnityMeters;
+            roomHeightInUnityMeters = roomHeightInTiles * _tileHeightInUnityMeters;
 
-            _blocks = new Block[roomWidthInTiles * roomHeightInTiles];
+            _tiles = new Tile[roomWidthInTiles * roomHeightInTiles];
+        }
+
+        public void AddPlatformTiles(Vector2 platformUpLeft, int numTilesWide, int numTilesTall)
+        {
+            float y = platformUpLeft.y;
+
+            for (int row = 0; row < numTilesTall; row++)
+            {
+                // re-zero x every row
+                float x = platformUpLeft.x;
+
+                for (int column = 0; column < numTilesWide; column++)
+                {
+                    int tileIndex = GetTileIndexFromUnityPosition(x, y);
+
+                    GameObject prefab = _tileSet.basePrefab;
+                    if (row == 0) prefab = _tileSet.topPrefab;
+
+                    _tiles[tileIndex] = new Tile()
+                    {
+                        prefab = prefab,
+                        positionInGlobalSpace = new Vector2(x, y)
+                    };
+
+                    x += _tileWidthInUnityMeters;
+                }
+                y -= _tileHeightInUnityMeters;
+            }
+        }
+        public void AddPerimiterTiles()
+        {
+            AddFloorTiles();
+            AddCeilingTiles();
+            AddLeftWallTiles();
+            AddRightWallTiles();
         }
         public void DrawSelf()
         {
-            AddPerimiterBlocks();
-            for(int i = 0; i < _blocks.Length; i++)
+            for (int i = 0; i < _tiles.Length; i++)
             {
-                if(_blocks[i] != null)
+                if (_tiles[i] != null)
                 {
-                    AddBlockToUnity(_blocks[i]);
+                    AddTileToUnity(_tiles[i]);
                 }
             }
         }
+        #endregion
 
-        private void AddPerimiterBlocks()
-        {
-            AddFloorBlocks();
-            AddCeilingBlocks();
-            AddLeftWallBlocks();
-            AddRightWallBlocks();
-        }
-        private void AddCeilingBlocks()
+        #region private methods
+        private void AddCeilingTiles()
         {
             float x = upperLeftInGlobalSpace.x;
             float y = upperLeftInGlobalSpace.y;
             for (int i = 0; i < roomWidthInTiles; i++)
             {
-                int blockIndex = GetBlockIndexFromUnityPosition(x, y);
-                if(_blocks[blockIndex] != null)
-                {
-                    string burp = "true";
-                }
-                _blocks[blockIndex] = new Block()
+                int tileIndex = GetTileIndexFromUnityPosition(x, y);
+
+                _tiles[tileIndex] = new Tile()
                 {
                     prefab = _tileSet.basePrefab,
-                    positionInRoom = new Vector2(x, y)
+                    positionInGlobalSpace = new Vector2(x, y)
                 };
-                // AddBlockToUnity(_tileSet.basePrefab, x, y);
-                
-                x += _blockWidthInUnityMeters;
+
+                x += _tileWidthInUnityMeters;
             }
         }
-        private void AddFloorBlocks()
+        private void AddFloorTiles()
         {
             float x = upperLeftInGlobalSpace.x;
-            float y = upperLeftInGlobalSpace.y - ((roomHeightInTiles - 1) * _blockHeightInUnityMeters);
+            float y = upperLeftInGlobalSpace.y - ((roomHeightInTiles - 1) * _tileHeightInUnityMeters);
             for (int i = 0; i < roomWidthInTiles; i++)
             {
                 GameObject prefab = _tileSet.topPrefab;
@@ -97,75 +123,86 @@ namespace Assets.Scripts.WorldBuilder
                     prefab = _tileSet.basePrefab;
                 }
 
-                int blockIndex = GetBlockIndexFromUnityPosition(x, y);
-                _blocks[blockIndex] = new Block()
+                int tileIndex = GetTileIndexFromUnityPosition(x, y);
+                _tiles[tileIndex] = new Tile()
                 {
                     prefab = prefab,
-                    positionInRoom = new Vector2(x, y)
+                    positionInGlobalSpace = new Vector2(x, y)
                 };
-                x += _blockWidthInUnityMeters;
+                x += _tileWidthInUnityMeters;
             }
         }
-        private void AddLeftWallBlocks()
+        private void AddLeftWallTiles()
         {
             float x = upperLeftInGlobalSpace.x;
-            float y = upperLeftInGlobalSpace.y - _blockHeightInUnityMeters;
+            float y = upperLeftInGlobalSpace.y - _tileHeightInUnityMeters;
             // assume floor and ceiling are already drawn
             for (int i = 0; i < roomHeightInTiles - 1; i++)
             {
-                int blockIndex = GetBlockIndexFromUnityPosition(x, y);
-                _blocks[blockIndex] = new Block()
+                int tileIndex = GetTileIndexFromUnityPosition(x, y);
+                _tiles[tileIndex] = new Tile()
                 {
                     prefab = _tileSet.basePrefab,
-                    positionInRoom = new Vector2(x, y)
+                    positionInGlobalSpace = new Vector2(x, y)
                 };
 
-                y -= _blockHeightInUnityMeters;
+                y -= _tileHeightInUnityMeters;
             }
         }
-        private void AddRightWallBlocks()
+        private void AddTileToUnity(Tile tile)
         {
-            float x = upperLeftInGlobalSpace.x + ((roomWidthInTiles - 1) * _blockWidthInUnityMeters);
-            float y = upperLeftInGlobalSpace.y - _blockHeightInUnityMeters;
+            Vector3 position = tile.positionInGlobalSpace;
+            Quaternion rotation = new Quaternion(0, 0, 0, 0);
+
+            // check to see if we've burried a top tile
+            if(tile.prefab == _tileSet.topPrefab)
+            {
+                int tileIndexAbove = GetTileIndexFromUnityPosition(tile.positionInGlobalSpace.x,
+                    tile.positionInGlobalSpace.y + _tileHeightInUnityMeters);
+                if (_tiles[tileIndexAbove] != null) tile.prefab = _tileSet.basePrefab;
+            }
+
+            GameObject obj = UnityEngine.Object.Instantiate(tile.prefab, position, rotation, _roomGameObject.transform);
+        }
+        private void AddRightWallTiles()
+        {
+            float x = upperLeftInGlobalSpace.x + ((roomWidthInTiles - 1) * _tileWidthInUnityMeters);
+            float y = upperLeftInGlobalSpace.y - _tileHeightInUnityMeters;
             // assume floor and ceiling are already drawn
             for (int i = 0; i < roomHeightInTiles - 1; i++)
             {
-                int blockIndex = GetBlockIndexFromUnityPosition(x, y);
-                _blocks[blockIndex] = new Block()
+                int tileIndex = GetTileIndexFromUnityPosition(x, y);
+                _tiles[tileIndex] = new Tile()
                 {
                     prefab = _tileSet.basePrefab,
-                    positionInRoom = new Vector2(x, y)
+                    positionInGlobalSpace = new Vector2(x, y)
                 };
 
-                y -= _blockHeightInUnityMeters;
+                y -= _tileHeightInUnityMeters;
             }
         }
-        private int GetBlockIndexFromUnityPosition(float x, float y)
+        private int GetTileIndexFromUnityPosition(float x, float y)
         {
             int xAsHundredTimes = (int)Math.Round(Math.Round(x, 2) * 100);
             int yAsHundredTimes = (int)Math.Round(Math.Round(y, 2) * 100);
             int xUlAsHundredTimes = (int)Math.Round(Math.Round(upperLeftInGlobalSpace.x, 2) * 100);
             int yUlAsHundredTimes = (int)Math.Round(Math.Round(upperLeftInGlobalSpace.y, 2) * 100);
-            int blockWidthAsHundredTimes = (int)Math.Round(Math.Round(_blockWidthInUnityMeters, 2) * 100);
-            int blockHeightAsHundredTimes = (int)Math.Round(Math.Round(_blockHeightInUnityMeters, 2) * 100);
+            int tileWidthAsHundredTimes = (int)Math.Round(Math.Round(_tileWidthInUnityMeters, 2) * 100);
+            int tileHeightAsHundredTimes = (int)Math.Round(Math.Round(_tileHeightInUnityMeters, 2) * 100);
 
             // remember that unity y gets lower as we go downward
             // but our index goes from up-left to down-right
             //
             // also, I rounded and multiplied by 100 because floats 
             // were doing weird things with the math
-            int numRowsDown =  (yUlAsHundredTimes - yAsHundredTimes) / blockHeightAsHundredTimes;
+            int numRowsDown = (yUlAsHundredTimes - yAsHundredTimes) / tileHeightAsHundredTimes;
             int valueInFirstColumnOfThatRow = numRowsDown * roomWidthInTiles;
-            int numColsIn = (xAsHundredTimes - xUlAsHundredTimes) / blockWidthAsHundredTimes;
-            return valueInFirstColumnOfThatRow + numColsIn; 
+            int numColsIn = (xAsHundredTimes - xUlAsHundredTimes) / tileWidthAsHundredTimes;
+            return valueInFirstColumnOfThatRow + numColsIn;
         }
 
-        private void AddBlockToUnity(Block block)
-        {
-            Vector3 position = block.positionInRoom;
-            Quaternion rotation = new Quaternion(0, 0, 0, 0);
-            GameObject obj = UnityEngine.Object.Instantiate(block.prefab, position, rotation, _roomGameObject.transform);
-        }
+        #endregion
+
 
     }
 }

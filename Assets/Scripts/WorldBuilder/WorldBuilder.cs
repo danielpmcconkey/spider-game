@@ -41,6 +41,13 @@ namespace Assets.Scripts.WorldBuilder
 
             Room r = new Room(_tileSetRock1, 40, 20, new Vector2(-19.2f, 9.6F), room000);
             rooms[0] = r;
+            r.AddPerimiterTiles();
+            // tile above the floor = -7.68
+            r.AddPlatformTiles(new Vector2(-14.4f, -3.84f), 3, 5);
+            r.AddPlatformTiles(new Vector2(-8.64f, -4.8f), 13, 1);
+            r.AddPlatformTiles(new Vector2(-8.64f, -0.96f), 5, 1);
+            r.AddPlatformTiles(new Vector2(-0.96f, -0.96f), 5, 1);
+            r.AddPlatformTiles(new Vector2(-8.64f, 2.88f), 13, 1);
             r.DrawSelf();
         }
         private void PopulateTileSets()

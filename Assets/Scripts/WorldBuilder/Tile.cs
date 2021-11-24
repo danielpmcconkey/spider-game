@@ -7,9 +7,9 @@ using UnityEngine;
 
 namespace Assets.Scripts.WorldBuilder
 {
-    public class Block
+    public class Tile
     {
         public GameObject prefab;
-        public Vector2 positionInRoom;
+        public Vector2 positionInGlobalSpace;
     }
 }
