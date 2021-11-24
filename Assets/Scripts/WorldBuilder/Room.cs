@@ -47,49 +47,124 @@ namespace Assets.Scripts.WorldBuilder
         }
         public void DrawSelf()
         {
-            DrawPerimiter();
-        }
-
-        private void DrawPerimiter()
-        {
-            DrawFloor();
-        }
-        private void DrawFloor()
-        {
-            float x = upperLeftInGlobalSpace.x;
-            float y = upperLeftInGlobalSpace.y - (roomHeightInTiles * _blockHeightInUnityMeters);
-            for (int i = 0; i < roomWidthInTiles; i++)
+            AddPerimiterBlocks();
+            for(int i = 0; i < _blocks.Length; i++)
             {
-                AddBlockToUnity(_tileSet.basePrefab, x, y);
-                x += _blockWidthInUnityMeters;
+                if(_blocks[i] != null)
+                {
+                    AddBlockToUnity(_blocks[i]);
+                }
             }
         }
 
-        private void AddBlockToUnity(GameObject prefab, float x, float y)
+        private void AddPerimiterBlocks()
         {
-            Vector3 position = new Vector3(x, y);
+            AddFloorBlocks();
+            AddCeilingBlocks();
+            AddLeftWallBlocks();
+            AddRightWallBlocks();
+        }
+        private void AddCeilingBlocks()
+        {
+            float x = upperLeftInGlobalSpace.x;
+            float y = upperLeftInGlobalSpace.y;
+            for (int i = 0; i < roomWidthInTiles; i++)
+            {
+                int blockIndex = GetBlockIndexFromUnityPosition(x, y);
+                if(_blocks[blockIndex] != null)
+                {
+                    string burp = "true";
+                }
+                _blocks[blockIndex] = new Block()
+                {
+                    prefab = _tileSet.basePrefab,
+                    positionInRoom = new Vector2(x, y)
+                };
+                // AddBlockToUnity(_tileSet.basePrefab, x, y);
+                
+                x += _blockWidthInUnityMeters;
+            }
+        }
+        private void AddFloorBlocks()
+        {
+            float x = upperLeftInGlobalSpace.x;
+            float y = upperLeftInGlobalSpace.y - ((roomHeightInTiles - 1) * _blockHeightInUnityMeters);
+            for (int i = 0; i < roomWidthInTiles; i++)
+            {
+                GameObject prefab = _tileSet.topPrefab;
+                if (i == 0 || i == roomWidthInTiles - 1)
+                {
+                    prefab = _tileSet.basePrefab;
+                }
+
+                int blockIndex = GetBlockIndexFromUnityPosition(x, y);
+                _blocks[blockIndex] = new Block()
+                {
+                    prefab = prefab,
+                    positionInRoom = new Vector2(x, y)
+                };
+                x += _blockWidthInUnityMeters;
+            }
+        }
+        private void AddLeftWallBlocks()
+        {
+            float x = upperLeftInGlobalSpace.x;
+            float y = upperLeftInGlobalSpace.y - _blockHeightInUnityMeters;
+            // assume floor and ceiling are already drawn
+            for (int i = 0; i < roomHeightInTiles - 1; i++)
+            {
+                int blockIndex = GetBlockIndexFromUnityPosition(x, y);
+                _blocks[blockIndex] = new Block()
+                {
+                    prefab = _tileSet.basePrefab,
+                    positionInRoom = new Vector2(x, y)
+                };
+
+                y -= _blockHeightInUnityMeters;
+            }
+        }
+        private void AddRightWallBlocks()
+        {
+            float x = upperLeftInGlobalSpace.x + ((roomWidthInTiles - 1) * _blockWidthInUnityMeters);
+            float y = upperLeftInGlobalSpace.y - _blockHeightInUnityMeters;
+            // assume floor and ceiling are already drawn
+            for (int i = 0; i < roomHeightInTiles - 1; i++)
+            {
+                int blockIndex = GetBlockIndexFromUnityPosition(x, y);
+                _blocks[blockIndex] = new Block()
+                {
+                    prefab = _tileSet.basePrefab,
+                    positionInRoom = new Vector2(x, y)
+                };
+
+                y -= _blockHeightInUnityMeters;
+            }
+        }
+        private int GetBlockIndexFromUnityPosition(float x, float y)
+        {
+            int xAsHundredTimes = (int)Math.Round(Math.Round(x, 2) * 100);
+            int yAsHundredTimes = (int)Math.Round(Math.Round(y, 2) * 100);
+            int xUlAsHundredTimes = (int)Math.Round(Math.Round(upperLeftInGlobalSpace.x, 2) * 100);
+            int yUlAsHundredTimes = (int)Math.Round(Math.Round(upperLeftInGlobalSpace.y, 2) * 100);
+            int blockWidthAsHundredTimes = (int)Math.Round(Math.Round(_blockWidthInUnityMeters, 2) * 100);
+            int blockHeightAsHundredTimes = (int)Math.Round(Math.Round(_blockHeightInUnityMeters, 2) * 100);
+
+            // remember that unity y gets lower as we go downward
+            // but our index goes from up-left to down-right
+            //
+            // also, I rounded and multiplied by 100 because floats 
+            // were doing weird things with the math
+            int numRowsDown =  (yUlAsHundredTimes - yAsHundredTimes) / blockHeightAsHundredTimes;
+            int valueInFirstColumnOfThatRow = numRowsDown * roomWidthInTiles;
+            int numColsIn = (xAsHundredTimes - xUlAsHundredTimes) / blockWidthAsHundredTimes;
+            return valueInFirstColumnOfThatRow + numColsIn; 
+        }
+
+        private void AddBlockToUnity(Block block)
+        {
+            Vector3 position = block.positionInRoom;
             Quaternion rotation = new Quaternion(0, 0, 0, 0);
-            //if (prefab == baseRockPrefab)
-            //{
-            //    // random chance to alternate out the tile
-            //    int rando = RNG.getRandomInt(0, 120);
-            //    if (rando < 10)
-            //    {
-            //        prefab = baseRockAltPrefab;
-            //    }
-            //    else if (rando < 20)
-            //    {
-            //        prefab = baseRockAlt2Prefab;
-            //    }
-            //    else if (rando < 30)
-            //    {
-            //        prefab = baseRockAlt3Prefab;
-            //    }
-
-            //}
-            GameObject obj = UnityEngine.Object.Instantiate(prefab, position, rotation, _roomGameObject.transform);
-
-            //obj.transform.localScale = new Vector3(2, 2, 2);
+            GameObject obj = UnityEngine.Object.Instantiate(block.prefab, position, rotation, _roomGameObject.transform);
         }
 
     }

@@ -14,6 +14,7 @@ namespace Assets.Scripts.WorldBuilder
         [Header("Tile sets")]
         [Space(10)]
         [SerializeField] public GameObject rock1Base;
+        [SerializeField] public GameObject rock1Top;
         public Room[] rooms;
 
         private TileSet _tileSetRock1; 
@@ -46,6 +47,7 @@ namespace Assets.Scripts.WorldBuilder
         {
             _tileSetRock1 = new TileSet();
             _tileSetRock1.basePrefab = rock1Base;
+            _tileSetRock1.topPrefab = rock1Top;
 
         }
     }

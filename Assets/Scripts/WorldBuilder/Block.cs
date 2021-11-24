@@ -9,7 +9,7 @@ namespace Assets.Scripts.WorldBuilder
 {
     public class Block
     {
-        public GameObject gameObject;
+        public GameObject prefab;
         public Vector2 positionInRoom;
     }
 }
