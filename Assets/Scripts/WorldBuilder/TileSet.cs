@@ -21,5 +21,9 @@ namespace Assets.Scripts.WorldBuilder
         public GameObject cornerUpLeftPrefab;
         public GameObject cornerDownRightPrefab;
         public GameObject cornerDownLeftPrefab;
+        public GameObject endCapLeftPrefab;
+        public GameObject endCapRightPrefab;
+        public GameObject endCapUpPrefab;
+        public GameObject endCapDownPrefab;
     }
 }

@@ -15,6 +15,17 @@ namespace Assets.Scripts.WorldBuilder
         [Space(10)]
         [SerializeField] public GameObject rock1Base;
         [SerializeField] public GameObject rock1Top;
+        [SerializeField] public GameObject rock1Bottom;
+        [SerializeField] public GameObject rock1Left;
+        [SerializeField] public GameObject rock1Right;
+        [SerializeField] public GameObject rock1CornerUpLeft;
+        [SerializeField] public GameObject rock1CornerUpRight;
+        [SerializeField] public GameObject rock1CornerBottomLeft;
+        [SerializeField] public GameObject rock1CornerBottomRight;
+        [SerializeField] public GameObject rock1EndCapUp;
+        [SerializeField] public GameObject rock1EndCapDown;
+        [SerializeField] public GameObject rock1EndCapLeft;
+        [SerializeField] public GameObject rock1EndCapRight;
         public Room[] rooms;
 
         private TileSet _tileSetRock1; 
@@ -39,15 +50,15 @@ namespace Assets.Scripts.WorldBuilder
              
             GameObject room000 = Instantiate(new GameObject("Room000"), roomsParent.transform, false);
 
-            Room r = new Room(_tileSetRock1, 40, 20, new Vector2(-19.2f, 9.6F), room000);
+            Room r = new Room(_tileSetRock1, 40, 20, new Vector2(-20.0f, 10.0F), room000);
             rooms[0] = r;
             r.AddPerimiterTiles();
             // tile above the floor = -7.68
-            r.AddPlatformTiles(new Vector2(-14.4f, -3.84f), 3, 5);
-            r.AddPlatformTiles(new Vector2(-8.64f, -4.8f), 13, 1);
-            r.AddPlatformTiles(new Vector2(-8.64f, -0.96f), 5, 1);
-            r.AddPlatformTiles(new Vector2(-0.96f, -0.96f), 5, 1);
-            r.AddPlatformTiles(new Vector2(-8.64f, 2.88f), 13, 1);
+            r.AddPlatformTiles(new Vector2(-15f, -4.0f), 3, 5);
+            r.AddPlatformTiles(new Vector2(-9f, -5f), 13, 1);
+            r.AddPlatformTiles(new Vector2(-9f, -1f), 5, 1);
+            r.AddPlatformTiles(new Vector2(-2.0f, -1f), 5, 1);
+            r.AddPlatformTiles(new Vector2(-9f, 3f), 13, 1);
             r.DrawSelf();
         }
         private void PopulateTileSets()
@@ -55,7 +66,17 @@ namespace Assets.Scripts.WorldBuilder
             _tileSetRock1 = new TileSet();
             _tileSetRock1.basePrefab = rock1Base;
             _tileSetRock1.topPrefab = rock1Top;
-
+            _tileSetRock1.bottomPrefab = rock1Bottom;
+            _tileSetRock1.leftPrefab = rock1Left;
+            _tileSetRock1.rightPrefab = rock1Right;
+            _tileSetRock1.cornerUpLeftPrefab = rock1CornerUpLeft;
+            _tileSetRock1.cornerUpRightPrefab = rock1CornerUpRight;
+            _tileSetRock1.cornerDownLeftPrefab = rock1CornerBottomLeft;
+            _tileSetRock1.cornerDownRightPrefab = rock1CornerBottomRight;
+            _tileSetRock1.endCapUpPrefab = rock1EndCapUp;
+            _tileSetRock1.endCapDownPrefab = rock1EndCapDown;
+            _tileSetRock1.endCapLeftPrefab = rock1EndCapLeft;
+            _tileSetRock1.endCapRightPrefab = rock1EndCapRight;
         }
     }
 }

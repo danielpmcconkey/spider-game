@@ -25,7 +25,8 @@ namespace Assets.Scripts.CharacterControl
         private CameraControl cameraControl;
         private WorldBuilder.WorldBuilder worldBuilder;
 
-        
+        private bool hasFarted = false;
+
 
         #endregion
 
@@ -55,10 +56,11 @@ namespace Assets.Scripts.CharacterControl
             LogAllVarsState();
 
             cameraControl = UnityEngine.Camera.main.GetComponent<CameraControl>();
-            
+
             worldBuilder = builder.GetComponent<WorldBuilder.WorldBuilder>();
             currentRoom = 0;
         }
+        
         protected override void FixedUpdate()
         {
             base.FixedUpdate();
@@ -73,14 +75,19 @@ namespace Assets.Scripts.CharacterControl
                 Replay.AddInputForFrame(Time.frameCount, _userInput);
             }
 
-            // todo: limit camera constraint to room transitions
-            const float camMargin = 6.0f;
-            (Vector2 upperLeft, Vector2 lowerRight) roomDimensions = worldBuilder.GetRoomDimensions(currentRoom);
-            cameraControl.ActivateLimits(
-                roomDimensions.upperLeft.x + camMargin, roomDimensions.lowerRight.x - camMargin,
-                roomDimensions.lowerRight.y + camMargin, roomDimensions.upperLeft.y - camMargin);
-                
-            
+            if (!hasFarted)
+            {
+                // todo: limit camera constraint to room transitions
+                const float camMargin = 3.0f;
+                (Vector2 upperLeft, Vector2 lowerRight) roomDimensions = worldBuilder.GetRoomDimensions(currentRoom);
+                cameraControl.ActivateLimits(
+                    roomDimensions.upperLeft.x + camMargin, roomDimensions.lowerRight.x - camMargin,
+                    roomDimensions.lowerRight.y + camMargin, roomDimensions.upperLeft.y - camMargin);
+
+                hasFarted = true;
+            }
+
+
         }
         void OnDestroy()
         {

@@ -153,7 +153,7 @@ SpriteRenderer:
   m_Size: {x: 6, y: 3}
   m_AdaptiveModeThreshold: 0.5
   m_SpriteTileMode: 0
-  m_WasSpriteAssigned: 1
+  m_WasSpriteAssigned: 0
   m_MaskInteraction: 0
   m_SpriteSortPoint: 0
 --- !u!50 &3251419005602766872
@@ -172,7 +172,7 @@ Rigidbody2D:
   m_LinearDrag: 0
   m_AngularDrag: 0.05
   m_GravityScale: 0
-  m_Material: {fileID: 0}
+  m_Material: {fileID: 6200000, guid: 6c555fc1672f8e7469b944194f10ba8d, type: 2}
   m_Interpolate: 0
   m_SleepingMode: 1
   m_CollisionDetection: 1
@@ -269,17 +269,19 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   isDebugModeOn: 1
   debugLogFileDirectory: C:\Users\Dan\AppData\LocalLow\SpiderController
-  debugTextBox: {fileID: 0}
-  runSpeed: 55
-  initialJumpThrust: 10
-  jumpThrustPerSecond: 80
-  maxJumpThrust: 30
-  movementSmoothing: 0.05
-  gravityOnPlayer: 40
-  rotationSpeed: 5
+  horizontalAccelerationPercent: 0.5
+  horizontalVelocityLimitPercent: 0.5
+  breaksPressurePercent: 0.5
+  initialJumpThrustPercent: 0.65
+  jumpThrustOverTimePercent: 0.5
+  jumpThrustLimitPercent: 0.238
+  gravityOnCharacterPercent: 0.793
+  corneringTimeRequiredPercent: 0.263
   isHorizontalMovementInAirAllowed: 1
   canWallCrawl: 1
   canCeilingCrawl: 1
+  canGrapple: 1
+  canFly: 0
   animator: {fileID: 3251419005602766947}
   rigidBody2D: {fileID: 3251419005602766872}
   bellyCheckTransform: {fileID: 3251419004542632118}
@@ -288,6 +290,14 @@ MonoBehaviour:
   whatIsPlatform:
     serializedVersion: 2
     m_Bits: 64
+  targetingReticuleTransform: {fileID: 0}
+  grappleBeamLineRenderer: {fileID: 0}
+  grappleBeamJoint: {fileID: 0}
+  grappleBeamForcePercent: 0.5
+  grappleBeamMaxDistancePercent: 0.5
+  replayFile: 
+  builder: {fileID: 0}
+  debugTextBox: {fileID: 0}
 --- !u!1 &3251419006101843425
 GameObject:
   m_ObjectHideFlags: 0

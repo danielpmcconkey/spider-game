@@ -22,8 +22,8 @@ namespace Assets.Scripts.WorldBuilder
 
 
         private Tile[] _tiles;
-        private const float _tileWidthInUnityMeters = 0.96f;
-        private const float _tileHeightInUnityMeters = 0.96f;
+        private const float _tileWidthInUnityMeters = 1.0f;
+        private const float _tileHeightInUnityMeters = 1.0f;
         private GameObject _roomGameObject;
 
 
@@ -61,7 +61,32 @@ namespace Assets.Scripts.WorldBuilder
                     int tileIndex = GetTileIndexFromUnityPosition(x, y);
 
                     GameObject prefab = _tileSet.basePrefab;
-                    if (row == 0) prefab = _tileSet.topPrefab;
+                    if (row == 0)
+                    {
+                        prefab = _tileSet.topPrefab;
+                        if (column == 0)
+                        {
+                            prefab = _tileSet.cornerUpLeftPrefab;
+                            if (numTilesTall == 1) prefab = _tileSet.endCapLeftPrefab;
+                            if (numTilesWide == 1) prefab = _tileSet.endCapUpPrefab;
+                        }
+                        else if(column == numTilesWide - 1)
+                        {
+                            prefab = _tileSet.cornerUpRightPrefab;
+                            if (numTilesTall == 1) prefab = _tileSet.endCapRightPrefab;
+                        }
+                    }
+                    else
+                    {
+                        if (column == 0)
+                        {
+                            prefab = _tileSet.leftPrefab;
+                        }
+                        else if (column == numTilesWide - 1)
+                        {
+                            prefab = _tileSet.rightPrefab;
+                        }
+                    }
 
                     _tiles[tileIndex] = new Tile()
                     {
@@ -100,11 +125,18 @@ namespace Assets.Scripts.WorldBuilder
             float y = upperLeftInGlobalSpace.y;
             for (int i = 0; i < roomWidthInTiles; i++)
             {
+                GameObject prefab = _tileSet.bottomPrefab;
+                if (i == 0 || i == roomWidthInTiles - 1)
+                {
+                    prefab = _tileSet.basePrefab;
+                }
+
+
                 int tileIndex = GetTileIndexFromUnityPosition(x, y);
 
                 _tiles[tileIndex] = new Tile()
                 {
-                    prefab = _tileSet.basePrefab,
+                    prefab = prefab,
                     positionInGlobalSpace = new Vector2(x, y)
                 };
 
@@ -137,12 +169,33 @@ namespace Assets.Scripts.WorldBuilder
             float x = upperLeftInGlobalSpace.x;
             float y = upperLeftInGlobalSpace.y - _tileHeightInUnityMeters;
             // assume floor and ceiling are already drawn
-            for (int i = 0; i < roomHeightInTiles - 1; i++)
+            for (int i = 0; i < roomHeightInTiles - 2; i++)
             {
+                GameObject prefab = _tileSet.rightPrefab;
+                
                 int tileIndex = GetTileIndexFromUnityPosition(x, y);
                 _tiles[tileIndex] = new Tile()
                 {
-                    prefab = _tileSet.basePrefab,
+                    prefab = prefab,
+                    positionInGlobalSpace = new Vector2(x, y)
+                };
+
+                y -= _tileHeightInUnityMeters;
+            }
+        }
+        private void AddRightWallTiles()
+        {
+            float x = upperLeftInGlobalSpace.x + ((roomWidthInTiles - 1) * _tileWidthInUnityMeters);
+            float y = upperLeftInGlobalSpace.y - _tileHeightInUnityMeters;
+            // assume floor and ceiling are already drawn
+            for (int i = 0; i < roomHeightInTiles - 2; i++)
+            {
+                GameObject prefab = _tileSet.leftPrefab;
+                
+                int tileIndex = GetTileIndexFromUnityPosition(x, y);
+                _tiles[tileIndex] = new Tile()
+                {
+                    prefab = prefab,
                     positionInGlobalSpace = new Vector2(x, y)
                 };
 
@@ -163,23 +216,6 @@ namespace Assets.Scripts.WorldBuilder
             }
 
             GameObject obj = UnityEngine.Object.Instantiate(tile.prefab, position, rotation, _roomGameObject.transform);
-        }
-        private void AddRightWallTiles()
-        {
-            float x = upperLeftInGlobalSpace.x + ((roomWidthInTiles - 1) * _tileWidthInUnityMeters);
-            float y = upperLeftInGlobalSpace.y - _tileHeightInUnityMeters;
-            // assume floor and ceiling are already drawn
-            for (int i = 0; i < roomHeightInTiles - 1; i++)
-            {
-                int tileIndex = GetTileIndexFromUnityPosition(x, y);
-                _tiles[tileIndex] = new Tile()
-                {
-                    prefab = _tileSet.basePrefab,
-                    positionInGlobalSpace = new Vector2(x, y)
-                };
-
-                y -= _tileHeightInUnityMeters;
-            }
         }
         private int GetTileIndexFromUnityPosition(float x, float y)
         {
