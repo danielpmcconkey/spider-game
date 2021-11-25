@@ -26,6 +26,8 @@ namespace Assets.Scripts.WorldBuilder
         [SerializeField] public GameObject rock1EndCapDown;
         [SerializeField] public GameObject rock1EndCapLeft;
         [SerializeField] public GameObject rock1EndCapRight;
+        [SerializeField] public GameObject rock1SingleWide;
+        [SerializeField] public GameObject rock1SingleTall;
         public Room[] rooms;
 
         private TileSet _tileSetRock1; 
@@ -55,10 +57,12 @@ namespace Assets.Scripts.WorldBuilder
             r.AddPerimiterTiles();
             // tile above the floor = -7.68
             r.AddPlatformTiles(new Vector2(-15f, -4.0f), 3, 5);
-            r.AddPlatformTiles(new Vector2(-9f, -5f), 13, 1);
+            r.AddPlatformTiles(new Vector2(-9f, -5f), 12, 1);
             r.AddPlatformTiles(new Vector2(-9f, -1f), 5, 1);
             r.AddPlatformTiles(new Vector2(-2.0f, -1f), 5, 1);
-            r.AddPlatformTiles(new Vector2(-9f, 3f), 13, 1);
+            r.AddPlatformTiles(new Vector2(-9f, 3f), 12, 1);
+            r.AddPlatformTiles(new Vector2(6f, 0f), 2, 7);
+            r.AddPlatformTiles(new Vector2(15f, 6f), 1, 11);
             r.DrawSelf();
         }
         private void PopulateTileSets()
@@ -77,6 +81,8 @@ namespace Assets.Scripts.WorldBuilder
             _tileSetRock1.endCapDownPrefab = rock1EndCapDown;
             _tileSetRock1.endCapLeftPrefab = rock1EndCapLeft;
             _tileSetRock1.endCapRightPrefab = rock1EndCapRight;
+            _tileSetRock1.singleTallPrefab = rock1SingleTall;
+            _tileSetRock1.singleWidePrefab = rock1SingleWide;
         }
     }
 }

@@ -70,22 +70,40 @@ namespace Assets.Scripts.WorldBuilder
                             if (numTilesTall == 1) prefab = _tileSet.endCapLeftPrefab;
                             if (numTilesWide == 1) prefab = _tileSet.endCapUpPrefab;
                         }
-                        else if(column == numTilesWide - 1)
+                        else if (column == numTilesWide - 1)
                         {
                             prefab = _tileSet.cornerUpRightPrefab;
                             if (numTilesTall == 1) prefab = _tileSet.endCapRightPrefab;
                         }
+                        else if (numTilesTall == 1) prefab = _tileSet.singleTallPrefab;
                     }
                     else
                     {
                         if (column == 0)
                         {
                             prefab = _tileSet.leftPrefab;
+                            if (row == numTilesTall - 1)
+                            {
+                                prefab = _tileSet.cornerDownLeftPrefab;
+                            }
                         }
                         else if (column == numTilesWide - 1)
                         {
                             prefab = _tileSet.rightPrefab;
+                            if (row == numTilesTall - 1)
+                            {
+                                prefab = _tileSet.cornerDownRightPrefab;
+                            }
                         }
+                        if (numTilesWide == 1)
+                        {
+                            prefab = _tileSet.singleWidePrefab;
+                            if(row == numTilesTall - 1)
+                            {
+                                prefab = _tileSet.endCapDownPrefab;
+                            }
+                        }
+                        
                     }
 
                     _tiles[tileIndex] = new Tile()
