@@ -60,6 +60,12 @@ namespace Assets.Scripts.CharacterControl
         protected const float pushOffAmount = 0.5f;
         const float breaksThreshold = 0.1f; // kick in the breaks when velocity is greater than this and no move pressure
         protected string _gameVersion;
+        protected Vector2 groundCheckRay1FirePoint = Vector2.zero;
+        protected Vector2 groundCheckRay1TargetPoint = Vector2.zero;
+        protected Vector2 groundCheckRay2FirePoint = Vector2.zero;
+        protected Vector2 groundCheckRay2TargetPoint = Vector2.zero;
+        private Transform groundedTransform;    // the game object we're grounded to if grounded
+        private Vector2 groundedStrikePoint;    // the vector 2 where we struck the grounded transform
 
 
         // min and max limiters on movement parameters
@@ -107,8 +113,51 @@ namespace Assets.Scripts.CharacterControl
             // apply the accumulation of physical forces
             rigidBody2D.velocity += _forcesAccumulated;
 
+            if (_stateController.currentMovementState == MovementState.GROUNDED)
+            {
+                // set other forces to zero
+                if(characterOrienter.headingDirection == FacingDirection.LEFT ||
+                    characterOrienter.headingDirection == FacingDirection.RIGHT)
+                {
+                    rigidBody2D.velocity = new Vector2(rigidBody2D.velocity.x, 0);
+                }
+                if (characterOrienter.headingDirection == FacingDirection.UP ||
+                    characterOrienter.headingDirection == FacingDirection.DOWN)
+                {
+                    rigidBody2D.velocity = new Vector2(0, rigidBody2D.velocity.y);
+                }
+
+                // and move the player character to be at the strike point
+                if(groundedTransform != null)
+                {
+                    if (characterOrienter.headingDirection == FacingDirection.LEFT ||
+                    characterOrienter.headingDirection == FacingDirection.RIGHT)
+                    {
+                        if(characterOrienter.thrustingDirection == FacingDirection.UP)
+                        {
+                            // belly transform Y = 11 
+                            // strike point = 9
+                            // move y by -2
+                            float distanceY = bellyCheckTransform.position.y - groundedStrikePoint.y;
+                            transform.position = new Vector2(transform.position.x, transform.position.y - distanceY);
+
+                        }
+                        else if (characterOrienter.thrustingDirection == FacingDirection.DOWN)
+                        {
+                            // belly transform Y = 9 
+                            // strike point = 11
+                            // move y by +2
+                            float distanceY = bellyCheckTransform.position.y - groundedStrikePoint.y;
+                            transform.position = new Vector2(transform.position.x, transform.position.y - distanceY);
+
+                        }
+                    }
+                }
+            }
+            
+
             // stop velocity when it's very low to prevent jittering
-            if((rigidBody2D.velocity.x > 0 && rigidBody2D.velocity.x < breaksThreshold)
+            if ((rigidBody2D.velocity.x > 0 && rigidBody2D.velocity.x < breaksThreshold)
                 || (rigidBody2D.velocity.x < 0 && rigidBody2D.velocity.x > -breaksThreshold))
             {
                 rigidBody2D.velocity = new Vector2(0, rigidBody2D.velocity.y);
@@ -237,7 +286,7 @@ namespace Assets.Scripts.CharacterControl
         protected virtual void AddArtificalGravity()
         {
             // turn off gravity when grounded to avoid jittery behavior in the y axis
-            if (_stateController.currentMovementState == MovementState.GROUNDED) return;
+            //if (_stateController.currentMovementState == MovementState.GROUNDED) return;
 
             FacingDirection formerGravityDirection = characterOrienter.gravityDirection;
 
@@ -409,110 +458,130 @@ namespace Assets.Scripts.CharacterControl
             // to see if we're close enough to the ground to be
             // considered grounded
 
-            characterOrienter.GetOppositeDirection(characterOrienter.thrustingDirection);
-
+            
             float distanceToCheck = _platformContactCheckRadius * 2f;
 
             float distanceWidth = Vector2.Distance(transform.position, forwardCheckTransform.position);
 
-            Vector2 firePoint1 = Vector2.zero;
-            Vector2 targetPoint1 = Vector2.zero;
-            Vector2 firePoint2 = Vector2.zero;
-            Vector2 targetPoint2 = Vector2.zero;
+            // reset the grounded transform every time so that it'll be null if 
+            // we don't strike ground
+            groundedTransform = null;
+            groundedStrikePoint = Vector2.zero;
+
+
 
 
             if (characterOrienter.thrustingDirection == FacingDirection.UP)
             {
-                firePoint1 = bellyCheckTransform.position;
-                targetPoint1 = firePoint1 + new Vector2(0, -distanceToCheck);
+                groundCheckRay1FirePoint = bellyCheckTransform.position;
+                groundCheckRay1TargetPoint = groundCheckRay1FirePoint + new Vector2(0, -distanceToCheck);
 
                 if (characterOrienter.headingDirection == FacingDirection.RIGHT)
                 {
                     // aft is left
-                    firePoint2 = firePoint1 + new Vector2(-distanceWidth, 0);
-                    targetPoint2 = firePoint2 + new Vector2(-distanceToCheck, -distanceToCheck);
+                    groundCheckRay2FirePoint = groundCheckRay1FirePoint + new Vector2(-distanceWidth, 0);
+                    groundCheckRay2TargetPoint = groundCheckRay2FirePoint + new Vector2(-distanceToCheck, -distanceToCheck);
 
                 }
                 if (characterOrienter.headingDirection == FacingDirection.LEFT)
                 {
                     // aft is right
-                    firePoint2 = firePoint1 + new Vector2(distanceWidth, 0);
-                    targetPoint2 = firePoint2 + new Vector2(distanceToCheck, -distanceToCheck);
+                    groundCheckRay2FirePoint = groundCheckRay1FirePoint + new Vector2(distanceWidth, 0);
+                    groundCheckRay2TargetPoint = groundCheckRay2FirePoint + new Vector2(distanceToCheck, -distanceToCheck);
 
                 }
             }
             if (characterOrienter.thrustingDirection == FacingDirection.DOWN)
             {
-                firePoint1 = bellyCheckTransform.position;
-                targetPoint1 = firePoint1 + new Vector2(0, distanceToCheck);
+                groundCheckRay1FirePoint = bellyCheckTransform.position;
+                groundCheckRay1TargetPoint = groundCheckRay1FirePoint + new Vector2(0, distanceToCheck);
 
                 if (characterOrienter.headingDirection == FacingDirection.RIGHT)
                 {
                     // aft is left
-                    firePoint2 = firePoint1 + new Vector2(-distanceWidth, 0);
-                    targetPoint2 = firePoint2 + new Vector2(-distanceToCheck, distanceToCheck);
+                    groundCheckRay2FirePoint = groundCheckRay1FirePoint + new Vector2(-distanceWidth, 0);
+                    groundCheckRay2TargetPoint = groundCheckRay2FirePoint + new Vector2(-distanceToCheck, distanceToCheck);
 
                 }
                 if (characterOrienter.headingDirection == FacingDirection.LEFT)
                 {
                     // aft is right
-                    firePoint2 = firePoint1 + new Vector2(distanceWidth, 0);
-                    targetPoint2 = firePoint2 + new Vector2(distanceToCheck, distanceToCheck);
+                    groundCheckRay2FirePoint = groundCheckRay1FirePoint + new Vector2(distanceWidth, 0);
+                    groundCheckRay2TargetPoint = groundCheckRay2FirePoint + new Vector2(distanceToCheck, distanceToCheck);
 
                 }
             }
             if (characterOrienter.thrustingDirection == FacingDirection.RIGHT)
             {
-                firePoint1 = bellyCheckTransform.position;
-                targetPoint1 = firePoint1 + new Vector2(-distanceToCheck, 0);
+                groundCheckRay1FirePoint = bellyCheckTransform.position;
+                groundCheckRay1TargetPoint = groundCheckRay1FirePoint + new Vector2(-distanceToCheck, 0);
 
                 if (characterOrienter.headingDirection == FacingDirection.UP)
                 {
                     // aft is down
-                    firePoint2 = firePoint1 + new Vector2(0, -distanceWidth);
-                    targetPoint2 = firePoint2 + new Vector2(-distanceToCheck, -distanceToCheck);
+                    groundCheckRay2FirePoint = groundCheckRay1FirePoint + new Vector2(0, -distanceWidth);
+                    groundCheckRay2TargetPoint = groundCheckRay2FirePoint + new Vector2(-distanceToCheck, -distanceToCheck);
 
                 }
                 if (characterOrienter.headingDirection == FacingDirection.DOWN)
                 {
                     // aft is up
-                    firePoint2 = firePoint1 + new Vector2(0, distanceWidth);
-                    targetPoint2 = firePoint2 + new Vector2(-distanceToCheck, distanceToCheck);
+                    groundCheckRay2FirePoint = groundCheckRay1FirePoint + new Vector2(0, distanceWidth);
+                    groundCheckRay2TargetPoint = groundCheckRay2FirePoint + new Vector2(-distanceToCheck, distanceToCheck);
 
                 }
             }
             if (characterOrienter.thrustingDirection == FacingDirection.LEFT)
             {
-                firePoint1 = bellyCheckTransform.position;
-                targetPoint1 = firePoint1 + new Vector2(distanceToCheck, 0);
+                groundCheckRay1FirePoint = bellyCheckTransform.position;
+                groundCheckRay1TargetPoint = groundCheckRay1FirePoint + new Vector2(distanceToCheck, 0);
 
                 if (characterOrienter.headingDirection == FacingDirection.UP)
                 {
                     // aft is down
-                    firePoint2 = firePoint1 + new Vector2(0, -distanceWidth);
-                    targetPoint2 = firePoint2 + new Vector2(distanceToCheck, -distanceToCheck);
+                    groundCheckRay2FirePoint = groundCheckRay1FirePoint + new Vector2(0, -distanceWidth);
+                    groundCheckRay2TargetPoint = groundCheckRay2FirePoint + new Vector2(distanceToCheck, -distanceToCheck);
 
                 }
                 if (characterOrienter.headingDirection == FacingDirection.DOWN)
                 {
                     // aft is up
-                    firePoint2 = firePoint1 + new Vector2(0, distanceWidth);
-                    targetPoint2 = firePoint2 + new Vector2(distanceToCheck, distanceToCheck);
+                    groundCheckRay2FirePoint = groundCheckRay1FirePoint + new Vector2(0, distanceWidth);
+                    groundCheckRay2TargetPoint = groundCheckRay2FirePoint + new Vector2(distanceToCheck, distanceToCheck);
 
                 }
             }
 
-            RaycastHit2D hitInfo1 = Raycaster.FireAtTargetPoint(firePoint1, targetPoint1, distanceToCheck, whatIsPlatform);
-            
-
             int hitCount = 0;
-            if (hitInfo1) hitCount++;
+            RaycastHit2D hitInfo1 = Raycaster.FireAtTargetPoint(groundCheckRay1FirePoint, groundCheckRay1TargetPoint, distanceToCheck, whatIsPlatform);
+            if (hitInfo1)
+            {
+                hitCount++;
+                if (hitInfo1.collider.transform != null)
+                {
+                    groundedTransform = hitInfo1.collider.transform;
+                    groundedStrikePoint = hitInfo1.point;
+                }
+            }
+
+            
+            
             if (_stateController.currentMovementState == MovementState.GROUNDED)
             {
                 // only check the aft state if we're grounded already
                 // use this for coyote time
-                RaycastHit2D hitInfo2 = Raycaster.FireAtTargetPoint(firePoint2, targetPoint2, distanceToCheck, whatIsPlatform);
-                if (hitInfo2) hitCount++;
+                RaycastHit2D hitInfo2 = Raycaster.FireAtTargetPoint(groundCheckRay2FirePoint, groundCheckRay2TargetPoint, distanceToCheck, whatIsPlatform);
+                if (hitInfo2)
+                {
+                    hitCount++;
+                    if (groundedTransform == null && hitInfo2.collider.transform != null)
+                    {
+                        // only update the grounded transform if we didn't do so with target 1
+                        // if target 1 and 2 both hit, then taget 1's is the one we want to keep
+                        groundedTransform = hitInfo2.collider.transform;
+                        groundedStrikePoint = hitInfo2.point;
+                    }
+                }
             }
 
             if (hitCount >= 1) return true;

@@ -17,7 +17,7 @@ namespace Assets.Scripts.CharacterControl
     {
         #region Vars set in Unity
         /* 
-        E:\Unity Projects\SpiderPocGit\Logs\CustomLogger\spiderReplay-2021-11-26.10.02.15.173.json
+        E:\Unity Projects\SpiderPocGit\Logs\CustomLogger\spiderReplay-2021-11-26.10.24.50.868.json
         */
         [SerializeField] public string replayFile = string.Empty;
         [SerializeField] public GameObject builder;
@@ -69,6 +69,21 @@ namespace Assets.Scripts.CharacterControl
             base.FixedUpdate();
             TrackTargetingReticlueToMousePosition();
             if (isDebugModeOn) WriteDebugInfoToUi();
+        }
+        //void OnDrawGizmos()
+        //{
+        //    Gizmos.color = Color.red;
+        //    Vector3 direction = transform.TransformDirection(Vector3.forward) * 5;
+        //    Gizmos.DrawRay(transform.position, direction);
+        //}
+        void OnDrawGizmos()
+        {
+            Gizmos.color = Color.yellow;
+            Gizmos.DrawSphere(groundCheckRay1FirePoint, 0.05f);
+            Gizmos.DrawSphere(groundCheckRay1TargetPoint, 0.05f);
+            Gizmos.color = Color.cyan;
+            Gizmos.DrawSphere(groundCheckRay2FirePoint, 0.05f);
+            Gizmos.DrawSphere(groundCheckRay2TargetPoint, 0.05f);
         }
         protected override void Update()
         {
@@ -218,7 +233,8 @@ namespace Assets.Scripts.CharacterControl
             //sb.AppendLine(string.Format("Gravity direction: {0}", characterOrienter.gravityDirection));
             //sb.AppendLine(string.Format("Current jump thrust: {0}", currentJumpThrust));
             sb.AppendLine(string.Format("Current state: {0}", _stateController.currentMovementState));
-            sb.AppendLine(string.Format("Animation: {0}", characterAnimationController.currentState));
+            //sb.AppendLine(string.Format("Animation: {0}", characterAnimationController.currentState));
+            sb.AppendLine(string.Format("position: {0}", rigidBody2D.position));
             sb.AppendLine(string.Format("velocity: {0}", rigidBody2D.velocity));
             sb.AppendLine(string.Format("Move pressure H: {0}", userInput.moveHPressure));
 
