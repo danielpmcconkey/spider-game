@@ -16,7 +16,10 @@ namespace Assets.Scripts.CharacterControl
     public class SpiderController : GrapplingCharacter
     {
         #region Vars set in Unity
-        [SerializeField] public string replayFile = string.Empty; // E:\Unity Projects\SpiderPocGit\Logs\CustomLogger\spiderReplay-2021-11-25.09.16.05.530.json
+        /* 
+        E:\Unity Projects\SpiderPocGit\Logs\CustomLogger\spiderReplay-2021-11-26.10.02.15.173.json
+        */
+        [SerializeField] public string replayFile = string.Empty;
         [SerializeField] public GameObject builder;
         public UnityEngine.UI.Text debugTextBox;
 
@@ -26,6 +29,7 @@ namespace Assets.Scripts.CharacterControl
         private WorldBuilder.WorldBuilder worldBuilder;
 
         private bool hasFarted = false;
+        private ReplayFrame _currentReplayFrame;
 
 
         #endregion
@@ -71,7 +75,17 @@ namespace Assets.Scripts.CharacterControl
             base.Update();
             if (isDebugModeOn)
             {
-                Replay.AddInputForFrame(Time.frameCount, _userInput);
+                ReplayFrame replayFrame = new ReplayFrame();
+                replayFrame.inputCollection = _userInput;
+                replayFrame.position = transform.position;
+                replayFrame.velocity = rigidBody2D.velocity;
+                Replay.AddInputForFrame(Time.frameCount, replayFrame);
+                // this is also when we should apply the replay's position and velocity
+                if (replayFile != string.Empty)
+                {
+                    transform.position = _currentReplayFrame.position;
+                    rigidBody2D.velocity = _currentReplayFrame.velocity;
+                }
             }
 
             if (!hasFarted)
@@ -115,7 +129,8 @@ namespace Assets.Scripts.CharacterControl
         {
             if(replayFile != string.Empty)
             {
-                _userInput = Replay.GetInputForFrame(Time.frameCount);
+                _currentReplayFrame = Replay.GetInputForFrame(Time.frameCount);
+                _userInput = _currentReplayFrame.inputCollection;
                 return;
             }
             // every frame check whether user has changed input
@@ -150,7 +165,7 @@ namespace Assets.Scripts.CharacterControl
         {
             Vector3 mousePosition = UnityEngine.Camera.main.ScreenToWorldPoint(    // had to specify UnityEngine to deconflict w/ my Camera namespace
                 new Vector3(_userInput.mouseX, _userInput.mouseY, 0));
-            mousePosition.z = 0;
+            mousePosition.z = -10;  // mouse position in front of platforms and enemies, but behind the camera
             targetingReticuleTransform.position = mousePosition;
         }
         #endregion

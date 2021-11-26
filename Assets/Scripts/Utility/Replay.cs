@@ -6,37 +6,43 @@ using System.Linq;
 using System.Text;
 using System.Text.RegularExpressions;
 using System.Threading.Tasks;
-
+using UnityEngine;
 
 namespace Assets.Scripts.Utility
 {
+    public struct ReplayFrame
+    {
+        public UserInputCollection inputCollection;
+        public Vector2 position;
+        public Vector2 velocity;
+
+    }
     public static class Replay
     {
         // properties to serialize
         public static string gameVersion { get; set; }
-        public static Dictionary<int, UserInputCollection> inputCollection { get; set; }
-
+        public static Dictionary<int, ReplayFrame> replayFrames { get; set; }
+        
 
         private static string _replayFileDirectory;
         
-
         public static void InitializeReplay(string version, string replayFileDirectory)
         {
             gameVersion = version;
             _replayFileDirectory = replayFileDirectory;
-            inputCollection = new Dictionary<int, UserInputCollection>();
+            replayFrames = new Dictionary<int, ReplayFrame>();
         }
-        public static void AddInputForFrame(int frame, UserInputCollection userInput)
+        public static void AddInputForFrame(int frame, ReplayFrame replayFrame)
         {
-            if(IsInputEmpty(userInput) || inputCollection.ContainsKey(frame))
+            if(replayFrames.ContainsKey(frame))
             {
                 return;
             }
-            inputCollection.Add(frame, userInput);
+            replayFrames.Add(frame, replayFrame);
         }
-        public static UserInputCollection GetInputForFrame(int frame)
+        public static ReplayFrame GetInputForFrame(int frame)
         {
-            return inputCollection.GetValueOrDefault(frame);
+            return replayFrames.GetValueOrDefault(frame);
         }
         public static void WriteReplayFile()
         {
@@ -54,7 +60,7 @@ namespace Assets.Scripts.Utility
             {
                 string line;
                 int currentKey = -1;
-                UserInputCollection currentCollection = new UserInputCollection();
+                ReplayFrame replayFrame = new ReplayFrame();
 
                 while ((line = reader.ReadLine()) != null)
                 {
@@ -65,10 +71,10 @@ namespace Assets.Scripts.Utility
                         {
                             gameVersion = match.value;
                         }
-                        if(match.key == "inputCollection")
+                        if (match.key == "replayFrames")
                         {
                             // create a new input collection
-                            inputCollection = new Dictionary<int, UserInputCollection>();
+                            replayFrames = new Dictionary<int, ReplayFrame>();
                         }
                         if (match.key == "Key")
                         {
@@ -76,56 +82,76 @@ namespace Assets.Scripts.Utility
                             // add the old one to the stack and create a new one
                             if (currentKey != -1)
                             {
-                                inputCollection.Add(currentKey, currentCollection);
+                                replayFrames.Add(currentKey, replayFrame);
                             }
                             currentKey = int.Parse(match.value);
-                            currentCollection = new UserInputCollection();
+                            replayFrame = new ReplayFrame();
                             
                         }
                         if (match.key == "moveHPressure")
                         {
-                            currentCollection.moveHPressure = float.Parse(match.value);
+                            replayFrame.inputCollection.moveHPressure = float.Parse(match.value);
                         }
                         if (match.key == "mouseX")
                         {
-                            currentCollection.mouseX = float.Parse(match.value);
+                            replayFrame.inputCollection.mouseX = float.Parse(match.value);
                         }
                         if (match.key == "mouseY")
                         {
-                            currentCollection.mouseY = float.Parse(match.value);
+                            replayFrame.inputCollection.mouseY = float.Parse(match.value);
                         }
                         if (match.key == "moveVPressure")
                         {
-                            currentCollection.moveVPressure = float.Parse(match.value);
+                            replayFrame.inputCollection.moveVPressure = float.Parse(match.value);
                         }
                         if (match.key == "isJumpPressed")
                         {
-                            currentCollection.isJumpPressed = bool.Parse(match.value);
+                            replayFrame.inputCollection.isJumpPressed = bool.Parse(match.value);
                         }
                         if (match.key == "isJumpReleased")
                         {
-                            currentCollection.isJumpReleased = bool.Parse(match.value);
+                            replayFrame.inputCollection.isJumpReleased = bool.Parse(match.value);
                         }
                         if (match.key == "isJumpHeldDown")
                         {
-                            currentCollection.isJumpHeldDown = bool.Parse(match.value);
+                            replayFrame.inputCollection.isJumpHeldDown = bool.Parse(match.value);
                         }
                         if (match.key == "isGrappleButtonPressed")
                         {
-                            currentCollection.isGrappleButtonPressed = bool.Parse(match.value);
+                            replayFrame.inputCollection.isGrappleButtonPressed = bool.Parse(match.value);
                         }
                         if (match.key == "isGrappleButtonReleased")
                         {
-                            currentCollection.isGrappleButtonReleased = bool.Parse(match.value);
+                            replayFrame.inputCollection.isGrappleButtonReleased = bool.Parse(match.value);
                         }
                         if (match.key == "isGrappleButtonHeldDown")
                         {
-                            currentCollection.isGrappleButtonHeldDown = bool.Parse(match.value);
+                            replayFrame.inputCollection.isGrappleButtonHeldDown = bool.Parse(match.value);
+                        }
+                        if (match.key == "positionX")
+                        {
+                            if (replayFrame.position == null) replayFrame.position = Vector2.zero;
+                            replayFrame.position.x = float.Parse(match.value);
+                        }
+                        if (match.key == "positionY")
+                        {
+                            if (replayFrame.position == null) replayFrame.position = Vector2.zero;
+                            replayFrame.position.y = float.Parse(match.value);
+                        }
+                        if (match.key == "velocityX")
+                        {
+                            if (replayFrame.velocity == null) replayFrame.velocity = Vector2.zero;
+                            replayFrame.velocity.x = float.Parse(match.value);
+                        }
+                        if (match.key == "velocityY")
+                        {
+                            if (replayFrame.velocity == null) replayFrame.velocity = Vector2.zero;
+                            replayFrame.velocity.y = float.Parse(match.value);
                         }
                     }
                 }
                 // add the last entry onto the stack
-                inputCollection.Add(currentKey, currentCollection);
+                replayFrames.Add(currentKey, replayFrame);
             }
         }
         private static (bool success, string key,string value) GetKvpFromJsonLine(string line)
@@ -146,21 +172,25 @@ namespace Assets.Scripts.Utility
             StringBuilder sb = new StringBuilder();
             sb.AppendLine("{");
             sb.AppendLine(string.Format("\"gameVersion\": \"{0}\",\n", gameVersion));
-            sb.AppendLine("\"inputCollection\": {\n");
-            foreach(KeyValuePair<int,UserInputCollection> row in inputCollection)
+            sb.AppendLine("\"replayFrames\": {\n");
+            foreach(KeyValuePair<int,ReplayFrame> row in replayFrames)
             {
                 sb.AppendLine(string.Format("\"Key\": {0},", row.Key.ToString()));
-                sb.AppendLine("\"UserInputCollection\": {");
-                sb.AppendLine(string.Format("\"moveHPressure\": {0},", row.Value.moveHPressure.ToString()));
-                sb.AppendLine(string.Format("\"moveVPressure\": {0},", row.Value.moveVPressure.ToString()));
-                sb.AppendLine(string.Format("\"isJumpPressed\": {0},", row.Value.isJumpPressed ? "true" : "false"));
-                sb.AppendLine(string.Format("\"isJumpReleased\": {0},", row.Value.isJumpReleased ? "true" : "false"));
-                sb.AppendLine(string.Format("\"isJumpHeldDown\": {0},", row.Value.isJumpHeldDown ? "true" : "false"));
-                sb.AppendLine(string.Format("\"isGrappleButtonPressed\": {0},", row.Value.isGrappleButtonPressed ? "true" : "false"));
-                sb.AppendLine(string.Format("\"isGrappleButtonReleased\": {0},", row.Value.isGrappleButtonReleased ? "true" : "false"));
-                sb.AppendLine(string.Format("\"isGrappleButtonHeldDown\": {0},", row.Value.isGrappleButtonHeldDown ? "true" : "false"));
-                sb.AppendLine(string.Format("\"mouseX\": {0},", row.Value.mouseX.ToString()));
-                sb.AppendLine(string.Format("\"mouseY\": {0},", row.Value.mouseY.ToString()));
+                sb.AppendLine("\"ReplayFrame\": {");
+                sb.AppendLine(string.Format("\"moveHPressure\": {0},", row.Value.inputCollection.moveHPressure.ToString()));
+                sb.AppendLine(string.Format("\"moveVPressure\": {0},", row.Value.inputCollection.moveVPressure.ToString()));
+                sb.AppendLine(string.Format("\"isJumpPressed\": {0},", row.Value.inputCollection.isJumpPressed ? "true" : "false"));
+                sb.AppendLine(string.Format("\"isJumpReleased\": {0},", row.Value.inputCollection.isJumpReleased ? "true" : "false"));
+                sb.AppendLine(string.Format("\"isJumpHeldDown\": {0},", row.Value.inputCollection.isJumpHeldDown ? "true" : "false"));
+                sb.AppendLine(string.Format("\"isGrappleButtonPressed\": {0},", row.Value.inputCollection.isGrappleButtonPressed ? "true" : "false"));
+                sb.AppendLine(string.Format("\"isGrappleButtonReleased\": {0},", row.Value.inputCollection.isGrappleButtonReleased ? "true" : "false"));
+                sb.AppendLine(string.Format("\"isGrappleButtonHeldDown\": {0},", row.Value.inputCollection.isGrappleButtonHeldDown ? "true" : "false"));
+                sb.AppendLine(string.Format("\"mouseX\": {0},", row.Value.inputCollection.mouseX.ToString()));
+                sb.AppendLine(string.Format("\"mouseY\": {0},", row.Value.inputCollection.mouseY.ToString()));
+                sb.AppendLine(string.Format("\"positionX\": {0},", row.Value.position.x.ToString()));
+                sb.AppendLine(string.Format("\"positionY\": {0},", row.Value.position.y.ToString()));
+                sb.AppendLine(string.Format("\"velocityX\": {0},", row.Value.velocity.x.ToString()));
+                sb.AppendLine(string.Format("\"velocityY\": {0},", row.Value.velocity.y.ToString()));
                 sb.AppendLine("}"); // end UserInputCollection for that row
             }
             sb.AppendLine("}"); // end dictionary

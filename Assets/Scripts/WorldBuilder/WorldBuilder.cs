@@ -52,17 +52,17 @@ namespace Assets.Scripts.WorldBuilder
              
             GameObject room000 = Instantiate(new GameObject("Room000"), roomsParent.transform, false);
 
-            Room r = new Room(_tileSetRock1, 40, 20, new Vector2(-20.0f, 10.0F), room000);
+            Room r = new Room(_tileSetRock1, 40, 20, new Vector2(-6.0f, 10.0F), room000);
             rooms[0] = r;
             r.AddPerimiterTiles();
             // tile above the floor = -7.68
-            r.AddPlatformTiles(new Vector2(-15f, -4.0f), 3, 5);
-            r.AddPlatformTiles(new Vector2(-9f, -5f), 12, 1);
-            r.AddPlatformTiles(new Vector2(-9f, -1f), 5, 1);
-            r.AddPlatformTiles(new Vector2(-2.0f, -1f), 5, 1);
-            r.AddPlatformTiles(new Vector2(-9f, 3f), 12, 1);
-            r.AddPlatformTiles(new Vector2(6f, 0f), 2, 7);
-            r.AddPlatformTiles(new Vector2(15f, 6f), 1, 11);
+            r.AddPlatformTiles(new Vector2(-1f, -4.0f), 4, 5);
+            r.AddPlatformTiles(new Vector2(5f, -5f), 12, 1);
+            r.AddPlatformTiles(new Vector2(5f, -1f), 5, 1);
+            r.AddPlatformTiles(new Vector2(12.0f, -1f), 5, 1);
+            r.AddPlatformTiles(new Vector2(5f, 3f), 12, 1);
+            r.AddPlatformTiles(new Vector2(20f, 0f), 2, 7);
+            r.AddPlatformTiles(new Vector2(29f, 6f), 1, 11);
             r.DrawSelf();
         }
         private void PopulateTileSets()
