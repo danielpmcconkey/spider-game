@@ -16,7 +16,7 @@ namespace Assets.Scripts.CharacterControl
     public class SpiderController : GrapplingCharacter
     {
         #region Vars set in Unity
-        [SerializeField] public string replayFile = string.Empty; // E:\Unity Projects\SpiderPocGit\Logs\CustomLogger\spiderReplay-2021-11-21.14.42.14.490.json
+        [SerializeField] public string replayFile = string.Empty; // E:\Unity Projects\SpiderPocGit\Logs\CustomLogger\spiderReplay-2021-11-25.09.16.05.530.json
         [SerializeField] public GameObject builder;
         public UnityEngine.UI.Text debugTextBox;
 
@@ -60,7 +60,6 @@ namespace Assets.Scripts.CharacterControl
             worldBuilder = builder.GetComponent<WorldBuilder.WorldBuilder>();
             currentRoom = 0;
         }
-        
         protected override void FixedUpdate()
         {
             base.FixedUpdate();

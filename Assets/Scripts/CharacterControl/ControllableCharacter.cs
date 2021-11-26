@@ -107,6 +107,18 @@ namespace Assets.Scripts.CharacterControl
             // apply the accumulation of physical forces
             rigidBody2D.velocity += _forcesAccumulated;
 
+            // stop velocity when it's very low to prevent jittering
+            if((rigidBody2D.velocity.x > 0 && rigidBody2D.velocity.x < breaksThreshold)
+                || (rigidBody2D.velocity.x < 0 && rigidBody2D.velocity.x > -breaksThreshold))
+            {
+                rigidBody2D.velocity = new Vector2(0, rigidBody2D.velocity.y);
+            }
+            if ((rigidBody2D.velocity.y > 0 && rigidBody2D.velocity.y < breaksThreshold)
+                || (rigidBody2D.velocity.y < 0 && rigidBody2D.velocity.y > -breaksThreshold))
+            {
+                rigidBody2D.velocity = new Vector2(rigidBody2D.velocity.x, 0);
+            }
+
             // constrain velocities to speed limit
             float horizontalVelocityLimit = minHorizontalVelocityLimit +
                 (horizontalVelocityLimitPercent * (maxHorizontalVelocityLimit - minHorizontalVelocityLimit));
@@ -224,6 +236,9 @@ namespace Assets.Scripts.CharacterControl
         }
         protected virtual void AddArtificalGravity()
         {
+            // turn off gravity when grounded to avoid jittery behavior in the y axis
+            if (_stateController.currentMovementState == MovementState.GROUNDED) return;
+
             FacingDirection formerGravityDirection = characterOrienter.gravityDirection;
 
             float gravityOnCharacter = minGravityOnCharacter +
@@ -305,6 +320,38 @@ namespace Assets.Scripts.CharacterControl
         }
         private void AddDirectionalMovementForceV()
         {
+            if (_userInput.moveVPressure == 0 && _stateController.currentMovementState == MovementState.GROUNDED)
+            {
+                // if the character has velocity in the y
+                // axis, add force in the opposite direction
+                // to make stopping more forceful, but only
+                // if the character is walking on a wall
+
+
+
+
+                if (_stateController.currentMovementState == MovementState.TETHERED)
+                {
+                    // don't disrupt the swinging effect
+                    return;
+                }
+                float breaksPressure = minBreaksPressure +
+                    (breaksPressurePercent * (maxBreaksPressure - minBreaksPressure));
+
+                float pressureToApply = breaksPressure * Time.deltaTime;
+                if (rigidBody2D.velocity.y > breaksThreshold)
+                {
+                    if (pressureToApply < rigidBody2D.velocity.y)
+                        _forcesAccumulated += new Vector2(0, -pressureToApply);
+                }
+                else if (rigidBody2D.velocity.y < -breaksThreshold)
+                {
+                    if (pressureToApply < (rigidBody2D.velocity.y * -1))
+                        _forcesAccumulated += new Vector2(0, pressureToApply);
+                }
+                else return;
+
+            }
             if (characterOrienter.headingDirection == FacingDirection.UP
                 || characterOrienter.headingDirection == FacingDirection.DOWN
                 || canFly)
@@ -456,11 +503,17 @@ namespace Assets.Scripts.CharacterControl
             }
 
             RaycastHit2D hitInfo1 = Raycaster.FireAtTargetPoint(firePoint1, targetPoint1, distanceToCheck, whatIsPlatform);
-            RaycastHit2D hitInfo2 = Raycaster.FireAtTargetPoint(firePoint2, targetPoint2, distanceToCheck, whatIsPlatform);
+            
 
             int hitCount = 0;
             if (hitInfo1) hitCount++;
-            if (hitInfo2) hitCount++;
+            if (_stateController.currentMovementState == MovementState.GROUNDED)
+            {
+                // only check the aft state if we're grounded already
+                // use this for coyote time
+                RaycastHit2D hitInfo2 = Raycaster.FireAtTargetPoint(firePoint2, targetPoint2, distanceToCheck, whatIsPlatform);
+                if (hitInfo2) hitCount++;
+            }
 
             if (hitCount >= 1) return true;
             return false;
@@ -614,7 +667,7 @@ namespace Assets.Scripts.CharacterControl
         }
         private void PushTowardRotation()
         {
-            float distance = Vector2.Distance(ceilingCheckTransform.position, transform.position);
+            float distance = 0.75f;// Vector2.Distance(ceilingCheckTransform.position, transform.position);
             Vector3 movement = Vector3.zero;
             if (characterOrienter.headingDirection == FacingDirection.RIGHT)
                 movement.x = distance;

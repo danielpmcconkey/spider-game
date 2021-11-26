@@ -84,19 +84,19 @@ namespace Assets.Scripts.Utility
                         }
                         if (match.key == "moveHPressure")
                         {
-                            currentCollection.moveHPressure = int.Parse(match.value);
+                            currentCollection.moveHPressure = float.Parse(match.value);
                         }
                         if (match.key == "mouseX")
                         {
-                            currentCollection.mouseX = int.Parse(match.value);
+                            currentCollection.mouseX = float.Parse(match.value);
                         }
                         if (match.key == "mouseY")
                         {
-                            currentCollection.mouseY = int.Parse(match.value);
+                            currentCollection.mouseY = float.Parse(match.value);
                         }
                         if (match.key == "moveVPressure")
                         {
-                            currentCollection.moveVPressure = int.Parse(match.value);
+                            currentCollection.moveVPressure = float.Parse(match.value);
                         }
                         if (match.key == "isJumpPressed")
                         {

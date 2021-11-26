@@ -666,7 +666,7 @@ RectTransform:
   m_AnchorMin: {x: 0, y: 0}
   m_AnchorMax: {x: 0, y: 0}
   m_AnchoredPosition: {x: 960, y: 356}
-  m_SizeDelta: {x: 1920, y: 712}
+  m_SizeDelta: {x: 1000, y: 600}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!4 &377807495 stripped
 Transform:
@@ -1140,6 +1140,10 @@ MonoBehaviour:
   rock1EndCapLeft: {fileID: 2862184802556131500, guid: 48e3c2d7c54da9343aac779bd01881c7,
     type: 3}
   rock1EndCapRight: {fileID: 3379665225088748033, guid: 863ea2e8955c3ed4f9f10edc589fd643,
+    type: 3}
+  rock1SingleWide: {fileID: 693214004673034280, guid: 9ee07fa364828124a97cc8d44a74babf,
+    type: 3}
+  rock1SingleTall: {fileID: 3341136290961658801, guid: 188fbdc39fa9ee54f9ee8094cdcce7df,
     type: 3}
 --- !u!1 &867688945
 GameObject:
