@@ -11,14 +11,12 @@ namespace Assets.Scripts.Utility
 
     public static class LoggerCustom
     {
-        private static bool _isDebugModeOn = false;
         private static int _frameCount;
         private static string _debugLogFileLocation = string.Empty; // C:\Users\Dan\AppData\LocalLow\SpiderController\log.txt
         private static StringBuilder _logStringBuilder;
 
-        public static void Init(bool isDebugModeOn, string debugLogFileLocation, int frameCount)
+        public static void Init(string debugLogFileLocation, int frameCount)
         {
-            _isDebugModeOn = isDebugModeOn;
             _debugLogFileLocation = Path.Combine(debugLogFileLocation, 
                 string.Format("spiderLog-{0}.txt", DateTime.Now.ToString("yyyy-MM-dd.HH.mm.ss.fff")));
             _frameCount = frameCount;
@@ -31,7 +29,9 @@ namespace Assets.Scripts.Utility
 
         public static void DEBUG(string message)
         {
-            if (_isDebugModeOn) _LogMessage(LogLevel.DEGUG, message);
+#if DEBUG
+            _LogMessage(LogLevel.DEGUG, message); 
+#endif
         }
         public static void INFO(string message)
         {

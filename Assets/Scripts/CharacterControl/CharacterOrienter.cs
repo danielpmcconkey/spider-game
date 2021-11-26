@@ -19,11 +19,10 @@ namespace Assets.Scripts.CharacterControl
         public FacingDirection thrustingDirection { get { return _thrustingDirection; } }
         public FacingDirection gravityDirection { get { return _gravityDirection; } }
 
-        private bool _isDebugModeOn = false;
+        
 
-        public CharacterOrienter(bool isDebugModeOn)
+        public CharacterOrienter()
         {
-            _isDebugModeOn = isDebugModeOn;
             _headingDirection = FacingDirection.RIGHT;
             _thrustingDirection = FacingDirection.UP;
             _gravityDirection = FacingDirection.DOWN;
@@ -62,27 +61,18 @@ namespace Assets.Scripts.CharacterControl
         }
         private void LogGravityChange(FacingDirection oldDir, FacingDirection newDir)
         {
-            if (_isDebugModeOn)
-            {
-                LoggerCustom.DEBUG(string.Format("Gravity direction has changed from {0} to {1}",
+            LoggerCustom.DEBUG(string.Format("Gravity direction has changed from {0} to {1}",
                     oldDir, newDir));
-            }
         }
         private void LogThrustingChange(FacingDirection oldDir, FacingDirection newDir)
         {
-            if (_isDebugModeOn)
-            {
-                LoggerCustom.DEBUG(string.Format("Thrusting direction has changed from {0} to {1}",
+            LoggerCustom.DEBUG(string.Format("Thrusting direction has changed from {0} to {1}",
                     oldDir, newDir));
-            }
         }
         private void LogHeadingChange(FacingDirection oldDir, FacingDirection newDir)
         {
-            if (_isDebugModeOn)
-            {
-                LoggerCustom.DEBUG(string.Format("Heading direction has changed from {0} to {1}",
+            LoggerCustom.DEBUG(string.Format("Heading direction has changed from {0} to {1}",
                     oldDir, newDir));
-            }
         }
     }
 }

@@ -16,12 +16,19 @@ namespace Assets.Scripts.CharacterControl
     public class SpiderController : GrapplingCharacter
     {
         #region Vars set in Unity
+
+#if DEBUG
+
         /* 
-        E:\Unity Projects\SpiderPocGit\Logs\CustomLogger\spiderReplay-2021-11-26.10.24.50.868.json
+        E:\Unity Projects\SpiderPocGit\Logs\CustomLogger\spiderReplay-2021-11-26.15.58.14.176.json
         */
         [SerializeField] public string replayFile = string.Empty;
-        [SerializeField] public GameObject builder;
         public UnityEngine.UI.Text debugTextBox;
+        
+#endif
+
+        [SerializeField] public GameObject builder;
+        
 
         public int currentRoom { get; private set; }
 
@@ -38,10 +45,10 @@ namespace Assets.Scripts.CharacterControl
         protected override void Awake()
         {
             _gameVersion = Assembly.GetExecutingAssembly().GetName().Version.ToString();
-            if (isDebugModeOn)
-            {
-                Replay.InitializeReplay(_gameVersion, debugLogFileDirectory);
-            }
+#if DEBUG
+            Replay.InitializeReplay(_gameVersion, debugLogFileDirectory);
+             
+#endif
 
             base.Awake();
             if (replayFile != string.Empty)
@@ -51,7 +58,7 @@ namespace Assets.Scripts.CharacterControl
 
 
 
-            LoggerCustom.Init(isDebugModeOn, debugLogFileDirectory, Time.frameCount);
+            LoggerCustom.Init(debugLogFileDirectory, Time.frameCount);
 
 
             LoggerCustom.INFO("**********************************************************************************");
@@ -68,14 +75,12 @@ namespace Assets.Scripts.CharacterControl
         {
             base.FixedUpdate();
             TrackTargetingReticlueToMousePosition();
-            if (isDebugModeOn) WriteDebugInfoToUi();
+#if DEBUG
+            WriteDebugInfoToUi(); 
+#endif
         }
-        //void OnDrawGizmos()
-        //{
-        //    Gizmos.color = Color.red;
-        //    Vector3 direction = transform.TransformDirection(Vector3.forward) * 5;
-        //    Gizmos.DrawRay(transform.position, direction);
-        //}
+
+#if DEBUG
         void OnDrawGizmos()
         {
             Gizmos.color = Color.yellow;
@@ -84,24 +89,26 @@ namespace Assets.Scripts.CharacterControl
             Gizmos.color = Color.cyan;
             Gizmos.DrawSphere(groundCheckRay2FirePoint, 0.05f);
             Gizmos.DrawSphere(groundCheckRay2TargetPoint, 0.05f);
-        }
+        } 
+#endif
         protected override void Update()
         {
             base.Update();
-            if (isDebugModeOn)
+#if DEBUG
+            
+            ReplayFrame replayFrame = new ReplayFrame();
+            replayFrame.inputCollection = _userInput;
+            replayFrame.position = transform.position;
+            replayFrame.velocity = rigidBody2D.velocity;
+            Replay.AddInputForFrame(Time.frameCount, replayFrame);
+            // this is also when we should apply the replay's position and velocity
+            if (replayFile != string.Empty)
             {
-                ReplayFrame replayFrame = new ReplayFrame();
-                replayFrame.inputCollection = _userInput;
-                replayFrame.position = transform.position;
-                replayFrame.velocity = rigidBody2D.velocity;
-                Replay.AddInputForFrame(Time.frameCount, replayFrame);
-                // this is also when we should apply the replay's position and velocity
-                if (replayFile != string.Empty)
-                {
-                    transform.position = _currentReplayFrame.position;
-                    rigidBody2D.velocity = _currentReplayFrame.velocity;
-                }
+                transform.position = _currentReplayFrame.position;
+                rigidBody2D.velocity = _currentReplayFrame.velocity;
             }
+            
+#endif
 
             if (!hasFarted)
             {
@@ -119,21 +126,20 @@ namespace Assets.Scripts.CharacterControl
         }
         void OnDestroy()
         {
-            if (isDebugModeOn)
-            {
-                Replay.WriteReplayFile();
-            }
-            if (isDebugModeOn)
-            {
-                LoggerCustom.INFO("**********************************************************************************");
-                LoggerCustom.INFO("GAME OVER");
-                LoggerCustom.INFO("**********************************************************************************");
-                LogAllVarsState();
+#if DEBUG
+            
+            Replay.WriteReplayFile();
+            
+            LoggerCustom.INFO("**********************************************************************************");
+            LoggerCustom.INFO("GAME OVER");
+            LoggerCustom.INFO("**********************************************************************************");
+            LogAllVarsState();
 
-                // write out the log to a log file
-                LoggerCustom.WriteLogToFile();
+            // write out the log to a log file
+            LoggerCustom.WriteLogToFile();
 
-            }
+             
+#endif
         }
         #endregion
 
@@ -210,7 +216,6 @@ namespace Assets.Scripts.CharacterControl
                  
                 if (cameraControl != null)
                 {
-                    cameraControl.isDebugModeOn = isDebugModeOn;
                     cameraControl.LogAllVarsState();
                 }
             }
@@ -227,6 +232,7 @@ namespace Assets.Scripts.CharacterControl
         }
         private void WriteDebugInfoToUi()
         {
+#if DEBUG
             StringBuilder sb = new StringBuilder();
             //sb.AppendLine(string.Format("Heading direction: {0}", characterOrienter.headingDirection));
             //sb.AppendLine(string.Format("Thrusting direction: {0}", characterOrienter.thrustingDirection));
@@ -238,7 +244,8 @@ namespace Assets.Scripts.CharacterControl
             sb.AppendLine(string.Format("velocity: {0}", rigidBody2D.velocity));
             sb.AppendLine(string.Format("Move pressure H: {0}", userInput.moveHPressure));
 
-            debugTextBox.text = sb.ToString();
+            debugTextBox.text = sb.ToString(); 
+#endif
         }
         #endregion
     }

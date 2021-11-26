@@ -14,13 +14,12 @@ namespace Assets.Scripts.Animation
         public AnimationState currentState;
         private Animator _animator;
         private ControllableCharacter _character;
-        private bool _isDebugModeOn = false;
+        
 
-        public CharacterAnimationController(ControllableCharacter character, Animator animator, bool isDebugModeOn)
+        public CharacterAnimationController(ControllableCharacter character, Animator animator)
         {
             _character = character;
             _animator = animator;
-            _isDebugModeOn = isDebugModeOn;
         }
         public void UpdateCurrentState()
         {
@@ -75,10 +74,11 @@ namespace Assets.Scripts.Animation
             }
             // end new state logic
 
-            if (_isDebugModeOn && newState != priorState)
+            if (newState != priorState)
             {
                 LoggerCustom.DEBUG(string.Format("Changing animation state from {0} to {1}", priorState, newState));
             }
+
             currentState = newState;
             SetAnimatorVariables();
         }

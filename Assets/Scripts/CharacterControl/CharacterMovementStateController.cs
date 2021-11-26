@@ -14,14 +14,13 @@ namespace Assets.Scripts.CharacterControl
         internal List<MovementTrigger> triggers { get; private set; }
 
         private ControllableCharacter _character;
-        private bool _isDebugModeOn;
         private float _currentCorneringCounter;
 
         internal CharacterMovementStateController(ControllableCharacter character, MovementState initialMovementState)
         {
             _character = character;
             currentMovementState = initialMovementState;
-            _isDebugModeOn = character.isDebugModeOn;
+
             triggers = new List<MovementTrigger>();
             _currentCorneringCounter = 0f;
         }
@@ -103,7 +102,6 @@ namespace Assets.Scripts.CharacterControl
                 SetState(newState);
             }
         }
-
         private void DetermineTriggers()
         {
             triggers = new List<MovementTrigger>();

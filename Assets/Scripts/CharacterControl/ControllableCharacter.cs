@@ -10,7 +10,7 @@ namespace Assets.Scripts.CharacterControl
         #region unity properties
         [Header("Debug")]
         [Space(10)]
-        [SerializeField] public bool isDebugModeOn = false;
+        
         [SerializeField] public string debugLogFileDirectory = string.Empty; // C:\Users\Dan\AppData\LocalLow\SpiderController\
         [Header("Movement parameters")]
         [Space(10)]
@@ -100,11 +100,11 @@ namespace Assets.Scripts.CharacterControl
                 isJumpHeldDown = false,
             };
 
-            characterOrienter = new CharacterOrienter(isDebugModeOn);
+            characterOrienter = new CharacterOrienter();
 
             _stateController = new CharacterMovementStateController(this, MovementState.FLOATING);
 
-            characterAnimationController = new CharacterAnimationController(this, animator, isDebugModeOn);
+            characterAnimationController = new CharacterAnimationController(this, animator);
 
             _forcesAccumulated = Vector2.zero;
         }
@@ -197,7 +197,8 @@ namespace Assets.Scripts.CharacterControl
         }
         protected virtual void Update()
         {
-            if (isDebugModeOn) LoggerCustom.SetFrameCount(Time.frameCount);
+            LoggerCustom.SetFrameCount(Time.frameCount);
+
             CheckUserInput();
             PopulatePlatformCollisionVars();
 
