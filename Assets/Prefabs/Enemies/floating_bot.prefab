@@ -45,6 +45,7 @@ GameObject:
   - component: {fileID: 2934860196678712746}
   - component: {fileID: 2934860196678712749}
   - component: {fileID: 2934860196678712747}
+  - component: {fileID: 7743107927790429588}
   m_Layer: 0
   m_Name: floating_bot
   m_TagString: Untagged
@@ -150,15 +151,14 @@ MonoBehaviour:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 2934860196678712737}
-  m_Enabled: 1
+  m_Enabled: 0
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 5ba867d3e9314354daa0aea3aa6b960b, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  isDebugModeOn: 0
   debugLogFileDirectory: 
-  horizontalAccelerationPercent: 0.059
-  horizontalVelocityLimitPercent: 0.068
+  horizontalAccelerationPercent: 1
+  horizontalVelocityLimitPercent: 1
   breaksPressurePercent: 0.5
   initialJumpThrustPercent: 0.65
   jumpThrustOverTimePercent: 0.5
@@ -179,7 +179,7 @@ MonoBehaviour:
     serializedVersion: 2
     m_Bits: 64
   targetingReticuleTransform: {fileID: 0}
-  player: {fileID: 0}
+  targetCharacter: {fileID: 0}
   agroDistance: 12
 --- !u!50 &2934860196678712749
 Rigidbody2D:
@@ -218,6 +218,43 @@ CircleCollider2D:
   m_Offset: {x: 0, y: 0}
   serializedVersion: 2
   m_Radius: 0.32284755
+--- !u!114 &7743107927790429588
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 2934860196678712737}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: a86c7a2f9da0e024c9d42b8ab067c41e, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  debugLogFileDirectory: 
+  horizontalAccelerationPercent: 0.5
+  horizontalVelocityLimitPercent: 0.5
+  breaksPressurePercent: 0.5
+  initialJumpThrustPercent: 0.65
+  jumpThrustOverTimePercent: 0.5
+  jumpThrustLimitPercent: 0.238
+  gravityOnCharacterPercent: 0
+  corneringTimeRequiredPercent: 0.263
+  isHorizontalMovementInAirAllowed: 1
+  canWallCrawl: 0
+  canCeilingCrawl: 0
+  canGrapple: 0
+  canFly: 1
+  animator: {fileID: 2934860196678712750}
+  rigidBody2D: {fileID: 2934860196678712749}
+  bellyCheckTransform: {fileID: 2934860198023715938}
+  forwardCheckTransform: {fileID: 2934860196476907739}
+  ceilingCheckTransform: {fileID: 2934860197151028285}
+  whatIsPlatform:
+    serializedVersion: 2
+    m_Bits: 64
+  targetingReticuleTransform: {fileID: 0}
+  targetCharacter: {fileID: 0}
+  agroDistance: 10
 --- !u!1 &2934860197151028284
 GameObject:
   m_ObjectHideFlags: 0

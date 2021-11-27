@@ -17,7 +17,7 @@ namespace Assets.Scripts.WorldBuilder
         public int roomHeightInTiles;
         public float roomWidthInUnityMeters;
         public float roomHeightInUnityMeters;
-        public ControllableCharacter[] enemies;
+        private List<Enemy> _startingEnemies;
         private TileSet _tileSet;
 
 
@@ -45,8 +45,8 @@ namespace Assets.Scripts.WorldBuilder
             roomHeightInUnityMeters = roomHeightInTiles * _tileHeightInUnityMeters;
 
             _tiles = new Tile[roomWidthInTiles * roomHeightInTiles];
+            _startingEnemies = new List<Enemy>();
         }
-
         public void AddPlatformTiles(Vector2 platformUpLeft, int numTilesWide, int numTilesTall)
         {
             float y = platformUpLeft.y;
@@ -124,6 +124,15 @@ namespace Assets.Scripts.WorldBuilder
             AddLeftWallTiles();
             AddRightWallTiles();
         }
+        public void AddStartingEnemy(GameObject prefab, Vector2 positionInGlobalSpace, GameObject playerCharacter)
+        {
+            _startingEnemies.Add(new Enemy()
+            {
+                prefab = prefab,
+                positionInGlobalSpace = positionInGlobalSpace,
+                targetCharacter = playerCharacter
+            });
+        }
         public void DrawSelf()
         {
             for (int i = 0; i < _tiles.Length; i++)
@@ -132,6 +141,10 @@ namespace Assets.Scripts.WorldBuilder
                 {
                     AddTileToUnity(_tiles[i]);
                 }
+            }
+            foreach(Enemy e in _startingEnemies)
+            {
+                GameObject enemyObj = DrawPrefab(e.prefab, e.positionInGlobalSpace);
             }
         }
         #endregion
@@ -222,9 +235,6 @@ namespace Assets.Scripts.WorldBuilder
         }
         private void AddTileToUnity(Tile tile)
         {
-            Vector3 position = tile.positionInGlobalSpace;
-            Quaternion rotation = new Quaternion(0, 0, 0, 0);
-
             // check to see if we've burried a top tile
             if(tile.prefab == _tileSet.topPrefab)
             {
@@ -232,8 +242,14 @@ namespace Assets.Scripts.WorldBuilder
                     tile.positionInGlobalSpace.y + _tileHeightInUnityMeters);
                 if (_tiles[tileIndexAbove] != null) tile.prefab = _tileSet.basePrefab;
             }
-
-            GameObject obj = UnityEngine.Object.Instantiate(tile.prefab, position, rotation, _roomGameObject.transform);
+            // now draw it
+            DrawPrefab(tile.prefab, tile.positionInGlobalSpace);
+        }
+        private GameObject DrawPrefab(GameObject prefab, Vector2 positionInGlobalSpace)
+        {
+            Vector3 position = positionInGlobalSpace;
+            Quaternion rotation = new Quaternion(0, 0, 0, 0);
+            return UnityEngine.Object.Instantiate(prefab, position, rotation, _roomGameObject.transform);
         }
         private int GetTileIndexFromUnityPosition(float x, float y)
         {

@@ -9,8 +9,25 @@ namespace Assets.Scripts.CharacterControl
 {
     public class AiControlledCharacter : ControllableCharacter
     {
-        [SerializeField] public GameObject player;
+        [SerializeField] public GameObject targetCharacter;
         [SerializeField] public float agroDistance = 10;
+
+        protected bool isAgroed = false;
+
+        protected override void Awake()
+        {
+            base.Awake();
+            if(targetCharacter == null)
+            {
+                targetCharacter = GameObject.Find("PlayerCharacter");
+            }
+        }
+        protected override void FixedUpdate()
+        {
+            string burp = _groundedForcesAccumulated.ToString();
+            string burp2 = _floatingForcesAccumulated.ToString();
+            base.FixedUpdate();
+        }
         protected override void CheckUserInput()
         {
             
@@ -26,10 +43,11 @@ namespace Assets.Scripts.CharacterControl
         {
             UserInputCollection userInput = new UserInputCollection();
 
-            Vector2 playerPos = player.transform.position;
+            Vector2 playerPos = targetCharacter.transform.position;
             Vector2 enemyPos = transform.position;
             if(Vector2.Distance(playerPos, enemyPos) < agroDistance)
             {
+                isAgroed = true;
                 Vector2 direction = playerPos - enemyPos;
                 if (direction.x > 0) userInput.moveHPressure = 1;
                 if (direction.x < 0) userInput.moveHPressure = -1;
@@ -37,20 +55,19 @@ namespace Assets.Scripts.CharacterControl
                 if (direction.y < 0) userInput.moveVPressure = -1;
 
             }
-
-
-
-            //userInput.moveHPressure = 0f;
-            //userInput.moveVPressure = 0f;
-            //userInput.isJumpPressed = false;
-            //userInput.isJumpReleased = false;
-            //userInput.isJumpHeldDown = false;
-            //userInput.isGrappleButtonPressed = false;
-            //userInput.isGrappleButtonReleased = false;
-            //userInput.isGrappleButtonHeldDown = false;
-            //userInput.mouseX = 0f;
-            //userInput.mouseY = 0f;
+            else
+            {
+                isAgroed = false;
+                userInput.moveHPressure = 0;
+                userInput.moveVPressure = 0;
+                Stop();
+            }
             return userInput;
+        }
+        protected virtual void Stop()
+        {
+            _groundedForcesAccumulated = Vector2.zero;
+            if (canFly) _floatingForcesAccumulated = Vector2.zero;
         }
     }
 }

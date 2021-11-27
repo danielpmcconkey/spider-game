@@ -210,7 +210,7 @@ namespace Assets.Scripts.CharacterControl
         #endregion
 
         #region private / protected methods
-        private void ApplyForcesFloating()
+        protected virtual void ApplyForcesFloating()
         {
             // apply the accumulation of physical forces
             rigidBody2D.velocity += _floatingForcesAccumulated;
@@ -435,7 +435,7 @@ namespace Assets.Scripts.CharacterControl
 
             return false;
         }
-        private bool IsGroundedRayCast()
+        protected virtual bool IsGroundedRayCast()
         {
             // the physics engine isn't always reliable. sometimes
             // using platform collision makes it seem like we're

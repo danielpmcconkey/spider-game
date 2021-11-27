@@ -9,6 +9,7 @@ namespace Assets.Scripts.WorldBuilder
 {
     public class WorldBuilder : MonoBehaviour
     {
+        [SerializeField] public GameObject playerCharacter; // used to assign enemies an initial target
         [SerializeField] public GameObject roomsParent;
         [Space(10)]
         [Header("Tile sets")]
@@ -28,6 +29,10 @@ namespace Assets.Scripts.WorldBuilder
         [SerializeField] public GameObject rock1EndCapRight;
         [SerializeField] public GameObject rock1SingleWide;
         [SerializeField] public GameObject rock1SingleTall;
+        [Space(10)]
+        [Header("Enemies")]
+        [Space(10)]
+        [SerializeField] public GameObject floatingBot;
         public Room[] rooms;
 
         private TileSet _tileSetRock1; 
@@ -52,7 +57,7 @@ namespace Assets.Scripts.WorldBuilder
              
             GameObject room000 = Instantiate(new GameObject("Room000"), roomsParent.transform, false);
 
-            Room r = new Room(_tileSetRock1, 40, 20, new Vector2(-6.0f, 10.0F), room000);
+            Room r = new Room(_tileSetRock1, 80, 20, new Vector2(-6.0f, 10.0F), room000);
             rooms[0] = r;
             r.AddPerimiterTiles();
             // tile above the floor = -7.68
@@ -63,6 +68,7 @@ namespace Assets.Scripts.WorldBuilder
             r.AddPlatformTiles(new Vector2(5f, 3f), 12, 1);
             r.AddPlatformTiles(new Vector2(20f, 0f), 2, 7);
             r.AddPlatformTiles(new Vector2(29f, 6f), 1, 11);
+            r.AddStartingEnemy(floatingBot, new Vector2(40f, 0f), playerCharacter);
             r.DrawSelf();
         }
         private void PopulateTileSets()
