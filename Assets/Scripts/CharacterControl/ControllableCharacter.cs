@@ -56,7 +56,8 @@ namespace Assets.Scripts.CharacterControl
         protected CharacterMovementStateController _stateController;
         private const float _platformContactCheckRadius = .2f; // Radius of the overlap circle to determine if touching a platform
         protected UserInputCollection _userInput;
-        protected Vector2 _forcesAccumulated;
+        protected Vector2 _floatingForcesAccumulated;
+        protected Vector2 _groundedForcesAccumulated;
         protected const float pushOffAmount = 0.5f;
         const float breaksThreshold = 0.1f; // kick in the breaks when velocity is greater than this and no move pressure
         protected string _gameVersion;
@@ -69,16 +70,16 @@ namespace Assets.Scripts.CharacterControl
 
 
         // min and max limiters on movement parameters
-        const float maxHorizontalAcceleration = 50000f;
-        const float minHorizontalAcceleration = 5000f;
+        const float maxHorizontalAcceleration = 12f;
+        const float minHorizontalAcceleration = 0.5f;
         const float maxHorizontalVelocityLimit = 25f;
         const float minHorizontalVelocityLimit = 3f;
-        const float maxInitialJumpThrust = 30f;
-        const float minInitialJumpThrust = 5f;
-        const float maxJumpThrustOverTime = 160f;
-        const float minJumpThrustOverTime = 10f;
-        const float maxJumpThrustLimit = 160f;
-        const float minJumpThrustLimit = 10f;
+        const float maxInitialJumpThrust = 3000f;
+        const float minInitialJumpThrust = 500f;
+        const float maxJumpThrustOverTime = 16000f;
+        const float minJumpThrustOverTime = 1000f;
+        const float maxJumpThrustLimit = 16000f;
+        const float minJumpThrustLimit = 1000f;
         const float maxGravityOnCharacter = 100f;
         const float minGravityOnCharacter = 0f;
         const float maxCorneringTimeRequired = 5f;
@@ -106,94 +107,22 @@ namespace Assets.Scripts.CharacterControl
 
             characterAnimationController = new CharacterAnimationController(this, animator);
 
-            _forcesAccumulated = Vector2.zero;
+            _floatingForcesAccumulated = Vector2.zero;
         }
+        
         protected virtual void FixedUpdate()
         {
-            // apply the accumulation of physical forces
-            rigidBody2D.velocity += _forcesAccumulated;
+            Update();
 
             if (_stateController.currentMovementState == MovementState.GROUNDED)
             {
-                // set other forces to zero
-                if(characterOrienter.headingDirection == FacingDirection.LEFT ||
-                    characterOrienter.headingDirection == FacingDirection.RIGHT)
-                {
-                    rigidBody2D.velocity = new Vector2(rigidBody2D.velocity.x, 0);
-                }
-                if (characterOrienter.headingDirection == FacingDirection.UP ||
-                    characterOrienter.headingDirection == FacingDirection.DOWN)
-                {
-                    rigidBody2D.velocity = new Vector2(0, rigidBody2D.velocity.y);
-                }
-
-                // and move the player character to be at the strike point
-                if(groundedTransform != null)
-                {
-                    if (characterOrienter.headingDirection == FacingDirection.LEFT ||
-                    characterOrienter.headingDirection == FacingDirection.RIGHT)
-                    {
-                        if(characterOrienter.thrustingDirection == FacingDirection.UP)
-                        {
-                            // belly transform Y = 11 
-                            // strike point = 9
-                            // move y by -2
-                            float distanceY = bellyCheckTransform.position.y - groundedStrikePoint.y;
-                            transform.position = new Vector2(transform.position.x, transform.position.y - distanceY);
-
-                        }
-                        else if (characterOrienter.thrustingDirection == FacingDirection.DOWN)
-                        {
-                            // belly transform Y = 9 
-                            // strike point = 11
-                            // move y by +2
-                            float distanceY = bellyCheckTransform.position.y - groundedStrikePoint.y;
-                            transform.position = new Vector2(transform.position.x, transform.position.y - distanceY);
-
-                        }
-                    }
-                }
+                ApplyForcesGrounded();
             }
+            else ApplyForcesFloating();
             
 
-            // stop velocity when it's very low to prevent jittering
-            if ((rigidBody2D.velocity.x > 0 && rigidBody2D.velocity.x < breaksThreshold)
-                || (rigidBody2D.velocity.x < 0 && rigidBody2D.velocity.x > -breaksThreshold))
-            {
-                rigidBody2D.velocity = new Vector2(0, rigidBody2D.velocity.y);
-            }
-            if ((rigidBody2D.velocity.y > 0 && rigidBody2D.velocity.y < breaksThreshold)
-                || (rigidBody2D.velocity.y < 0 && rigidBody2D.velocity.y > -breaksThreshold))
-            {
-                rigidBody2D.velocity = new Vector2(rigidBody2D.velocity.x, 0);
-            }
-
-            // constrain velocities to speed limit
-            float horizontalVelocityLimit = minHorizontalVelocityLimit +
-                (horizontalVelocityLimitPercent * (maxHorizontalVelocityLimit - minHorizontalVelocityLimit));
-
-            if (rigidBody2D.velocity.x > horizontalVelocityLimit)
-            {
-                rigidBody2D.velocity = new Vector2(horizontalVelocityLimit, rigidBody2D.velocity.y);
-            }
-            if (rigidBody2D.velocity.x < (horizontalVelocityLimit * -1))
-            {
-                rigidBody2D.velocity = new Vector2((horizontalVelocityLimit * -1), rigidBody2D.velocity.y);
-            }
-            if (_stateController.currentMovementState == MovementState.GROUNDED)
-            {
-                // also constrain the vertical
-                if (rigidBody2D.velocity.y > horizontalVelocityLimit)
-                {
-                    rigidBody2D.velocity = new Vector2(rigidBody2D.velocity.x, horizontalVelocityLimit);
-                }
-                if (rigidBody2D.velocity.y < (horizontalVelocityLimit * -1))
-                {
-                    rigidBody2D.velocity = new Vector2(rigidBody2D.velocity.x, (horizontalVelocityLimit * -1));
-                }
-            }
-            // reset the accumulation
-            _forcesAccumulated = Vector2.zero;
+            
+            
         }
         protected virtual void Update()
         {
@@ -214,19 +143,20 @@ namespace Assets.Scripts.CharacterControl
             characterAnimationController.UpdateCurrentState();
 
             // respond to H and V movement inputs
-            if (
-                _stateController.currentMovementState == MovementState.GROUNDED
-                || _stateController.currentMovementState == MovementState.TETHERED
+            if (_stateController.currentMovementState == MovementState.GROUNDED)
+            {
+                AddDirectionalMovementForceHGrounded();
+                AddDirectionalMovementForceVGrounded();
+            }
+            if(_stateController.currentMovementState == MovementState.TETHERED
                 || (_stateController.currentMovementState == MovementState.FLOATING && isHorizontalMovementInAirAllowed)
                 || (_stateController.currentMovementState == MovementState.JUMP_ACCELERATING && isHorizontalMovementInAirAllowed)
                 )
             {
-                AddDirectionalMovementForceH();
+                AddDirectionalMovementForceHFloating();
+                if (canFly) AddDirectionalMovementForceVFloating();
             }
-            if (_stateController.currentMovementState == MovementState.GROUNDED || canFly)
-            {
-                AddDirectionalMovementForceV();
-            }
+            
 
 
             // respond to jump button held down
@@ -280,6 +210,96 @@ namespace Assets.Scripts.CharacterControl
         #endregion
 
         #region private / protected methods
+        private void ApplyForcesFloating()
+        {
+            // apply the accumulation of physical forces
+            rigidBody2D.velocity += _floatingForcesAccumulated;
+
+            // constrain velocities to speed limit
+            float horizontalVelocityLimit = minHorizontalVelocityLimit +
+                (horizontalVelocityLimitPercent * (maxHorizontalVelocityLimit - minHorizontalVelocityLimit));
+
+            if (rigidBody2D.velocity.x > horizontalVelocityLimit)
+            {
+                rigidBody2D.velocity = new Vector2(horizontalVelocityLimit, rigidBody2D.velocity.y);
+            }
+            if (rigidBody2D.velocity.x < (horizontalVelocityLimit * -1))
+            {
+                rigidBody2D.velocity = new Vector2((horizontalVelocityLimit * -1), rigidBody2D.velocity.y);
+            }
+
+            // also constrain the vertical
+            if (rigidBody2D.velocity.y > horizontalVelocityLimit)
+            {
+                rigidBody2D.velocity = new Vector2(rigidBody2D.velocity.x, horizontalVelocityLimit);
+            }
+            if (rigidBody2D.velocity.y < (horizontalVelocityLimit * -1))
+            {
+                rigidBody2D.velocity = new Vector2(rigidBody2D.velocity.x, (horizontalVelocityLimit * -1));
+            }
+
+            // reset the accumulation
+            _floatingForcesAccumulated = Vector2.zero;
+
+        }
+        private void ApplyForcesGrounded()
+        {
+            // zero out velocity as we want to turn off
+            // the physics engine while grounded
+            rigidBody2D.velocity = Vector2.zero;
+
+            // add accumulated forces as movement
+            transform.position = new Vector2(transform.position.x + _groundedForcesAccumulated.x,
+                transform.position.y + _groundedForcesAccumulated.y);
+
+            //Vector3.SmoothDamp(rigidBody2D.velocity, targetVelocity, ref _velocity, movementSmoothing);
+
+            // and move the player character to be at the strike point
+            if (groundedTransform != null)
+            {
+                if (characterOrienter.headingDirection == FacingDirection.LEFT ||
+                characterOrienter.headingDirection == FacingDirection.RIGHT)
+                {
+                    if (characterOrienter.thrustingDirection == FacingDirection.UP)
+                    {
+                        // belly transform Y = 11 
+                        // strike point = 9
+                        // move y by -2
+                        float distanceY = bellyCheckTransform.position.y - groundedStrikePoint.y;
+                        transform.position = new Vector2(transform.position.x, transform.position.y - distanceY);
+
+                    }
+                    else if (characterOrienter.thrustingDirection == FacingDirection.DOWN)
+                    {
+                        // belly transform Y = 9 
+                        // strike point = 11
+                        // move y by +2
+                        float distanceY = bellyCheckTransform.position.y - groundedStrikePoint.y;
+                        transform.position = new Vector2(transform.position.x, transform.position.y - distanceY);
+
+                    }
+                }
+            }
+
+            // reset the accumulation
+            _groundedForcesAccumulated = Vector2.zero;
+            
+
+
+            // stop velocity when it's very low to prevent jittering
+            if ((rigidBody2D.velocity.x > 0 && rigidBody2D.velocity.x < breaksThreshold)
+                || (rigidBody2D.velocity.x < 0 && rigidBody2D.velocity.x > -breaksThreshold))
+            {
+                rigidBody2D.velocity = new Vector2(0, rigidBody2D.velocity.y);
+            }
+            if ((rigidBody2D.velocity.y > 0 && rigidBody2D.velocity.y < breaksThreshold)
+                || (rigidBody2D.velocity.y < 0 && rigidBody2D.velocity.y > -breaksThreshold))
+            {
+                rigidBody2D.velocity = new Vector2(rigidBody2D.velocity.x, 0);
+            }
+
+
+        }
         protected virtual void CheckUserInput()
         {
 
@@ -309,7 +329,7 @@ namespace Assets.Scripts.CharacterControl
                     characterOrienter.SetGravityDirection(FacingDirection.UP);
                     thrustMultiplier *= 1f;
                 }
-                _forcesAccumulated += new Vector2(0, thrustMultiplier);
+                _floatingForcesAccumulated += new Vector2(0, thrustMultiplier);
             }
             if (characterOrienter.headingDirection == FacingDirection.UP
                 || characterOrienter.headingDirection == FacingDirection.DOWN)
@@ -324,91 +344,33 @@ namespace Assets.Scripts.CharacterControl
                     characterOrienter.SetGravityDirection(FacingDirection.LEFT);
                     thrustMultiplier *= -1f;
                 }
-                _forcesAccumulated += new Vector2(thrustMultiplier, 0);
+                _floatingForcesAccumulated += new Vector2(thrustMultiplier, 0);
             }
         }
-        private void AddDirectionalMovementForceH()
+        private void AddDirectionalMovementForceHFloating()
         {
-            if (_userInput.moveHPressure == 0)
-            {
-                // if the character has velocity in the X
-                // axis, add force in the opposite direction
-                // to make stopping more forceful
-
-
-
-
-                if (_stateController.currentMovementState == MovementState.TETHERED)
-                {
-                    // don't disrupt the swinging effect
-                    return;
-                }
-                float breaksPressure = minBreaksPressure +
-                    (breaksPressurePercent * (maxBreaksPressure - minBreaksPressure));
-
-                float pressureToApply = breaksPressure * Time.deltaTime;
-                if (rigidBody2D.velocity.x > breaksThreshold)
-                {
-                    if (pressureToApply < rigidBody2D.velocity.x)
-                        _forcesAccumulated += new Vector2(-pressureToApply, 0);
-                }
-                else if (rigidBody2D.velocity.x < -breaksThreshold)
-                {
-                    if (pressureToApply < (rigidBody2D.velocity.x * -1))
-                        _forcesAccumulated += new Vector2(pressureToApply, 0);
-                }
-                else return;
-
-            }
-            if (characterOrienter.headingDirection == FacingDirection.RIGHT
-                || characterOrienter.headingDirection == FacingDirection.LEFT)
-            {
-                float acceleration = minHorizontalAcceleration +
-                    (horizontalAccelerationPercent * (maxHorizontalAcceleration - minHorizontalAcceleration));
-                MoveH(_userInput.moveHPressure * acceleration * Time.deltaTime);
-            }
+            _floatingForcesAccumulated = MoveH(_floatingForcesAccumulated);
         }
-        private void AddDirectionalMovementForceV()
+        private void AddDirectionalMovementForceHGrounded()
         {
-            if (_userInput.moveVPressure == 0 && _stateController.currentMovementState == MovementState.GROUNDED)
+            if (_userInput.moveHPressure == 0) ApplyBreaks();
+            else
             {
-                // if the character has velocity in the y
-                // axis, add force in the opposite direction
-                // to make stopping more forceful, but only
-                // if the character is walking on a wall
-
-
-
-
-                if (_stateController.currentMovementState == MovementState.TETHERED)
-                {
-                    // don't disrupt the swinging effect
-                    return;
-                }
-                float breaksPressure = minBreaksPressure +
-                    (breaksPressurePercent * (maxBreaksPressure - minBreaksPressure));
-
-                float pressureToApply = breaksPressure * Time.deltaTime;
-                if (rigidBody2D.velocity.y > breaksThreshold)
-                {
-                    if (pressureToApply < rigidBody2D.velocity.y)
-                        _forcesAccumulated += new Vector2(0, -pressureToApply);
-                }
-                else if (rigidBody2D.velocity.y < -breaksThreshold)
-                {
-                    if (pressureToApply < (rigidBody2D.velocity.y * -1))
-                        _forcesAccumulated += new Vector2(0, pressureToApply);
-                }
-                else return;
+                _groundedForcesAccumulated = MoveH(_groundedForcesAccumulated);
 
             }
-            if (characterOrienter.headingDirection == FacingDirection.UP
-                || characterOrienter.headingDirection == FacingDirection.DOWN
-                || canFly)
+
+        }
+        private void AddDirectionalMovementForceVFloating()
+        {
+            _floatingForcesAccumulated = MoveV(_floatingForcesAccumulated);
+        }
+        private void AddDirectionalMovementForceVGrounded()
+        {
+            if (_userInput.moveVPressure == 0) ApplyBreaks();
+            else
             {
-                float acceleration = minHorizontalAcceleration +
-                    (horizontalAccelerationPercent * (maxHorizontalAcceleration - minHorizontalAcceleration));
-                MoveV(_userInput.moveVPressure * acceleration * Time.deltaTime);
+                _groundedForcesAccumulated = MoveV(_groundedForcesAccumulated);
             }
         }
         private void AddJumpForce(float force)
@@ -433,7 +395,30 @@ namespace Assets.Scripts.CharacterControl
                     thrust = new Vector2(-force, 0f);
                     break;
             }
-            _forcesAccumulated += thrust;
+            _floatingForcesAccumulated += thrust;
+        }
+        private void ApplyBreaks()
+        {
+            // if the character has velocity in the X
+            // axis, add force in the opposite direction
+            // to make stopping more forceful
+
+            // todo: fix this velocity
+            //float breaksPressure = minBreaksPressure +
+            //        (breaksPressurePercent * (maxBreaksPressure - minBreaksPressure));
+
+            //float pressureToApply = breaksPressure * Time.deltaTime;
+            //if (rigidBody2D.velocity.x > breaksThreshold)
+            //{
+            //    if (pressureToApply < rigidBody2D.velocity.x)
+            //        _floatingForcesAccumulated += new Vector2(-pressureToApply, 0);
+            //}
+            //else if (rigidBody2D.velocity.x < -breaksThreshold)
+            //{
+            //    if (pressureToApply < (rigidBody2D.velocity.x * -1))
+            //        _floatingForcesAccumulated += new Vector2(pressureToApply, 0);
+            //}
+            //else return;
         }
         private bool IsCollidingWithPlatform(Transform checkingTransform)
         {
@@ -620,44 +605,68 @@ namespace Assets.Scripts.CharacterControl
             SetFacingDirections(characterOrienter.headingDirection, FacingDirection.DOWN);
             currentJumpThrust = 0f;
         }
-        private void MoveH(float movementValue)
+        private Vector2 MoveH(Vector2 forceAccumulation)
         {
-            // Move the character by finding the target velocity
-            Vector2 targetVelocity = new Vector2(movementValue, 0);
-            // And then smoothing it out and applying it to the character
-            _forcesAccumulated += targetVelocity * Time.deltaTime;
+            if (characterOrienter.headingDirection == FacingDirection.RIGHT
+                || characterOrienter.headingDirection == FacingDirection.LEFT)
+            {
+                float acceleration = minHorizontalAcceleration +
+                    (horizontalAccelerationPercent * (maxHorizontalAcceleration - minHorizontalAcceleration));
 
-            // If the input is moving the player right and the player is facing left...
-            if (movementValue > 0 && characterOrienter.headingDirection == FacingDirection.LEFT)
-            {
-                // ... flip the player.
-                SetFacingDirections(FacingDirection.RIGHT, characterOrienter.thrustingDirection);
+                float movementValue = _userInput.moveHPressure * acceleration;
+                if(_stateController.currentMovementState != MovementState.GROUNDED)
+                {
+                    movementValue *= 10;
+                }
+
+                // Move the character by finding the target velocity
+                Vector2 targetVelocity = new Vector2(movementValue, 0);
+                // And then smoothing it out and applying it to the character
+                forceAccumulation += targetVelocity * Time.deltaTime;
+
+                // If the input is moving the player right and the player is facing left...
+                if (movementValue > 0 && characterOrienter.headingDirection == FacingDirection.LEFT)
+                {
+                    // ... flip the player.
+                    SetFacingDirections(FacingDirection.RIGHT, characterOrienter.thrustingDirection);
+                }
+                // Otherwise if the input is moving the player left and the player is facing right...
+                else if (movementValue < 0 && characterOrienter.headingDirection == FacingDirection.RIGHT)
+                {
+                    // ... flip the player.
+                    SetFacingDirections(FacingDirection.LEFT, characterOrienter.thrustingDirection);
+                }
             }
-            // Otherwise if the input is moving the player left and the player is facing right...
-            else if (movementValue < 0 && characterOrienter.headingDirection == FacingDirection.RIGHT)
-            {
-                // ... flip the player.
-                SetFacingDirections(FacingDirection.LEFT, characterOrienter.thrustingDirection);
-            }
+            return forceAccumulation;
         }
-        private void MoveV(float movementValue)
+        private Vector2 MoveV(Vector2 forceAccumulation)
         {
-            // Move the character by finding the target velocity
-            Vector2 targetVelocity = new Vector2(0, movementValue);
-            _forcesAccumulated += targetVelocity * Time.deltaTime;
+            if (characterOrienter.headingDirection == FacingDirection.UP
+                || characterOrienter.headingDirection == FacingDirection.DOWN
+                || canFly)
+            {
+                float acceleration = minHorizontalAcceleration +
+                    (horizontalAccelerationPercent * (maxHorizontalAcceleration - minHorizontalAcceleration));
+                float movementValue = _userInput.moveVPressure * acceleration;
 
-            // If the input is moving the player right and the player is facing left...
-            if (movementValue < 0 && characterOrienter.headingDirection == FacingDirection.UP)
-            {
-                // ... flip the player.
-                SetFacingDirections(FacingDirection.DOWN, characterOrienter.thrustingDirection);
+                // Move the character by finding the target velocity
+                Vector2 targetVelocity = new Vector2(0, movementValue);
+                forceAccumulation += targetVelocity * Time.deltaTime;
+
+                // If the input is moving the player right and the player is facing left...
+                if (movementValue < 0 && characterOrienter.headingDirection == FacingDirection.UP)
+                {
+                    // ... flip the player.
+                    SetFacingDirections(FacingDirection.DOWN, characterOrienter.thrustingDirection);
+                }
+                // Otherwise if the input is moving the player left and the player is facing right...
+                else if (movementValue > 0 && characterOrienter.headingDirection == FacingDirection.DOWN)
+                {
+                    // ... flip the player.
+                    SetFacingDirections(FacingDirection.UP, characterOrienter.thrustingDirection);
+                }
             }
-            // Otherwise if the input is moving the player left and the player is facing right...
-            else if (movementValue > 0 && characterOrienter.headingDirection == FacingDirection.DOWN)
-            {
-                // ... flip the player.
-                SetFacingDirections(FacingDirection.UP, characterOrienter.thrustingDirection);
-            }
+            return forceAccumulation;
         }
         private void PopulatePlatformCollisionVars()
         {

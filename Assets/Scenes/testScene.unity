@@ -2932,7 +2932,7 @@ PrefabInstance:
     - target: {fileID: 3251419005602766951, guid: e5aa7d7847a68704f8237d0bc6043afb,
         type: 3}
       propertyPath: jumpThrustLimitPercent
-      value: 0.238
+      value: 0.522
       objectReference: {fileID: 0}
     - target: {fileID: 3251419005602766951, guid: e5aa7d7847a68704f8237d0bc6043afb,
         type: 3}
@@ -2957,12 +2957,12 @@ PrefabInstance:
     - target: {fileID: 3251419005602766951, guid: e5aa7d7847a68704f8237d0bc6043afb,
         type: 3}
       propertyPath: gravityOnCharacterPercent
-      value: 0.793
+      value: 0.911
       objectReference: {fileID: 0}
     - target: {fileID: 3251419005602766951, guid: e5aa7d7847a68704f8237d0bc6043afb,
         type: 3}
       propertyPath: jumpThrustOverTimePercent
-      value: 0.5
+      value: 0.577
       objectReference: {fileID: 0}
     - target: {fileID: 3251419005602766951, guid: e5aa7d7847a68704f8237d0bc6043afb,
         type: 3}
@@ -2982,7 +2982,7 @@ PrefabInstance:
     - target: {fileID: 3251419005602766951, guid: e5aa7d7847a68704f8237d0bc6043afb,
         type: 3}
       propertyPath: horizontalAccelerationPercent
-      value: 0.5
+      value: 0.587
       objectReference: {fileID: 0}
     - target: {fileID: 3251419005602766951, guid: e5aa7d7847a68704f8237d0bc6043afb,
         type: 3}

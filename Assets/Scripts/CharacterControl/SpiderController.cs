@@ -20,12 +20,13 @@ namespace Assets.Scripts.CharacterControl
 #if DEBUG
 
         /* 
-        E:\Unity Projects\SpiderPocGit\Logs\CustomLogger\spiderReplay-2021-11-26.15.58.14.176.json
+        E:\Unity Projects\SpiderPocGit\Logs\CustomLogger\spiderReplay-2021-11-27.08.56.33.874.json
         */
         [SerializeField] public string replayFile = string.Empty;
-        public UnityEngine.UI.Text debugTextBox;
-        
+
+
 #endif
+        public UnityEngine.UI.Text debugTextBox;
 
         [SerializeField] public GameObject builder;
         
@@ -51,10 +52,17 @@ namespace Assets.Scripts.CharacterControl
 #endif
 
             base.Awake();
+
+            debugTextBox.enabled = false;
+
+#if DEBUG
+            debugTextBox.enabled = true;
+
             if (replayFile != string.Empty)
             {
                 Replay.DeSerializeFromReplayFile(replayFile);
-            }
+            } 
+#endif
 
 
 
@@ -148,12 +156,14 @@ namespace Assets.Scripts.CharacterControl
         
         protected override void CheckUserInput()
         {
-            if(replayFile != string.Empty)
+#if DEBUG
+            if (replayFile != string.Empty)
             {
                 _currentReplayFrame = Replay.GetInputForFrame(Time.frameCount);
                 _userInput = _currentReplayFrame.inputCollection;
                 return;
-            }
+            } 
+#endif
             // every frame check whether user has changed input
             _userInput.moveHPressure = Input.GetAxisRaw("Horizontal");
             _userInput.moveVPressure = Input.GetAxisRaw("Vertical");
