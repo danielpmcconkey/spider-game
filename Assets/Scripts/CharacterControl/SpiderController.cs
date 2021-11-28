@@ -36,7 +36,7 @@ namespace Assets.Scripts.CharacterControl
         private CameraControl cameraControl;
         private WorldBuilder.WorldBuilder worldBuilder;
 
-        private bool hasFarted = false;
+       
         private ReplayFrame _currentReplayFrame;
 
 
@@ -97,8 +97,16 @@ namespace Assets.Scripts.CharacterControl
             Gizmos.color = Color.cyan;
             Gizmos.DrawSphere(groundCheckRay2FirePoint, 0.05f);
             Gizmos.DrawSphere(groundCheckRay2TargetPoint, 0.05f);
-        } 
+        }
 #endif
+        private void Start()
+        {
+            Events.GameEvents.current.onDoorwayTriggerEnter += OnDoorwayOpen;
+            Events.GameEvents.current.onDoorwayTriggerExit += OnDoorwayExit;
+
+            
+            UpdateCameraConstraints();
+        }
         protected override void Update()
         {
             base.Update();
@@ -118,18 +126,7 @@ namespace Assets.Scripts.CharacterControl
             
 #endif
 
-            if (!hasFarted)
-            {
-                // todo: limit camera constraint to room transitions
-                const float camMargin = 3.0f;
-                (Vector2 upperLeft, Vector2 lowerRight) roomDimensions = worldBuilder.GetRoomDimensions(currentRoom);
-                cameraControl.ActivateLimits(
-                    roomDimensions.upperLeft.x + camMargin, roomDimensions.lowerRight.x - camMargin,
-                    roomDimensions.lowerRight.y + camMargin, roomDimensions.upperLeft.y - camMargin);
-
-                hasFarted = true;
-            }
-
+            
 
         }
         void OnDestroy()
@@ -192,12 +189,29 @@ namespace Assets.Scripts.CharacterControl
             }
             
         }
+        private void OnDoorwayExit()
+        {
+
+        }
+        private void OnDoorwayOpen()
+        {
+            currentRoom = worldBuilder.WhichRoomAreWeIn(transform.position, characterOrienter);
+            UpdateCameraConstraints();            
+        }
         private void TrackTargetingReticlueToMousePosition()
         {
             Vector3 mousePosition = UnityEngine.Camera.main.ScreenToWorldPoint(    // had to specify UnityEngine to deconflict w/ my Camera namespace
                 new Vector3(_userInput.mouseX, _userInput.mouseY, 0));
             mousePosition.z = -10;  // mouse position in front of platforms and enemies, but behind the camera
             targetingReticuleTransform.position = mousePosition;
+        }
+        private void UpdateCameraConstraints()
+        {
+            const float camMargin = 3.0f;
+            (Vector2 upperLeft, Vector2 lowerRight) roomDimensions = worldBuilder.GetRoomDimensions(currentRoom);
+            cameraControl.ActivateLimits(
+                roomDimensions.upperLeft.x + camMargin, roomDimensions.lowerRight.x - camMargin,
+                roomDimensions.lowerRight.y + camMargin, roomDimensions.upperLeft.y - camMargin);
         }
         #endregion
 

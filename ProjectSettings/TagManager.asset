@@ -3,20 +3,21 @@
 --- !u!78 &1
 TagManager:
   serializedVersion: 2
-  tags: []
+  tags:
+  - PlayerCharacterDoorCheck
   layers:
   - Default
   - TransparentFX
   - Ignore Raycast
-  - Player
+  - 
   - Water
   - UI
   - Platform
   - 
   - 
+  - Player
   - 
-  - 
-  - 
+  - Doors
   - 
   - 
   - 
@@ -40,4 +41,16 @@ TagManager:
   m_SortingLayers:
   - name: Default
     uniqueID: 0
+    locked: 0
+  - name: DoorSlider
+    uniqueID: 3243400437
+    locked: 0
+  - name: Platforms
+    uniqueID: 1512551607
+    locked: 0
+  - name: Player
+    uniqueID: 1031140391
+    locked: 0
+  - name: Doors
+    uniqueID: 956292693
     locked: 0

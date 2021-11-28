@@ -1,4 +1,5 @@
-﻿using System;
+﻿using Assets.Scripts.CharacterControl;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -29,6 +30,7 @@ namespace Assets.Scripts.WorldBuilder
         [SerializeField] public GameObject rock1EndCapRight;
         [SerializeField] public GameObject rock1SingleWide;
         [SerializeField] public GameObject rock1SingleTall;
+        [SerializeField] public GameObject rock1Door;
         [Space(10)]
         [Header("Enemies")]
         [Space(10)]
@@ -37,9 +39,13 @@ namespace Assets.Scripts.WorldBuilder
 
         private TileSet _tileSetRock1; 
 
-        void Start()
+        public int WhichRoomAreWeIn(Vector2 currentLocation, CharacterOrienter orienter)
         {
-            int howManyRooms = 1;
+            return 1;
+        }
+        void Awake()
+        {
+            int howManyRooms = 2;
             PopulateTileSets();
 
             rooms = new Room[howManyRooms];
@@ -57,19 +63,31 @@ namespace Assets.Scripts.WorldBuilder
              
             GameObject room000 = Instantiate(new GameObject("Room000"), roomsParent.transform, false);
 
-            Room r = new Room(_tileSetRock1, 80, 20, new Vector2(-6.0f, 10.0F), room000);
-            rooms[0] = r;
-            r.AddPerimiterTiles();
+            Room room0 = new Room(_tileSetRock1, 40, 20, new Vector2(-6.0f, 10.0F), room000);
+            rooms[0] = room0;
+            room0.AddPerimiterTiles();
             // tile above the floor = -7.68
-            r.AddPlatformTiles(new Vector2(-1f, -4.0f), 4, 5);
-            r.AddPlatformTiles(new Vector2(5f, -5f), 12, 1);
-            r.AddPlatformTiles(new Vector2(5f, -1f), 5, 1);
-            r.AddPlatformTiles(new Vector2(12.0f, -1f), 5, 1);
-            r.AddPlatformTiles(new Vector2(5f, 3f), 12, 1);
-            r.AddPlatformTiles(new Vector2(20f, 0f), 2, 7);
-            r.AddPlatformTiles(new Vector2(29f, 6f), 1, 11);
-            r.AddStartingEnemy(floatingBot, new Vector2(40f, 0f), playerCharacter);
-            r.DrawSelf();
+            room0.AddPlatformTiles(new Vector2(-1f, -4.0f), 4, 5);
+            room0.AddPlatformTiles(new Vector2(5f, -5f), 12, 1);
+            room0.AddPlatformTiles(new Vector2(5f, -1f), 5, 1);
+            room0.AddPlatformTiles(new Vector2(12.0f, -1f), 5, 1);
+            room0.AddPlatformTiles(new Vector2(5f, 3f), 12, 1);
+            room0.AddPlatformTiles(new Vector2(20f, 0f), 2, 7);
+            
+
+            GameObject room001 = Instantiate(new GameObject("Room001"), roomsParent.transform, false);
+
+            Room room1 = new Room(_tileSetRock1, 20, 20, new Vector2(34.0f, 10.0F), room001);
+            rooms[1] = room1;
+            room1.AddPerimiterTiles();
+            room1.AddPlatformTiles(new Vector2(38f, 6f), 1, 11);
+            room1.AddStartingEnemy(floatingBot, new Vector2(40f, 0f), playerCharacter);
+            
+
+            // draw the door between them
+            ConnectRoomsWithDoor(room0, room1, rock1Door, 1f);
+            room0.DrawSelf();
+            room1.DrawSelf();
         }
         private void PopulateTileSets()
         {
@@ -89,6 +107,24 @@ namespace Assets.Scripts.WorldBuilder
             _tileSetRock1.endCapRightPrefab = rock1EndCapRight;
             _tileSetRock1.singleTallPrefab = rock1SingleTall;
             _tileSetRock1.singleWidePrefab = rock1SingleWide;
+        }
+        private void ConnectRoomsWithDoor(Room roomLeft, Room roomRight, GameObject prefab, 
+            float heightFromLeftFloorInTiles)
+        {
+            
+            float posX = roomLeft.lowerRightInGlobalSpace.x - 1;
+            float posY = roomLeft.lowerRightInGlobalSpace.y + heightFromLeftFloorInTiles + Globals.doorHeightInTiles;
+            // now knock out perimiter blocks in each room
+            for (int i = 0; i < Globals.doorHeightInTiles; i++)
+            {
+                roomLeft.KnockOutTile(new Vector2(posX, posY - i));
+                roomRight.KnockOutTile(new Vector2(posX + 1, posY - i));
+            }
+
+
+            Vector3 position = new Vector2(posX, posY);
+            Quaternion rotation = new Quaternion(0, 0, 0, 0);
+            Instantiate(prefab, position, rotation, roomsParent.transform);
         }
     }
 }

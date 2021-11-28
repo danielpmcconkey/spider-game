@@ -87,7 +87,7 @@ MonoBehaviour:
     m_HSlider: 0
     m_VSlider: 0
     m_IgnoreScrollWheelUntilClicked: 0
-    m_EnableMouseInput: 1
+    m_EnableMouseInput: 0
     m_EnableSliderZoomHorizontal: 0
     m_EnableSliderZoomVertical: 0
     m_UniformScale: 1
@@ -227,9 +227,9 @@ MonoBehaviour:
   m_SceneHierarchy:
     m_TreeViewState:
       scrollPos: {x: 0, y: 0}
-      m_SelectedIDs: 0a4d0000
-      m_LastClickedID: 19722
-      m_ExpandedIDs: 02f6ffff70f6ffffa8f6ffffe0f6ffffe4f6ffffaef8ffff10fbffff0a4d0000
+      m_SelectedIDs: 98eeffff
+      m_LastClickedID: -4456
+      m_ExpandedIDs: 5e4dfeff18b7feff1cb7feff4e1cffff521cffff463fffff4a3fffff2cf6ffff2c5100007a51000080510000
       m_RenameOverlay:
         m_UserAcceptedRename: 0
         m_Name: 
@@ -314,7 +314,7 @@ MonoBehaviour:
       collapsed: 0
       displayed: 1
       snapOffset: {x: 0, y: 0}
-      snapOffsetDelta: {x: -98, y: -26}
+      snapOffsetDelta: {x: -101, y: -26}
       snapCorner: 3
       id: Tool Settings
       index: 0
@@ -347,7 +347,7 @@ MonoBehaviour:
       collapsed: 0
       displayed: 1
       snapOffset: {x: -322, y: 0}
-      snapOffsetDelta: {x: 0, y: 0}
+      snapOffsetDelta: {x: -5, y: 0}
       snapCorner: 1
       id: unity-scene-view-toolbar
       index: 0
@@ -505,9 +505,9 @@ MonoBehaviour:
   m_PlayAudio: 0
   m_AudioPlay: 0
   m_Position:
-    m_Target: {x: 628.51886, y: -82.949425, z: -0.035818513}
+    m_Target: {x: 0, y: 6.24, z: 0}
     speed: 2
-    m_Value: {x: 628.51886, y: -82.949425, z: -0.035818513}
+    m_Value: {x: 0, y: 6.24, z: 0}
   m_RenderMode: 0
   m_CameraMode:
     drawMode: 0
@@ -558,9 +558,9 @@ MonoBehaviour:
     speed: 2
     m_Value: {x: 0, y: 0, z: 0, w: 1}
   m_Size:
-    m_Target: 5.259648
+    m_Target: 3.3555923
     speed: 2
-    m_Value: 5.259648
+    m_Value: 3.3555923
   m_Ortho:
     m_Target: 1
     speed: 2
@@ -765,22 +765,22 @@ MonoBehaviour:
     m_SkipHidden: 0
     m_SearchArea: 1
     m_Folders:
-    - Assets/Materials
+    - Assets/Prefabs/Platforms/TileSetRock1
     m_Globs: []
     m_OriginalText: 
   m_ViewMode: 1
   m_StartGridSize: 16
   m_LastFolders:
-  - Assets/Materials
+  - Assets/Prefabs/Platforms/TileSetRock1
   m_LastFoldersGridSize: 16
   m_LastProjectPath: E:\Unity Projects\SpiderPocGit
   m_LockTracker:
     m_IsLocked: 0
   m_FolderTreeState:
-    scrollPos: {x: 0, y: 63}
-    m_SelectedIDs: 5e520000
-    m_LastClickedID: 21086
-    m_ExpandedIDs: 000000004c5200004e5200005052000052520000545200005652000000ca9a3b
+    scrollPos: {x: 0, y: 79}
+    m_SelectedIDs: 887f0000
+    m_LastClickedID: 32648
+    m_ExpandedIDs: 00000000de550000e0550000e2550000e4550000e6550000e855000000ca9a3b
     m_RenameOverlay:
       m_UserAcceptedRename: 0
       m_Name: 
@@ -808,7 +808,7 @@ MonoBehaviour:
     scrollPos: {x: 0, y: 0}
     m_SelectedIDs: 
     m_LastClickedID: 0
-    m_ExpandedIDs: 000000004c5200004e52000050520000525200005452000056520000
+    m_ExpandedIDs: 00000000de550000e0550000e2550000e4550000e6550000e8550000
     m_RenameOverlay:
       m_UserAcceptedRename: 0
       m_Name: 
@@ -833,24 +833,24 @@ MonoBehaviour:
       m_Icon: {fileID: 0}
       m_ResourceFile: 
   m_ListAreaState:
-    m_SelectedInstanceIDs: 0a4d0000
-    m_LastClickedInstanceID: 19722
-    m_HadKeyboardFocusLastEvent: 0
+    m_SelectedInstanceIDs: 98eeffff
+    m_LastClickedInstanceID: -4456
+    m_HadKeyboardFocusLastEvent: 1
     m_ExpandedInstanceIDs: c62300004a6501006a5000001afb0500
     m_RenameOverlay:
       m_UserAcceptedRename: 0
-      m_Name: 
-      m_OriginalName: 
+      m_Name: Rock1Right48x48
+      m_OriginalName: Rock1Right48x48
       m_EditFieldRect:
         serializedVersion: 2
         x: 0
         y: 0
         width: 0
         height: 0
-      m_UserData: 0
+      m_UserData: 5904
       m_IsWaitingForDelay: 0
       m_IsRenaming: 0
-      m_OriginalEventType: 11
+      m_OriginalEventType: 0
       m_IsRenamingFilename: 1
       m_ClientGUIView: {fileID: 11}
     m_CreateAssetUtility:

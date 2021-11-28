@@ -13,12 +13,12 @@ namespace Assets.Scripts.Utility
         // raycasting starts at 13:38 
 
         internal static RaycastHit2D FireAtTargetPoint(Vector2 firePoint, Vector2 targetPoint, 
-            float grappleBeamMaxDistance, LayerMask layerMask)
+            float maxDistance, LayerMask layerMask)
         {
             Vector2 normalizedDirection = GetNormalizedDirectionBetweenPoints(firePoint, targetPoint);
 
             return Physics2D.Raycast(firePoint, normalizedDirection,
-                grappleBeamMaxDistance, layerMask);
+                maxDistance, layerMask);
         }
         internal static Vector2 GetNormalizedDirectionBetweenPoints(Vector2 point1, Vector2 point2)
         {

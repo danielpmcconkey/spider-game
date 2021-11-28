@@ -249,8 +249,71 @@ namespace Assets.Scripts.CharacterControl
             rigidBody2D.velocity = Vector2.zero;
 
             // add accumulated forces as movement
-            transform.position = new Vector2(transform.position.x + _groundedForcesAccumulated.x,
+            // but first check that this doesn't move you 
+            // into a platform
+            Vector2 targetMove = new Vector2(transform.position.x + _groundedForcesAccumulated.x,
                 transform.position.y + _groundedForcesAccumulated.y);
+            RaycastHit2D hitInfo = Raycaster.FireAtTargetPoint(transform.position, targetMove, 1, whatIsPlatform);
+            if(!hitInfo)
+            {
+                // all clear
+                transform.position = targetMove;
+            }
+            else
+            {
+                float distanceToTargetMove = Vector2.Distance(transform.position, targetMove);
+                float distanceToStrikePoint = Vector2.Distance(transform.position, hitInfo.point);
+                float distanceToForwardCollider = Vector2.Distance(transform.position, forwardCheckTransform.position);
+                
+                if (distanceToStrikePoint > distanceToTargetMove)
+                {
+                    // still good, strike point was further out
+                    transform.position = targetMove;
+                }
+                else //if (distanceToStrikePoint < distanceToForwardCollider)
+                {
+                    // we're inside of a wall already
+                    string burp = "true";
+                    float distanceBetweenMiddleAndForwardCollider = Vector2.Distance(transform.position, hitInfo.point);
+
+                    if (characterOrienter.headingDirection == FacingDirection.LEFT)
+                    {
+                        transform.position = new Vector2(
+                            hitInfo.point.x + distanceBetweenMiddleAndForwardCollider,
+                            transform.position.y
+                            );
+                    }
+                    if (characterOrienter.headingDirection == FacingDirection.RIGHT)
+                    {
+                        transform.position = new Vector2(
+                            hitInfo.point.x - distanceBetweenMiddleAndForwardCollider,
+                            transform.position.y
+                            );
+                    }
+                    if (characterOrienter.headingDirection == FacingDirection.DOWN)
+                    {
+                        transform.position = new Vector2(
+                            transform.position.x,
+                            hitInfo.point.y + distanceBetweenMiddleAndForwardCollider
+                            );
+                    }
+                    if (characterOrienter.headingDirection == FacingDirection.UP)
+                    {
+                        transform.position = new Vector2(
+                            transform.position.x,
+                            hitInfo.point.y - distanceBetweenMiddleAndForwardCollider
+                            );
+                    }
+                }
+                //else
+                //{
+                //    // moving here would put us inside a wall
+                //    // don't do it
+                //    string burp = "true";
+                //}
+            }
+
+
 
             //Vector3.SmoothDamp(rigidBody2D.velocity, targetVelocity, ref _velocity, movementSmoothing);
 

@@ -22,8 +22,6 @@ namespace Assets.Scripts.WorldBuilder
 
 
         private Tile[] _tiles;
-        private const float _tileWidthInUnityMeters = 1.0f;
-        private const float _tileHeightInUnityMeters = 1.0f;
         private GameObject _roomGameObject;
 
 
@@ -37,12 +35,12 @@ namespace Assets.Scripts.WorldBuilder
             this.roomHeightInTiles = roomHeightInTiles;
             this.upperLeftInGlobalSpace = upperLeftInGlobalSpace;
             lowerRightInGlobalSpace = new Vector2(
-                upperLeftInGlobalSpace.x + (_tileWidthInUnityMeters * roomWidthInTiles),
-                upperLeftInGlobalSpace.y - (_tileHeightInUnityMeters * roomHeightInTiles));
+                upperLeftInGlobalSpace.x + (Globals.tileWidthInUnityMeters * roomWidthInTiles),
+                upperLeftInGlobalSpace.y - (Globals.tileHeightInUnityMeters * roomHeightInTiles));
             _roomGameObject = roomsGameObject;
 
-            roomWidthInUnityMeters = roomWidthInTiles * _tileWidthInUnityMeters;
-            roomHeightInUnityMeters = roomHeightInTiles * _tileHeightInUnityMeters;
+            roomWidthInUnityMeters = roomWidthInTiles * Globals.tileWidthInUnityMeters;
+            roomHeightInUnityMeters = roomHeightInTiles * Globals.tileHeightInUnityMeters;
 
             _tiles = new Tile[roomWidthInTiles * roomHeightInTiles];
             _startingEnemies = new List<Enemy>();
@@ -112,9 +110,9 @@ namespace Assets.Scripts.WorldBuilder
                         positionInGlobalSpace = new Vector2(x, y)
                     };
 
-                    x += _tileWidthInUnityMeters;
+                    x += Globals.tileWidthInUnityMeters;
                 }
-                y -= _tileHeightInUnityMeters;
+                y -= Globals.tileHeightInUnityMeters;
             }
         }
         public void AddPerimiterTiles()
@@ -147,6 +145,10 @@ namespace Assets.Scripts.WorldBuilder
                 GameObject enemyObj = DrawPrefab(e.prefab, e.positionInGlobalSpace);
             }
         }
+        public void KnockOutTile(Vector2 positionInGlobalSpace)
+        {
+            _tiles[GetTileIndexFromUnityPosition(positionInGlobalSpace.x, positionInGlobalSpace.y)] = null;
+        }
         #endregion
 
         #region private methods
@@ -171,13 +173,13 @@ namespace Assets.Scripts.WorldBuilder
                     positionInGlobalSpace = new Vector2(x, y)
                 };
 
-                x += _tileWidthInUnityMeters;
+                x += Globals.tileWidthInUnityMeters;
             }
         }
         private void AddFloorTiles()
         {
             float x = upperLeftInGlobalSpace.x;
-            float y = upperLeftInGlobalSpace.y - ((roomHeightInTiles - 1) * _tileHeightInUnityMeters);
+            float y = upperLeftInGlobalSpace.y - ((roomHeightInTiles - 1) * Globals.tileHeightInUnityMeters);
             for (int i = 0; i < roomWidthInTiles; i++)
             {
                 GameObject prefab = _tileSet.topPrefab;
@@ -192,13 +194,13 @@ namespace Assets.Scripts.WorldBuilder
                     prefab = prefab,
                     positionInGlobalSpace = new Vector2(x, y)
                 };
-                x += _tileWidthInUnityMeters;
+                x += Globals.tileWidthInUnityMeters;
             }
         }
         private void AddLeftWallTiles()
         {
             float x = upperLeftInGlobalSpace.x;
-            float y = upperLeftInGlobalSpace.y - _tileHeightInUnityMeters;
+            float y = upperLeftInGlobalSpace.y - Globals.tileHeightInUnityMeters;
             // assume floor and ceiling are already drawn
             for (int i = 0; i < roomHeightInTiles - 2; i++)
             {
@@ -211,13 +213,13 @@ namespace Assets.Scripts.WorldBuilder
                     positionInGlobalSpace = new Vector2(x, y)
                 };
 
-                y -= _tileHeightInUnityMeters;
+                y -= Globals.tileHeightInUnityMeters;
             }
         }
         private void AddRightWallTiles()
         {
-            float x = upperLeftInGlobalSpace.x + ((roomWidthInTiles - 1) * _tileWidthInUnityMeters);
-            float y = upperLeftInGlobalSpace.y - _tileHeightInUnityMeters;
+            float x = upperLeftInGlobalSpace.x + ((roomWidthInTiles - 1) * Globals.tileWidthInUnityMeters);
+            float y = upperLeftInGlobalSpace.y - Globals.tileHeightInUnityMeters;
             // assume floor and ceiling are already drawn
             for (int i = 0; i < roomHeightInTiles - 2; i++)
             {
@@ -230,7 +232,7 @@ namespace Assets.Scripts.WorldBuilder
                     positionInGlobalSpace = new Vector2(x, y)
                 };
 
-                y -= _tileHeightInUnityMeters;
+                y -= Globals.tileHeightInUnityMeters;
             }
         }
         private void AddTileToUnity(Tile tile)
@@ -239,7 +241,7 @@ namespace Assets.Scripts.WorldBuilder
             if(tile.prefab == _tileSet.topPrefab)
             {
                 int tileIndexAbove = GetTileIndexFromUnityPosition(tile.positionInGlobalSpace.x,
-                    tile.positionInGlobalSpace.y + _tileHeightInUnityMeters);
+                    tile.positionInGlobalSpace.y + Globals.tileHeightInUnityMeters);
                 if (_tiles[tileIndexAbove] != null) tile.prefab = _tileSet.basePrefab;
             }
             // now draw it
@@ -257,8 +259,8 @@ namespace Assets.Scripts.WorldBuilder
             int yAsHundredTimes = (int)Math.Round(Math.Round(y, 2) * 100);
             int xUlAsHundredTimes = (int)Math.Round(Math.Round(upperLeftInGlobalSpace.x, 2) * 100);
             int yUlAsHundredTimes = (int)Math.Round(Math.Round(upperLeftInGlobalSpace.y, 2) * 100);
-            int tileWidthAsHundredTimes = (int)Math.Round(Math.Round(_tileWidthInUnityMeters, 2) * 100);
-            int tileHeightAsHundredTimes = (int)Math.Round(Math.Round(_tileHeightInUnityMeters, 2) * 100);
+            int tileWidthAsHundredTimes = (int)Math.Round(Math.Round(Globals.tileWidthInUnityMeters, 2) * 100);
+            int tileHeightAsHundredTimes = (int)Math.Round(Math.Round(Globals.tileHeightInUnityMeters, 2) * 100);
 
             // remember that unity y gets lower as we go downward
             // but our index goes from up-left to down-right
