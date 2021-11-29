@@ -186,7 +186,7 @@ Camera:
   far clip plane: 1000
   field of view: 60
   orthographic: 1
-  orthographic size: 8.75
+  orthographic size: 4.25
   m_Depth: -1
   m_CullingMask:
     serializedVersion: 2
@@ -231,7 +231,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   player: {fileID: 593497461}
   scrollMultiplier: 1.1
-  movementWindowSize: {x: 16, y: 9}
+  movementWindowSize: {x: 8, y: 4.5}
   windowOffset: {x: 0, y: 0}
   limitCameraMovement: 1
   limitLeft: -9

@@ -120,7 +120,7 @@ TextureImporter:
       rect:
         serializedVersion: 2
         x: 0
-        y: 72
+        y: 216
         width: 144
         height: 72
       alignment: 0
@@ -141,7 +141,7 @@ TextureImporter:
       rect:
         serializedVersion: 2
         x: 144
-        y: 72
+        y: 216
         width: 144
         height: 72
       alignment: 0
@@ -162,7 +162,7 @@ TextureImporter:
       rect:
         serializedVersion: 2
         x: 288
-        y: 72
+        y: 216
         width: 144
         height: 72
       alignment: 0
@@ -183,7 +183,7 @@ TextureImporter:
       rect:
         serializedVersion: 2
         x: 432
-        y: 72
+        y: 216
         width: 144
         height: 72
       alignment: 0
@@ -204,7 +204,7 @@ TextureImporter:
       rect:
         serializedVersion: 2
         x: 0
-        y: 0
+        y: 144
         width: 144
         height: 72
       alignment: 0
@@ -225,7 +225,7 @@ TextureImporter:
       rect:
         serializedVersion: 2
         x: 144
-        y: 0
+        y: 144
         width: 144
         height: 72
       alignment: 0
@@ -246,7 +246,7 @@ TextureImporter:
       rect:
         serializedVersion: 2
         x: 288
-        y: 0
+        y: 144
         width: 144
         height: 72
       alignment: 0
@@ -267,7 +267,7 @@ TextureImporter:
       rect:
         serializedVersion: 2
         x: 432
-        y: 0
+        y: 144
         width: 144
         height: 72
       alignment: 0
@@ -279,6 +279,174 @@ TextureImporter:
       bones: []
       spriteID: 2210d1775497ff34dab3525668efa3b7
       internalID: 20491968
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: spiderMovementSheet144x72_8
+      rect:
+        serializedVersion: 2
+        x: 0
+        y: 72
+        width: 144
+        height: 72
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 6d3015bfe559a68468ceafb23a4cd460
+      internalID: -847325459
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: spiderMovementSheet144x72_9
+      rect:
+        serializedVersion: 2
+        x: 144
+        y: 72
+        width: 144
+        height: 72
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 38b286d1610720849ae0afbf0ccc71d8
+      internalID: -2004671100
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: spiderMovementSheet144x72_10
+      rect:
+        serializedVersion: 2
+        x: 288
+        y: 72
+        width: 144
+        height: 72
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 312c26bfe896f9948896456abeeb47dd
+      internalID: -1403762782
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: spiderMovementSheet144x72_11
+      rect:
+        serializedVersion: 2
+        x: 432
+        y: 72
+        width: 144
+        height: 72
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: e3cd26e68eea30b4e981961c8d370636
+      internalID: 1763059472
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: spiderMovementSheet144x72_12
+      rect:
+        serializedVersion: 2
+        x: 0
+        y: 0
+        width: 144
+        height: 72
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 982af2514a1ff3d459557013cdcdb5b8
+      internalID: 546672692
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: spiderMovementSheet144x72_13
+      rect:
+        serializedVersion: 2
+        x: 144
+        y: 0
+        width: 144
+        height: 72
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 3027538365cafc848a559dbcd548807e
+      internalID: -1324312884
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: spiderMovementSheet144x72_14
+      rect:
+        serializedVersion: 2
+        x: 288
+        y: 0
+        width: 144
+        height: 72
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 706e6ee1cb6e6d346b43d649a5fbec52
+      internalID: 1646399091
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: spiderMovementSheet144x72_15
+      rect:
+        serializedVersion: 2
+        x: 432
+        y: 0
+        width: 144
+        height: 72
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 981618d299bcdfb42aa535df4258730c
+      internalID: -1960687646
       vertices: []
       indices: 
       edges: []
@@ -295,12 +463,20 @@ TextureImporter:
     secondaryTextures: []
     nameFileIdTable:
       spiderMovementSheet144x72_1: -1306119234
+      spiderMovementSheet144x72_13: -1324312884
       spiderMovementSheet144x72_6: 1551962746
       spiderMovementSheet144x72_0: -451794201
       spiderMovementSheet144x72_4: 1935195943
+      spiderMovementSheet144x72_14: 1646399091
+      spiderMovementSheet144x72_12: 546672692
+      spiderMovementSheet144x72_11: 1763059472
+      spiderMovementSheet144x72_9: -2004671100
+      spiderMovementSheet144x72_8: -847325459
       spiderMovementSheet144x72_3: 1834900038
       spiderMovementSheet144x72_5: 337454919
+      spiderMovementSheet144x72_10: -1403762782
       spiderMovementSheet144x72_2: -896746109
+      spiderMovementSheet144x72_15: -1960687646
       spiderMovementSheet144x72_7: 20491968
   spritePackingTag: 
   pSDRemoveMatte: 0
