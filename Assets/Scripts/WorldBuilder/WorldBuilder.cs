@@ -39,9 +39,19 @@ namespace Assets.Scripts.WorldBuilder
 
         private TileSet _tileSetRock1; 
 
-        public int WhichRoomAreWeIn(Vector2 currentLocation, CharacterOrienter orienter)
+        public int WhichRoomAreWeIn(Vector2 currentLocation)
         {
-            return 1;
+            for(int i = 0; i < rooms.Length; i++)
+            {
+                if(rooms[i].upperLeftInGlobalSpace.x < currentLocation.x
+                    && rooms[i].lowerRightInGlobalSpace.x > currentLocation.x
+                    && rooms[i].upperLeftInGlobalSpace.y > currentLocation.y
+                    && rooms[i].lowerRightInGlobalSpace.y < currentLocation.y)
+                {
+                    return i;
+                }
+            }
+            return 0;
         }
         void Awake()
         {
@@ -73,7 +83,11 @@ namespace Assets.Scripts.WorldBuilder
             room0.AddPlatformTiles(new Vector2(12.0f, -1f), 5, 1);
             room0.AddPlatformTiles(new Vector2(5f, 3f), 12, 1);
             room0.AddPlatformTiles(new Vector2(20f, 0f), 2, 7);
-            
+            //room0.AddPlatformTiles(new Vector2(24f, 1f), 1, 10);
+            //room0.AddPlatformTiles(new Vector2(26f, 0f), 1, 9);
+            //room0.AddPlatformTiles(new Vector2(28f, -1f), 1, 8);
+            //room0.AddPlatformTiles(new Vector2(30f, -2f), 1, 7);
+
 
             GameObject room001 = Instantiate(new GameObject("Room001"), roomsParent.transform, false);
 

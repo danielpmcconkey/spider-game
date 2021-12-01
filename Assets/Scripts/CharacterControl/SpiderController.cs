@@ -101,7 +101,7 @@ namespace Assets.Scripts.CharacterControl
 #endif
         private void Start()
         {
-            Events.GameEvents.current.onDoorwayTriggerEnter += OnDoorwayOpen;
+            Events.GameEvents.current.onDoorwayTriggerEnter += OnDoorwayEnter;
             Events.GameEvents.current.onDoorwayTriggerExit += OnDoorwayExit;
 
             
@@ -189,14 +189,16 @@ namespace Assets.Scripts.CharacterControl
             }
             
         }
-        private void OnDoorwayExit()
+        private void OnDoorwayExit(Vector2 doorPosition)
         {
-
+            currentRoom = worldBuilder.WhichRoomAreWeIn(transform.position);
+            UpdateCameraConstraints();
         }
-        private void OnDoorwayOpen()
+        private void OnDoorwayEnter(Vector2 doorPosition)
         {
-            currentRoom = worldBuilder.WhichRoomAreWeIn(transform.position, characterOrienter);
-            UpdateCameraConstraints();            
+            Vector2 cameraTarget = new Vector2(doorPosition.x, cameraControl.GetCameraPosition().y);
+            //cameraControl.DeactivateLimits();
+            cameraControl.MoveCamera(cameraTarget);
         }
         private void TrackTargetingReticlueToMousePosition()
         {
@@ -207,11 +209,15 @@ namespace Assets.Scripts.CharacterControl
         }
         private void UpdateCameraConstraints()
         {
-            const float camMargin = 3.0f;
             (Vector2 upperLeft, Vector2 lowerRight) roomDimensions = worldBuilder.GetRoomDimensions(currentRoom);
-            cameraControl.ActivateLimits(
-                roomDimensions.upperLeft.x + camMargin, roomDimensions.lowerRight.x - camMargin,
-                roomDimensions.lowerRight.y + camMargin, roomDimensions.upperLeft.y - camMargin);
+            cameraControl.UpdateRoomDimensions(roomDimensions.upperLeft, roomDimensions.lowerRight);
+            //const float camMargin = 6.0f;
+            
+            //cameraControl.ActivateLimits(
+            //    roomDimensions.upperLeft.x + camMargin, 
+            //    roomDimensions.lowerRight.x - camMargin,
+            //    roomDimensions.lowerRight.y + camMargin, 
+            //    roomDimensions.upperLeft.y - camMargin);
         }
         #endregion
 
@@ -238,10 +244,10 @@ namespace Assets.Scripts.CharacterControl
             if (UnityEngine.Camera.main != null)
             {
                  
-                if (cameraControl != null)
-                {
-                    cameraControl.LogAllVarsState();
-                }
+                //if (cameraControl != null)
+                //{
+                //    cameraControl.LogAllVarsState();
+                //}
             }
 
             LoggerCustom.INFO("**********************************************************************************");

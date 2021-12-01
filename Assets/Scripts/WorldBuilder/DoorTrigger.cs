@@ -15,6 +15,7 @@ namespace Assets.Scripts.WorldBuilder
         private Vector2 _upPosition;
         private const float _doorCloseTimeInSeconds = 2.0f;
         [SerializeField] public GameObject doorSlider;
+        [SerializeField] public GameObject doorOrigin;
         private IEnumerator _coroutineOpen;
         private IEnumerator _coroutineClose;
 
@@ -31,22 +32,22 @@ namespace Assets.Scripts.WorldBuilder
             
         }
 
-        private void OnTriggerEnter2D(Collider2D collision)
+        private void OnTriggerEnter2D(Collider2D collider)
         {
-            if(collision.CompareTag("Player"))
+            if(collider.CompareTag("Player"))
             {
-                GameEvents.current.DoorwayTriggerEnter();
+                GameEvents.current.DoorwayTriggerEnter(doorOrigin.transform.position);
 
                 StopCoroutine(_coroutineOpen);
                 StopCoroutine(_coroutineClose);
                 StartCoroutine(_coroutineOpen);
             }
         }
-        private void OnTriggerExit2D(Collider2D collision)
+        private void OnTriggerExit2D(Collider2D collider)
         {
-            if (collision.CompareTag("Player"))
+            if (collider.CompareTag("Player"))
             {
-                GameEvents.current.DoorwayTriggerExit();
+                GameEvents.current.DoorwayTriggerExit(doorOrigin.transform.position);
                 StopCoroutine(_coroutineOpen);
                 StopCoroutine(_coroutineClose);
                 StartCoroutine(_coroutineClose);

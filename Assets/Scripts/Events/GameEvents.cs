@@ -10,8 +10,8 @@ namespace Assets.Scripts.Events
     public class GameEvents : MonoBehaviour
     {
         public static GameEvents current;
-        public event Action onDoorwayTriggerEnter;
-        public event Action onDoorwayTriggerExit;
+        public event Action<Vector2> onDoorwayTriggerEnter;
+        public event Action<Vector2> onDoorwayTriggerExit;
 
         private void Awake()
         {
@@ -20,18 +20,18 @@ namespace Assets.Scripts.Events
         }
 
         
-        public void DoorwayTriggerEnter()
+        public void DoorwayTriggerEnter(Vector2 doorPosition)
         {
             if(onDoorwayTriggerEnter != null)
             {
-                onDoorwayTriggerEnter();
+                onDoorwayTriggerEnter(doorPosition);
             }
         }
-        public void DoorwayTriggerExit()
+        public void DoorwayTriggerExit(Vector2 doorPosition)
         {
             if (onDoorwayTriggerExit != null)
             {
-                onDoorwayTriggerExit();
+                onDoorwayTriggerExit(doorPosition);
             }
         }
     }
