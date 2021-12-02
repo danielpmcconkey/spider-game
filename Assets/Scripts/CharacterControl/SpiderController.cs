@@ -193,6 +193,7 @@ namespace Assets.Scripts.CharacterControl
         {
             currentRoom = worldBuilder.WhichRoomAreWeIn(transform.position);
             UpdateCameraConstraints();
+            cameraControl.MoveCameraToConstraint();
         }
         private void OnDoorwayEnter(Vector2 doorPosition)
         {

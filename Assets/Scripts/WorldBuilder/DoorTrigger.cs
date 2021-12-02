@@ -16,6 +16,7 @@ namespace Assets.Scripts.WorldBuilder
         [SerializeField] public GameObject doorSlider;
         [SerializeField] public GameObject doorOrigin;
         [SerializeField] public float doorGravity = 91f;
+        [SerializeField] public float doorHeight = 3f;
         private bool _isSliding;
 
         private void Start()
@@ -62,9 +63,12 @@ namespace Assets.Scripts.WorldBuilder
 
             while (timeElapsed < duration)
             {
+                float targetY = doorSlider.transform.position.y + doorGravity * Time.deltaTime;
+                if(targetY > _originalPosition.y + doorHeight) targetY = _originalPosition.y + doorHeight;
+
                 doorSlider.transform.position = new Vector2(
-                    _originalPosition.x,
-                    doorSlider.transform.position.y + doorGravity * Time.deltaTime);
+                    _originalPosition.x, targetY
+                    );
                 timeElapsed += Time.deltaTime;
 
                 yield return null;

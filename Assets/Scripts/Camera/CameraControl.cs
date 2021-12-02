@@ -26,6 +26,7 @@ namespace Assets.Scripts.Camera
         private Vector2 _roomDownRight;
         private float _camZ;
         private bool _isClutchEngaged;  // when on, prevent the camera from tracking the player
+        private Vector2 _camTargetPosition;
 
 
         void LateUpdate()
@@ -69,6 +70,35 @@ namespace Assets.Scripts.Camera
         {
             StartCoroutine(MoveToPosition(targetPosition));
         }
+        public void MoveCameraToConstraint()
+        {
+            // gently move toward the constrained position
+            // rather than snap to it
+            // this assumes only moving in 1 dimension
+            // at a time
+            
+            float minLeft = _roomUpLeft.x + roomPadLeft;
+            float maxRight = _roomDownRight.x - roomPadRight;
+            float minBottom = _roomDownRight.y + roomPadBottom;
+            float maxTop = _roomUpLeft.y - roomPadTop;
+            if (_camPositionWithoutZ.x < minLeft)
+            {
+                StartCoroutine(MoveToPosition(new Vector2(minLeft, _camPositionWithoutZ.y)));
+            }
+            if (_camPositionWithoutZ.x > maxRight)
+            {
+                StartCoroutine(MoveToPosition(new Vector2(maxRight, _camPositionWithoutZ.y)));
+            }
+            if (_camPositionWithoutZ.y < minBottom)
+            {
+                StartCoroutine(MoveToPosition(new Vector2(_camPositionWithoutZ.x, minBottom)));
+            }
+            if (_camPositionWithoutZ.y > maxTop)
+            {
+                StartCoroutine(MoveToPosition(new Vector2(_camPositionWithoutZ.x, maxTop)));
+            }
+        }
+
         public void UpdateRoomDimensions(Vector2 upLeft, Vector2 downRight)
         {
             _roomUpLeft = upLeft;
@@ -115,17 +145,18 @@ namespace Assets.Scripts.Camera
         }
         IEnumerator MoveToPosition(Vector2 targetPosition)
         {
+            _camTargetPosition = targetPosition; // keep the target a class variable so we can update it mid-move
             _isClutchEngaged = true;
 
             const float snapDistance = 0.1f;
 
 
-            while (_camPositionWithoutZ != targetPosition)
+            while (_camPositionWithoutZ != _camTargetPosition)
             {
-                _camPositionWithoutZ = Vector3.MoveTowards(transform.position, targetPosition, moveSpeed * Time.deltaTime);
-                if (Vector2.Distance(_camPositionWithoutZ, targetPosition) < snapDistance)
+                _camPositionWithoutZ = Vector3.MoveTowards(transform.position, _camTargetPosition, moveSpeed * Time.deltaTime);
+                if (Vector2.Distance(_camPositionWithoutZ, _camTargetPosition) < snapDistance)
                 {
-                    _camPositionWithoutZ = targetPosition;
+                    _camPositionWithoutZ = _camTargetPosition;
                 }
                 SetTransformToCapPosition();
                 yield return 0;
