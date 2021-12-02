@@ -112,7 +112,7 @@ namespace Assets.Scripts.CharacterControl
         
         protected virtual void FixedUpdate()
         {
-            Update();
+            Update(); // todo: determine if Update() call here is necessary
 
             if (_stateController.currentMovementState == MovementState.GROUNDED)
             {

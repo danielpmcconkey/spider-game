@@ -24,8 +24,6 @@ namespace Assets.Scripts.CharacterControl
         }
         protected override void FixedUpdate()
         {
-            string burp = _groundedForcesAccumulated.ToString();
-            string burp2 = _floatingForcesAccumulated.ToString();
             base.FixedUpdate();
         }
         protected override void CheckUserInput()

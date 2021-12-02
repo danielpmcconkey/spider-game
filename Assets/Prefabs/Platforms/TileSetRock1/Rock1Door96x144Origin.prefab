@@ -183,6 +183,8 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   doorSlider: {fileID: 6321212811743213997}
   doorOrigin: {fileID: 1897778161841608990}
+  doorGravity: 9
+  doorPushGravityMultiplier: 1.5
 --- !u!1 &4328071952988039125
 GameObject:
   m_ObjectHideFlags: 0

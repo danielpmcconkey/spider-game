@@ -229,18 +229,14 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: cfba5f970d5399c4cb5f9fdb688a23fd, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  maxDistanceFromPlayer: 4
+  moveSpeed: 20
   player: {fileID: 593497461}
-  scrollMultiplier: 1.1
-  movementWindowSize: {x: 8, y: 4.5}
-  windowOffset: {x: 0, y: 0}
-  limitCameraMovement: 1
-  limitLeft: -9
-  limitRight: 33
-  limitBottom: 1
-  limitTop: 10
-  showDebugBoxes: 0
-  activeTracking: 1
-  isDebugModeOn: 0
+  scrollMultiplier: 1.8
+  roomPadBottom: 6
+  roomPadTop: 6
+  roomPadLeft: 8
+  roomPadRight: 8
 --- !u!1 &71653971
 GameObject:
   m_ObjectHideFlags: 0

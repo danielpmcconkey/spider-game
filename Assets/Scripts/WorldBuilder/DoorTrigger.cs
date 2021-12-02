@@ -12,24 +12,32 @@ namespace Assets.Scripts.WorldBuilder
     public class DoorTrigger: MonoBehaviour
     {
         private Vector2 _originalPosition;
-        private Vector2 _upPosition;
-        private const float _doorCloseTimeInSeconds = 2.0f;
+        private const float _doorOpenTimeInSeconds = 4.0f;
         [SerializeField] public GameObject doorSlider;
         [SerializeField] public GameObject doorOrigin;
-        private IEnumerator _coroutineOpen;
-        private IEnumerator _coroutineClose;
+        [SerializeField] public float doorGravity = 91f;
+        private bool _isSliding;
 
         private void Start()
         {
             _originalPosition = doorSlider.transform.position;
-            _upPosition = new Vector2(_originalPosition.x, _originalPosition.y + Globals.doorHeightInTiles);
-
-            _coroutineOpen = SlideToward(_originalPosition, _upPosition, 4.0f);
-            _coroutineClose = SlideToward(_upPosition, _originalPosition, 2.0f);
+            _isSliding = false;
         }
         private void Update()
         {
             
+        }
+        private void FixedUpdate()
+        {
+            if (doorSlider.transform.position.y > _originalPosition.y && !_isSliding)
+            {
+                doorSlider.transform.position = new Vector2(
+                    _originalPosition.x, transform.position.y + doorGravity * Time.deltaTime * -1);
+            }
+            if (doorSlider.transform.position.y < _originalPosition.y)
+            {
+                doorSlider.transform.position = _originalPosition;
+            }
         }
 
         private void OnTriggerEnter2D(Collider2D collider)
@@ -37,10 +45,7 @@ namespace Assets.Scripts.WorldBuilder
             if(collider.CompareTag("Player"))
             {
                 GameEvents.current.DoorwayTriggerEnter(doorOrigin.transform.position);
-
-                StopCoroutine(_coroutineOpen);
-                StopCoroutine(_coroutineClose);
-                StartCoroutine(_coroutineOpen);
+                StartCoroutine(PushDoorUp(_doorOpenTimeInSeconds));
             }
         }
         private void OnTriggerExit2D(Collider2D collider)
@@ -48,23 +53,23 @@ namespace Assets.Scripts.WorldBuilder
             if (collider.CompareTag("Player"))
             {
                 GameEvents.current.DoorwayTriggerExit(doorOrigin.transform.position);
-                StopCoroutine(_coroutineOpen);
-                StopCoroutine(_coroutineClose);
-                StartCoroutine(_coroutineClose);
             }
         }
-        IEnumerator SlideToward(Vector2 start, Vector2 target, float lerpDuration)
+        IEnumerator PushDoorUp(float duration)
         {
+            _isSliding = true;
             float timeElapsed = 0;
-            while (timeElapsed < lerpDuration)
+
+            while (timeElapsed < duration)
             {
-                doorSlider.transform.position = Vector2.Lerp(start, target, timeElapsed / lerpDuration);
+                doorSlider.transform.position = new Vector2(
+                    _originalPosition.x,
+                    doorSlider.transform.position.y + doorGravity * Time.deltaTime);
                 timeElapsed += Time.deltaTime;
 
                 yield return null;
             }
-            // finally, snap it into desired position
-            doorSlider.transform.position = target;
+            _isSliding = false;
         }
     }
 }
