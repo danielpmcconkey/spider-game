@@ -15,6 +15,7 @@ namespace Assets.Scripts.CharacterControl
 
         private ControllableCharacter _character;
         private float _currentCorneringCounter;
+        private bool _isClutchEngaged;  // the clutch prevents state changes during transitions
 
         internal CharacterMovementStateController(ControllableCharacter character, MovementState initialMovementState)
         {
@@ -23,11 +24,18 @@ namespace Assets.Scripts.CharacterControl
 
             triggers = new List<MovementTrigger>();
             _currentCorneringCounter = 0f;
+            _isClutchEngaged = false;
+        }
+        internal void ResetClutch()
+        {
+            _isClutchEngaged = false;
         }
         internal void UpdateCurrentState()
         {
             // call this once per frame. it updates the current state
             // and triggers the controllable character to act
+
+            if (_isClutchEngaged) return;
 
             DetermineTriggers();
 
@@ -218,7 +226,12 @@ namespace Assets.Scripts.CharacterControl
             {
                 LoggerCustom.DEBUG(string.Format("State change: {0} to {1}",
                     currentMovementState.ToString(), newState.ToString()));
+
                 currentMovementState = newState;
+
+                // turn on the clutch to prevent new state transitions
+                // before the this one can be acted on
+                _isClutchEngaged = true;
             }
         }
         private bool ShouldTriggerCornering()

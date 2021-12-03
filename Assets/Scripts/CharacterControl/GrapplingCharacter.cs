@@ -124,7 +124,7 @@ namespace Assets.Scripts.CharacterControl
             // if we're also grappling, limit the distance of the 
             // beam joint
             if(grappleBeamJoint.enabled)
-                grappleBeamJoint.distance -= pushOffAmount;
+                grappleBeamJoint.distance -= _pushOffAmount;
         }
         private bool TriggerGrappleAttempt()
         {

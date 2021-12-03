@@ -92,11 +92,11 @@ namespace Assets.Scripts.CharacterControl
         void OnDrawGizmos()
         {
             Gizmos.color = Color.yellow;
-            Gizmos.DrawSphere(groundCheckRay1FirePoint, 0.05f);
-            Gizmos.DrawSphere(groundCheckRay1TargetPoint, 0.05f);
+            Gizmos.DrawSphere(_groundCheckRay1FirePoint, 0.05f);
+            Gizmos.DrawSphere(_groundCheckRay1TargetPoint, 0.05f);
             Gizmos.color = Color.cyan;
-            Gizmos.DrawSphere(groundCheckRay2FirePoint, 0.05f);
-            Gizmos.DrawSphere(groundCheckRay2TargetPoint, 0.05f);
+            Gizmos.DrawSphere(_groundCheckRay2FirePoint, 0.05f);
+            Gizmos.DrawSphere(_groundCheckRay2TargetPoint, 0.05f);
         }
 #endif
         private void Start()
