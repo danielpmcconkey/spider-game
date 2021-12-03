@@ -40,6 +40,11 @@ namespace Assets.Scripts.CharacterControl
         [SerializeField] public Transform ceilingCheckTransform;
         [SerializeField] public LayerMask whatIsPlatform;  // A mask determining what is ground to the character 
         [SerializeField] public Transform targetingReticuleTransform;
+
+        [Header("Health Properties")]
+        [Space(10)]
+        [SerializeField] public float maxHP = 100;
+        [SerializeField] public float currentHP = 100;
         #endregion unity properties
 
         #region fields not set in unity
@@ -76,10 +81,10 @@ namespace Assets.Scripts.CharacterControl
         private const float _minHorizontalVelocityLimit = 3f;
         private const float _maxInitialJumpThrust = 3000f;
         private const float _minInitialJumpThrust = 500f;
-        private const float _maxJumpThrustOverTime = 16000f;
-        private const float _minJumpThrustOverTime = 1000f;
-        private const float _maxJumpThrustLimit = 16000f;
-        private const float _minJumpThrustLimit = 1000f;
+        private const float _maxJumpThrustOverTime = 1600f;
+        private const float _minJumpThrustOverTime = 100f;
+        private const float _maxJumpThrustLimit = 3200f;
+        private const float _minJumpThrustLimit = 200f;
         private const float _maxGravityOnCharacter = 100f;
         private const float _minGravityOnCharacter = 0f;
         private const float _maxCorneringTimeRequired = 5f;
@@ -112,7 +117,7 @@ namespace Assets.Scripts.CharacterControl
         
         protected virtual void FixedUpdate()
         {
-            Update(); // todo: determine if Update() call here is necessary
+            //Update(); // todo: determine if Update() call here is necessary
 
             if (_stateController.currentMovementState == MovementState.GROUNDED)
             {
