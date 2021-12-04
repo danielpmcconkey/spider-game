@@ -31,6 +31,7 @@ namespace Assets.Scripts.CharacterControl
         [SerializeField] public GameObject builder;
         
 
+
         public int currentRoom { get; private set; }
 
         private CameraControl cameraControl;
@@ -206,7 +207,6 @@ namespace Assets.Scripts.CharacterControl
         {
             // use this method for i-frames or triggering animations
             StartCoroutine(FlashSprite());
-            // todo: implement knock-back
             base.ReactToDamageDealt();
         }
         private IEnumerator FlashSprite()

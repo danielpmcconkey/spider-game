@@ -58,6 +58,7 @@ namespace Assets.Scripts.CharacterControl
         [SerializeField] public float armorClass = 10;  // the higher, the more protection
         [SerializeField] public float contactDamageDealt = 20;
         [SerializeField] public float invincibilityDurationInSeconds = 1.5f;
+        [Range(0, 1f)] [SerializeField] public float knockBackForcePercent = 0.5f;
         #endregion unity properties
 
         #region fields not set in unity
@@ -77,6 +78,7 @@ namespace Assets.Scripts.CharacterControl
         protected UserInputCollection _userInput;
         protected Vector2 _floatingForcesAccumulated;
         protected Vector2 _groundedForcesAccumulated;
+        protected Vector2 _knockBackForcesAccumulated;
         protected const float _pushOffAmount = 0.5f;
         private const float _breaksThreshold = 0.1f; // kick in the breaks when velocity is greater than this and no move pressure
         protected string _gameVersion;
@@ -86,6 +88,7 @@ namespace Assets.Scripts.CharacterControl
         protected Vector2 _groundCheckRay2TargetPoint = Vector2.zero;
         private Transform _groundedTransform;    // the game object we're grounded to if grounded
         private Vector2 _groundedStrikePoint;    // the vector 2 where we struck the grounded transform
+        protected bool _isAlive = true;
         
         protected bool _isInvincible;
         
@@ -106,6 +109,9 @@ namespace Assets.Scripts.CharacterControl
         private const float _minCorneringTimeRequired = 0.5f;
         private const float _maxBreaksPressure = 60.0f;
         private const float _minBreaksPressure = 0.0f;
+        private float _minKnockBackForce = 0.0f;
+        private float _maxKnockBackForce = 30.0f;
+
 
         #endregion
 
@@ -141,9 +147,9 @@ namespace Assets.Scripts.CharacterControl
                 ApplyForcesGrounded();
             }
             else ApplyForcesFloating();
+            _knockBackForcesAccumulated = Vector2.zero;
 
             _stateController.ResetClutch();
-            
             
         }
         protected virtual void Update()
@@ -236,6 +242,12 @@ namespace Assets.Scripts.CharacterControl
         {
             // apply the accumulation of physical forces
             rigidBody2D.velocity += _floatingForcesAccumulated;
+            // add knockback to forces. we add it here instead of 
+            // just adding to the _floatingForces in the update
+            // because input of zero zeroes out the _groundedForces.
+            // it's just easier to do the same for floating than
+            // to inject the knockback at different points
+            rigidBody2D.velocity += _knockBackForcesAccumulated;
 
             // constrain velocities to speed limit
             float horizontalVelocityLimit = _minHorizontalVelocityLimit +
@@ -269,6 +281,11 @@ namespace Assets.Scripts.CharacterControl
             // zero out velocity as we want to turn off
             // the physics engine while grounded
             rigidBody2D.velocity = Vector2.zero;
+
+            // add knockback to forces. we add it here instead of 
+            // just adding to the _groundedForces in the update
+            // because input of zero zeroes out the _groundedForces
+            _groundedForcesAccumulated += _knockBackForcesAccumulated;
 
             // add accumulated forces as movement
             // but first check that this doesn't move you 
@@ -505,6 +522,12 @@ namespace Assets.Scripts.CharacterControl
             //}
             //else return;
         }
+        protected virtual void Die()
+        {
+            _isAlive = false;
+            // todo: trigger death timer before disappearing
+            Destroy(gameObject);
+        }
         private bool IsCollidingWithPlatform(Transform checkingTransform)
         {
             Collider2D[] collisions = Physics2D.OverlapCircleAll(
@@ -658,6 +681,11 @@ namespace Assets.Scripts.CharacterControl
             if (hitCount >= 1) return true;
             return false;
         }
+        private void KnockBack()
+        {
+            FacingDirection direction = characterOrienter.GetOppositeDirection(characterOrienter.headingDirection);
+            StartCoroutine(KnockBackOverTime(direction));
+        }        
         private void LandFloor()
         {
             LoggerCustom.DEBUG("LandH");
@@ -847,6 +875,15 @@ namespace Assets.Scripts.CharacterControl
         {
             // use this method for i-frames or triggering animations
             StartCoroutine(InvokeInvincibility());
+            KnockBack();
+        }
+        private void ReduceHealth(float amount)
+        {
+            currentHP -= amount;
+            if(currentHP <= 0)
+            {
+                Die();
+            }
         }
         protected void SetFacingDirections(FacingDirection heading, FacingDirection thrusting)
         {
@@ -877,7 +914,7 @@ namespace Assets.Scripts.CharacterControl
             float damageDone = damageAmount - armorClass;
             if (damageDone > 0)
             {
-                currentHP -= damageDone;
+                ReduceHealth(damageDone);
                 ReactToDamageDealt();
             }
         }
@@ -979,6 +1016,36 @@ namespace Assets.Scripts.CharacterControl
             isTakingDamage = false;
             _isInvincible = false;
 
+        }
+        private IEnumerator KnockBackOverTime(FacingDirection direction)
+        {
+            float timer = 0f;
+            const float duration = 0.25f;
+
+            float knockBackForce = _minKnockBackForce +
+                (knockBackForcePercent * (_maxKnockBackForce - _minKnockBackForce));
+
+            while (timer < duration)
+            {
+                switch (direction)
+                {
+                    case FacingDirection.RIGHT:
+                        _knockBackForcesAccumulated += new Vector2(knockBackForce * Time.deltaTime, 0);
+                        break;
+                    case FacingDirection.LEFT:
+                        _knockBackForcesAccumulated += new Vector2(knockBackForce * Time.deltaTime * -1, 0);
+                        break;
+                    case FacingDirection.UP:
+                        _knockBackForcesAccumulated += new Vector2(0, knockBackForce * Time.deltaTime);
+                        break;
+                    case FacingDirection.DOWN:
+                        _knockBackForcesAccumulated += new Vector2(0, knockBackForce * Time.deltaTime * -1);
+                        break;
+                }
+
+                timer += Time.deltaTime;
+                yield return 0;
+            }
         }
         #endregion
     }

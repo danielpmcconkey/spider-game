@@ -16,7 +16,12 @@ namespace Assets.Scripts.CharacterControl.Enemies
             if (collider.CompareTag("Player"))
             {
                 GameEvents.current.ContactDamageForPlayerTriggerEnter(contactDamageDealt);
+                Die();
             }
+        }
+        protected override void Die()
+        {
+            base.Die();
         }
     }
 }
