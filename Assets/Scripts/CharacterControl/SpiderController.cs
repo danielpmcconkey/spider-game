@@ -84,7 +84,7 @@ namespace Assets.Scripts.CharacterControl
             base.FixedUpdate();
             TrackTargetingReticlueToMousePosition();
 #if DEBUG
-            WriteDebugInfoToUi(); 
+            WriteDebugInfoToUi();            
 #endif
         }
 
@@ -101,6 +101,7 @@ namespace Assets.Scripts.CharacterControl
 #endif
         private void Start()
         {
+            Events.GameEvents.current.onContactDamageForPlayer += TakeContactDamage;
             Events.GameEvents.current.onDoorwayTriggerEnter += OnDoorwayEnter;
             Events.GameEvents.current.onDoorwayTriggerExit += OnDoorwayExit;
 
@@ -123,10 +124,10 @@ namespace Assets.Scripts.CharacterControl
                 transform.position = _currentReplayFrame.position;
                 rigidBody2D.velocity = _currentReplayFrame.velocity;
             }
-            
-#endif
 
+#endif
             
+
 
         }
         void OnDestroy()
@@ -200,6 +201,49 @@ namespace Assets.Scripts.CharacterControl
             Vector2 cameraTarget = new Vector2(doorPosition.x, cameraControl.GetCameraPosition().y);
             //cameraControl.DeactivateLimits();
             cameraControl.MoveCamera(cameraTarget);
+        }
+        protected override void ReactToDamageDealt()
+        {
+            // use this method for i-frames or triggering animations
+            StartCoroutine(FlashSprite());
+            // todo: implement knock-back
+            base.ReactToDamageDealt();
+        }
+        private IEnumerator FlashSprite()
+        {
+            float timer = 0f;
+            const float duration = 1.75f;
+            var sprite = transform.GetComponent<SpriteRenderer>();
+            Color pink = new Color32(241, 8, 135, 255);
+            Color white = new Color32(255, 255, 255, 255);
+            Color yellow = new Color32(255, 194, 0, 255);
+            Color cyan = new Color32(0, 255, 240, 255);
+            while (timer < duration)
+            {
+                // every other frame, swap the sprite color
+                switch(Time.frameCount % 8)
+                {
+                    case 0:
+                    case 1:
+                        sprite.color = pink;
+                        break;
+                    case 2:
+                    case 3:
+                        sprite.color = cyan;
+                        break;
+                    case 4:
+                    case 5:
+                        sprite.color = yellow;
+                        break;
+                    default:
+                        sprite.color = white;
+                        break;
+                }
+                
+                timer += Time.deltaTime;
+                yield return 0;
+            }
+            sprite.color = white;
         }
         private void TrackTargetingReticlueToMousePosition()
         {

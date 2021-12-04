@@ -42,10 +42,10 @@ GameObject:
   - component: {fileID: 2934860196678712748}
   - component: {fileID: 2934860196678712751}
   - component: {fileID: 2934860196678712750}
-  - component: {fileID: 2934860196678712746}
   - component: {fileID: 2934860196678712749}
+  - component: {fileID: 9070185054869064429}
   - component: {fileID: 2934860196678712747}
-  - component: {fileID: 7743107927790429588}
+  - component: {fileID: -819783398218547211}
   m_Layer: 0
   m_Name: floating_bot
   m_TagString: Untagged
@@ -145,45 +145,6 @@ Animator:
   m_HasTransformHierarchy: 1
   m_AllowConstantClipSamplingOptimization: 1
   m_KeepAnimatorControllerStateOnDisable: 0
---- !u!114 &2934860196678712746
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 2934860196678712737}
-  m_Enabled: 0
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 5ba867d3e9314354daa0aea3aa6b960b, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  debugLogFileDirectory: 
-  horizontalAccelerationPercent: 1
-  horizontalVelocityLimitPercent: 1
-  breaksPressurePercent: 0.5
-  initialJumpThrustPercent: 0.65
-  jumpThrustOverTimePercent: 0.5
-  jumpThrustLimitPercent: 0.238
-  gravityOnCharacterPercent: 0
-  corneringTimeRequiredPercent: 0.263
-  isHorizontalMovementInAirAllowed: 1
-  canWallCrawl: 0
-  canCeilingCrawl: 0
-  canGrapple: 0
-  canFly: 1
-  animator: {fileID: 2934860196678712750}
-  rigidBody2D: {fileID: 2934860196678712749}
-  bellyCheckTransform: {fileID: 2934860198023715938}
-  forwardCheckTransform: {fileID: 2934860196476907739}
-  ceilingCheckTransform: {fileID: 2934860197151028285}
-  whatIsPlatform:
-    serializedVersion: 2
-    m_Bits: 64
-  targetingReticuleTransform: {fileID: 0}
-  maxHP: 100
-  currentHP: 100
-  targetCharacter: {fileID: 0}
-  agroDistance: 12
 --- !u!50 &2934860196678712749
 Rigidbody2D:
   serializedVersion: 4
@@ -205,6 +166,22 @@ Rigidbody2D:
   m_SleepingMode: 1
   m_CollisionDetection: 0
   m_Constraints: 4
+--- !u!58 &9070185054869064429
+CircleCollider2D:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 2934860196678712737}
+  m_Enabled: 1
+  m_Density: 1
+  m_Material: {fileID: 0}
+  m_IsTrigger: 1
+  m_UsedByEffector: 0
+  m_UsedByComposite: 0
+  m_Offset: {x: 0, y: 0}
+  serializedVersion: 2
+  m_Radius: 0.3240671
 --- !u!58 &2934860196678712747
 CircleCollider2D:
   m_ObjectHideFlags: 0
@@ -221,7 +198,7 @@ CircleCollider2D:
   m_Offset: {x: 0, y: 0}
   serializedVersion: 2
   m_Radius: 0.32284755
---- !u!114 &7743107927790429588
+--- !u!114 &-819783398218547211
 MonoBehaviour:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
@@ -230,7 +207,7 @@ MonoBehaviour:
   m_GameObject: {fileID: 2934860196678712737}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: a86c7a2f9da0e024c9d42b8ab067c41e, type: 3}
+  m_Script: {fileID: 11500000, guid: 97106bd97df2e704d9269056ec4f5ffb, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
   debugLogFileDirectory: 
@@ -240,14 +217,13 @@ MonoBehaviour:
   initialJumpThrustPercent: 0.65
   jumpThrustOverTimePercent: 0.5
   jumpThrustLimitPercent: 0.238
-  gravityOnCharacterPercent: 0
+  gravityOnCharacterPercent: 0.793
   corneringTimeRequiredPercent: 0.263
   isHorizontalMovementInAirAllowed: 1
   canWallCrawl: 0
   canCeilingCrawl: 0
   canGrapple: 0
   canFly: 1
-  animator: {fileID: 2934860196678712750}
   rigidBody2D: {fileID: 2934860196678712749}
   bellyCheckTransform: {fileID: 2934860198023715938}
   forwardCheckTransform: {fileID: 2934860196476907739}
@@ -256,8 +232,17 @@ MonoBehaviour:
     serializedVersion: 2
     m_Bits: 64
   targetingReticuleTransform: {fileID: 0}
+  animator: {fileID: 2934860196678712750}
+  idleAnimationName: floating_bot_idle
+  movingAnimationName: 
+  jumpingAnimationName: 
+  fallingAnimationName: 
+  damageAnimationName: 
   maxHP: 20
   currentHP: 20
+  armorClass: 10
+  contactDamageDealt: 20
+  invincibilityDurationInSeconds: 1.5
   targetCharacter: {fileID: 0}
   agroDistance: 10
 --- !u!1 &2934860197151028284

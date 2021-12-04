@@ -1,6 +1,7 @@
 ﻿using Assets.Scripts.Animation;
 using Assets.Scripts.Utility;
 using System;
+using System.Collections;
 using UnityEngine;
 
 namespace Assets.Scripts.CharacterControl
@@ -33,7 +34,7 @@ namespace Assets.Scripts.CharacterControl
 
         [Header("Movement references")]
         [Space(10)]
-        [SerializeField] public Animator animator;
+        
         [SerializeField] public Rigidbody2D rigidBody2D;
         [SerializeField] public Transform bellyCheckTransform;
         [SerializeField] public Transform forwardCheckTransform;
@@ -41,10 +42,22 @@ namespace Assets.Scripts.CharacterControl
         [SerializeField] public LayerMask whatIsPlatform;  // A mask determining what is ground to the character 
         [SerializeField] public Transform targetingReticuleTransform;
 
-        [Header("Health Properties")]
+        [Header("Animation")]
+        [Space(10)]
+        [SerializeField] public Animator animator;
+        [SerializeField] public string idleAnimationName;
+        [SerializeField] public string movingAnimationName;
+        [SerializeField] public string jumpingAnimationName;
+        [SerializeField] public string fallingAnimationName;
+        [SerializeField] public string damageAnimationName;
+
+        [Header("Combat Properties")]
         [Space(10)]
         [SerializeField] public float maxHP = 100;
         [SerializeField] public float currentHP = 100;
+        [SerializeField] public float armorClass = 10;  // the higher, the more protection
+        [SerializeField] public float contactDamageDealt = 20;
+        [SerializeField] public float invincibilityDurationInSeconds = 1.5f;
         #endregion unity properties
 
         #region fields not set in unity
@@ -56,6 +69,7 @@ namespace Assets.Scripts.CharacterControl
         public CharacterAnimationController characterAnimationController { get; private set; }
         public float jumpThrustLimit { get; private set; }  // this is calculated every frame. we make it a member var because the state controller needs access
         public float corneringTimeRequired { get; private set; }  // this is calculated every frame. we make it a member var because the state controller needs access
+        public bool isTakingDamage { get; private set; }    // used to control the animator
 
         // private and protected members
         protected CharacterMovementStateController _stateController;
@@ -73,6 +87,7 @@ namespace Assets.Scripts.CharacterControl
         private Transform _groundedTransform;    // the game object we're grounded to if grounded
         private Vector2 _groundedStrikePoint;    // the vector 2 where we struck the grounded transform
         
+        protected bool _isInvincible;
         
         // min and max limiters on movement parameters
         private const float _maxHorizontalAcceleration = 12f;
@@ -113,7 +128,9 @@ namespace Assets.Scripts.CharacterControl
             characterAnimationController = new CharacterAnimationController(this, animator);
 
             _floatingForcesAccumulated = Vector2.zero;
-        }
+            isTakingDamage = false;
+            _isInvincible = false;
+    }
         
         protected virtual void FixedUpdate()
         {
@@ -826,6 +843,11 @@ namespace Assets.Scripts.CharacterControl
                 movement.y = -distance;
             transform.position += movement;
         }
+        protected virtual void ReactToDamageDealt()
+        {
+            // use this method for i-frames or triggering animations
+            StartCoroutine(InvokeInvincibility());
+        }
         protected void SetFacingDirections(FacingDirection heading, FacingDirection thrusting)
         {
             if (characterOrienter.headingDirection == heading && characterOrienter.thrustingDirection == thrusting)
@@ -846,6 +868,18 @@ namespace Assets.Scripts.CharacterControl
 
             characterOrienter.SetHeadingDirection(heading);
             characterOrienter.SetThrustingDirection(thrusting);
+        }
+        protected virtual void TakeContactDamage(float damageAmount)
+        {
+            if (_isInvincible) return;
+
+            // deduct armor class
+            float damageDone = damageAmount - armorClass;
+            if (damageDone > 0)
+            {
+                currentHP -= damageDone;
+                ReactToDamageDealt();
+            }
         }
         private bool TriggerCorner()
         {
@@ -927,6 +961,24 @@ namespace Assets.Scripts.CharacterControl
                 return true;
             }
             return false;
+        }
+        #endregion
+
+        #region coroutines
+        IEnumerator InvokeInvincibility()
+        {
+            isTakingDamage = true;
+            _isInvincible = true;
+            float timeElapsed = 0;
+
+            while (timeElapsed < invincibilityDurationInSeconds)
+            {
+                timeElapsed += Time.deltaTime;
+                yield return null;
+            }
+            isTakingDamage = false;
+            _isInvincible = false;
+
         }
         #endregion
     }
