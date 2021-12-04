@@ -280,7 +280,9 @@ namespace Assets.Scripts.CharacterControl
         {
             // zero out velocity as we want to turn off
             // the physics engine while grounded
-            rigidBody2D.velocity = Vector2.zero;
+            // unless the character is a flying character. 
+            // then they'll need to float off the ground.
+            if(!canFly) rigidBody2D.velocity = Vector2.zero;
 
             // add knockback to forces. we add it here instead of 
             // just adding to the _groundedForces in the update

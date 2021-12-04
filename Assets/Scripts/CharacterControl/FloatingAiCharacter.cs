@@ -13,6 +13,12 @@ namespace Assets.Scripts.CharacterControl
         {
             return false;
         }
+        protected override void AddArtificalGravity()
+        {
+            // don't add gravity because it's much stronger than
+            // the flying thrust
+            return;
+        }
         protected override void ApplyForcesFloating()
         {
             base.ApplyForcesFloating();
