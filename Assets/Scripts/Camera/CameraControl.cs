@@ -40,11 +40,13 @@ namespace Assets.Scripts.Camera
                 Vector3 playerMoveDistance = _playerPositionWithoutZ - _playerPositionWithoutZPrior;
 
                 //Move the camera this direction, but faster than the player moved.
-                Vector2 multipliedDifference = playerMoveDistance * scrollMultiplier;
+                Vector2 multipliedDifference =  playerMoveDistance * scrollMultiplier;
 
                 // assign the new cam position value
-                _camPositionWithoutZ += multipliedDifference;
-
+                // don't multiply the Y val
+                _camPositionWithoutZ.x += multipliedDifference.x; ;
+                _camPositionWithoutZ.y = _playerPositionWithoutZ.y;
+                
                 // now constrain the dimensions
                 ClampCamPosition();
 
@@ -121,10 +123,11 @@ namespace Assets.Scripts.Camera
                     _camPositionWithoutZ.x,
                     _playerPositionWithoutZ.x - maxDistanceFromPlayer,
                     _playerPositionWithoutZ.x + maxDistanceFromPlayer);
-                _camPositionWithoutZ.y = Mathf.Clamp(
-                    _camPositionWithoutZ.y,
-                    _playerPositionWithoutZ.y - maxDistanceFromPlayer,
-                    _playerPositionWithoutZ.y + maxDistanceFromPlayer);
+                //_camPositionWithoutZ.y = Mathf.Clamp(
+                //    _camPositionWithoutZ.y,
+                //    _playerPositionWithoutZ.y - (maxDistanceFromPlayer / 2),
+                //    _playerPositionWithoutZ.y + (maxDistanceFromPlayer / 2));   // clamp the Y tighter to the player
+                _camPositionWithoutZ.y = _playerPositionWithoutZ.y;
             }
 
 
@@ -133,10 +136,10 @@ namespace Assets.Scripts.Camera
                 _camPositionWithoutZ.x,
                 _roomUpLeft.x + roomPadLeft,
                 _roomDownRight.x - roomPadRight);
-            _camPositionWithoutZ.y = Mathf.Clamp(
-                _camPositionWithoutZ.y,
-                _roomDownRight.y + roomPadBottom,
-                _roomUpLeft.y - roomPadTop);
+            //_camPositionWithoutZ.y = Mathf.Clamp(
+            //    _camPositionWithoutZ.y,
+            //    _roomDownRight.y + roomPadBottom,
+            //    _roomUpLeft.y - roomPadTop);
 
         }
         private void SetTransformToCapPosition()

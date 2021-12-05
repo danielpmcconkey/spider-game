@@ -191,6 +191,12 @@ namespace Assets.Scripts.CharacterControl
             }
             
         }
+        protected virtual void Die()
+        {
+            _isAlive = false;
+            // todo: build a death animation
+            // todo: transition to death scene
+        }
         private void OnDoorwayExit(Vector2 doorPosition)
         {
             currentRoom = worldBuilder.WhichRoomAreWeIn(transform.position);
@@ -212,37 +218,35 @@ namespace Assets.Scripts.CharacterControl
         private IEnumerator FlashSprite()
         {
             float timer = 0f;
-            const float duration = 1.75f;
+            
             var sprite = transform.GetComponent<SpriteRenderer>();
             Color pink = new Color32(241, 8, 135, 255);
             Color white = new Color32(255, 255, 255, 255);
             Color yellow = new Color32(255, 194, 0, 255);
             Color cyan = new Color32(0, 255, 240, 255);
-            while (timer < duration)
+            while (timer < invincibilityDurationInSeconds)
             {
                 // every other frame, swap the sprite color
-                switch(Time.frameCount % 8)
+                int completionPercent = (int)MathF.Round(timer / invincibilityDurationInSeconds * 100, 0);
+                if(completionPercent % 12 == 0)
                 {
-                    case 0:
-                    case 1:
-                        sprite.color = pink;
-                        break;
-                    case 2:
-                    case 3:
-                        sprite.color = cyan;
-                        break;
-                    case 4:
-                    case 5:
-                        sprite.color = yellow;
-                        break;
-                    default:
-                        sprite.color = white;
-                        break;
+                    if(sprite.enabled)
+                    {
+                        sprite.enabled = false;
+                    }
+                    else
+                    {
+                        sprite.enabled = true;
+                        if (sprite.color == pink) sprite.color = white;
+                        else if (sprite.color == yellow) sprite.color = cyan;
+                        else if (sprite.color == white) sprite.color = yellow;
+                        else if (sprite.color == cyan) sprite.color = pink;
+                    }
                 }
-                
                 timer += Time.deltaTime;
                 yield return 0;
             }
+            sprite.enabled = true;
             sprite.color = white;
         }
         private void TrackTargetingReticlueToMousePosition()

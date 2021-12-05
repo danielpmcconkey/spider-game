@@ -250,6 +250,12 @@ namespace Assets.Scripts.CharacterControl
             if(!_shouldStopReelingIn && grappleBeamJoint.distance < maxScroll)
             {
                 _shouldStopReelingIn = true;
+                if(characterOrienter.thrustingDirection == FacingDirection.DOWN)
+                {
+                    // kill the grapple so we don't upside down swing
+                    DisableGrapple();
+                    SetFacingDirections(characterOrienter.headingDirection, FacingDirection.UP);
+                }
             }
             // regardless of how far we are, update the line's 
             // position 0 to keep up with swinging and such
