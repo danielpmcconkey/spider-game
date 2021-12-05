@@ -61,30 +61,6 @@ namespace Assets.Scripts.CharacterControl
         }
         #endregion
 
-        internal override bool HandleTrigger(MovementTrigger t)
-        {
-            bool success = false;
-            switch (t)
-            {
-                case MovementTrigger.TRIGGER_GRAPPLE_ATTEMPT:
-                    success = TriggerGrappleAttempt();
-                    break;
-                case MovementTrigger.TRIGGER_GRAPPLE_SUCCESS:
-                    success = true; // nothing to do here as action was already done in the attempt
-                    break;
-                case MovementTrigger.TRIGGER_GRAPPLE_RELEASE:
-                    success = TriggerGrappleRelease();
-                    break;
-                case MovementTrigger.TRIGGER_GRAPPLE_STRUCK_GROUND:
-                    success = TriggerGrappleStruckGround();
-                    break;
-                default:
-                    success = base.HandleTrigger(t);
-                    break;
-            }
-            return success;
-        }
-
         #region private methods
         private void Climb(float moveVPressure)
         {
@@ -117,6 +93,29 @@ namespace Assets.Scripts.CharacterControl
             grappleBeamLineRenderer.enabled = true;
             grappleBeamJoint.enabled = true;
             _shouldStopReelingIn = false;
+        }
+        internal override bool HandleTrigger(MovementTrigger t)
+        {
+            bool success = false;
+            switch (t)
+            {
+                case MovementTrigger.TRIGGER_GRAPPLE_ATTEMPT:
+                    success = TriggerGrappleAttempt();
+                    break;
+                case MovementTrigger.TRIGGER_GRAPPLE_SUCCESS:
+                    success = true; // nothing to do here as action was already done in the attempt
+                    break;
+                case MovementTrigger.TRIGGER_GRAPPLE_RELEASE:
+                    success = TriggerGrappleRelease();
+                    break;
+                case MovementTrigger.TRIGGER_GRAPPLE_STRUCK_GROUND:
+                    success = TriggerGrappleStruckGround();
+                    break;
+                default:
+                    success = base.HandleTrigger(t);
+                    break;
+            }
+            return success;
         }
         protected override void PushOff()
         {
@@ -260,9 +259,11 @@ namespace Assets.Scripts.CharacterControl
             // regardless of how far we are, update the line's 
             // position 0 to keep up with swinging and such
             grappleBeamLineRenderer.SetPosition(0, transform.position);
-        } 
+        }
         #endregion
 
-
+        
+        
+        
     }
 }

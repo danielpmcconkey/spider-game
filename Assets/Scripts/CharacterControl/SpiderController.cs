@@ -62,9 +62,10 @@ namespace Assets.Scripts.CharacterControl
             if (replayFile != string.Empty)
             {
                 Replay.DeSerializeFromReplayFile(replayFile);
-            } 
+            }
 #endif
-
+            Cursor.visible = false;
+            
 
 
             LoggerCustom.Init(debugLogFileDirectory, Time.frameCount);
@@ -201,13 +202,14 @@ namespace Assets.Scripts.CharacterControl
         {
             currentRoom = worldBuilder.WhichRoomAreWeIn(transform.position);
             UpdateCameraConstraints();
-            cameraControl.MoveCameraToConstraint();
+            //cameraControl.MoveCameraToConstraint();
+            // todo: rework camera doorway interactivity
         }
         private void OnDoorwayEnter(Vector2 doorPosition)
         {
-            Vector2 cameraTarget = new Vector2(doorPosition.x, cameraControl.GetCameraPosition().y);
-            //cameraControl.DeactivateLimits();
-            cameraControl.MoveCamera(cameraTarget);
+            //Vector2 cameraTarget = new Vector2(doorPosition.x, cameraControl.GetCameraPosition().y);
+            ////cameraControl.DeactivateLimits();
+            //cameraControl.MoveCamera(cameraTarget);
         }
         protected override void ReactToDamageDealt()
         {

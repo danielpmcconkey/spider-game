@@ -54,3 +54,6 @@ TagManager:
   - name: Doors
     uniqueID: 956292693
     locked: 0
+  - name: Reticule
+    uniqueID: 485262379
+    locked: 0
