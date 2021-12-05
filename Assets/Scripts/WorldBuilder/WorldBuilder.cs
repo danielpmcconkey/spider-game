@@ -70,7 +70,6 @@ namespace Assets.Scripts.WorldBuilder
         }
         private void BuildStarterRoom()
         {
-             
             GameObject room000 = Instantiate(new GameObject("Room000"), roomsParent.transform, false);
 
             Room room0 = new Room(_tileSetRock1, 40, 20, new Vector2(-6.0f, 10.0F), room000);

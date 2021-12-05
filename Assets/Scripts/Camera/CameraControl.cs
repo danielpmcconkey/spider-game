@@ -6,14 +6,11 @@ using Assets.Scripts.Utility;
 
 namespace Assets.Scripts.Camera
 {
-    // inspired by https://gist.github.com/Jellybit/9f6182c25bceac06db31
-    // and then simplified
-
     class CameraControl : MonoBehaviour
     {
         #region stuff to keep
         [SerializeField] public float idealDistanceInFrontOfPlayer = 3f;
-        [SerializeField] public float moveSpeed = 20f;
+        [SerializeField] public float moveSpeed = 150f; // the full velocity, not when lazing back to the player while idle
         [SerializeField] public GameObject player;
         [SerializeField] public float roomPadBottom = 1.0f; // how much you want to see beyond the room border
         [SerializeField] public float roomPadTop = 1.0f;

@@ -9,7 +9,7 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 2934860196476907739}
-  m_Layer: 0
+  m_Layer: 10
   m_Name: ForwardCheck
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -46,7 +46,7 @@ GameObject:
   - component: {fileID: 9070185054869064429}
   - component: {fileID: 2934860196678712747}
   - component: {fileID: -819783398218547211}
-  m_Layer: 0
+  m_Layer: 10
   m_Name: floating_bot
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -243,6 +243,7 @@ MonoBehaviour:
   armorClass: 10
   contactDamageDealt: 20
   invincibilityDurationInSeconds: 1.5
+  knockBackForcePercent: 0.5
   targetCharacter: {fileID: 0}
   agroDistance: 10
 --- !u!1 &2934860197151028284
@@ -254,7 +255,7 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 2934860197151028285}
-  m_Layer: 0
+  m_Layer: 10
   m_Name: CeilingCheck
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -285,7 +286,7 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 2934860197330983455}
-  m_Layer: 0
+  m_Layer: 10
   m_Name: EmptyReticule
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -316,7 +317,7 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 2934860198023715938}
-  m_Layer: 0
+  m_Layer: 10
   m_Name: GroundCheck
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -349,6 +350,16 @@ PrefabInstance:
         type: 3}
       propertyPath: m_Name
       value: HealthBar
+      objectReference: {fileID: 0}
+    - target: {fileID: 677880498183542075, guid: dc6c44f0fc104634bbcf175574d2565c,
+        type: 3}
+      propertyPath: m_Layer
+      value: 10
+      objectReference: {fileID: 0}
+    - target: {fileID: 2161153564758549375, guid: dc6c44f0fc104634bbcf175574d2565c,
+        type: 3}
+      propertyPath: m_Layer
+      value: 10
       objectReference: {fileID: 0}
     - target: {fileID: 3135459726333647836, guid: dc6c44f0fc104634bbcf175574d2565c,
         type: 3}
@@ -404,6 +415,26 @@ PrefabInstance:
         type: 3}
       propertyPath: m_LocalEulerAnglesHint.z
       value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 4114820648799658947, guid: dc6c44f0fc104634bbcf175574d2565c,
+        type: 3}
+      propertyPath: m_Layer
+      value: 10
+      objectReference: {fileID: 0}
+    - target: {fileID: 4905742627948142451, guid: dc6c44f0fc104634bbcf175574d2565c,
+        type: 3}
+      propertyPath: m_Layer
+      value: 10
+      objectReference: {fileID: 0}
+    - target: {fileID: 5110939336913614219, guid: dc6c44f0fc104634bbcf175574d2565c,
+        type: 3}
+      propertyPath: m_Layer
+      value: 10
+      objectReference: {fileID: 0}
+    - target: {fileID: 6795550080293806885, guid: dc6c44f0fc104634bbcf175574d2565c,
+        type: 3}
+      propertyPath: m_Layer
+      value: 10
       objectReference: {fileID: 0}
     - target: {fileID: 8110808662456237670, guid: dc6c44f0fc104634bbcf175574d2565c,
         type: 3}

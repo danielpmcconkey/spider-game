@@ -32,6 +32,7 @@ namespace Assets.Scripts.CharacterControl
         
 
 
+
         public int currentRoom { get; private set; }
 
         private CameraControl cameraControl;
@@ -173,6 +174,9 @@ namespace Assets.Scripts.CharacterControl
             _userInput.isGrappleButtonPressed = Input.GetButtonDown("Fire3");
             _userInput.isGrappleButtonReleased = Input.GetButtonUp("Fire3");
             _userInput.isGrappleButtonHeldDown = Input.GetButton("Fire3");
+            _userInput.isPrimaryFireButtonPressed = Input.GetButtonDown("Fire1");
+            _userInput.isPrimaryFireButtonReleased = Input.GetButtonUp("Fire1");
+            _userInput.isPrimaryFireButtonHeldDown = Input.GetButton("Fire1");
             _userInput.mouseX = Input.mousePosition.x;
             _userInput.mouseY = Input.mousePosition.y;
 
