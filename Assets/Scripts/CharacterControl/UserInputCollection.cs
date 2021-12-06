@@ -6,20 +6,21 @@ using System.Threading.Tasks;
 
 namespace Assets.Scripts.CharacterControl
 {
+    [Serializable]
     public struct UserInputCollection
     {
-        public float moveHPressure { get; set; }
-        public float moveVPressure { get; set; }
-        public bool isJumpPressed { get; set; }
-        public bool isJumpReleased { get; set; }
-        public bool isJumpHeldDown { get; set; }
-        public bool isGrappleButtonPressed { get; set; }
-        public bool isGrappleButtonReleased { get; set; }
-        public bool isGrappleButtonHeldDown { get; set; }
-        public bool isPrimaryFireButtonPressed { get; set; }
-        public bool isPrimaryFireButtonReleased { get; set; }
-        public bool isPrimaryFireButtonHeldDown { get; set; }
-        public float mouseX { get; set; }
-        public float mouseY { get; set; }
+        public float moveHPressure;
+        public float moveVPressure;
+        public bool isJumpPressed;
+        public bool isJumpReleased;
+        public bool isJumpHeldDown;
+        public bool isGrappleButtonPressed;
+        public bool isGrappleButtonReleased;
+        public bool isGrappleButtonHeldDown;
+        public bool isPrimaryFireButtonPressed;
+        public bool isPrimaryFireButtonReleased;
+        public bool isPrimaryFireButtonHeldDown;
+        public float mouseX;
+        public float mouseY;
     }
 }
