@@ -240,7 +240,7 @@ MonoBehaviour:
   damageAnimationName: 
   maxHP: 20
   currentHP: 20
-  armorClass: 10
+  armorClass: 0
   contactDamageDealt: 20
   invincibilityDurationInSeconds: 1.5
   knockBackForcePercent: 0.5

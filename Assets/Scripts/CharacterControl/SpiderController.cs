@@ -104,7 +104,7 @@ namespace Assets.Scripts.CharacterControl
 #endif
         private void Start()
         {
-            Events.GameEvents.current.onContactDamageForPlayer += TakeContactDamage;
+            Events.GameEvents.current.onContactDamageForPlayer += TakeDamage;
             Events.GameEvents.current.onDoorwayTriggerEnter += OnDoorwayEnter;
             Events.GameEvents.current.onDoorwayTriggerExit += OnDoorwayExit;
 
@@ -215,11 +215,11 @@ namespace Assets.Scripts.CharacterControl
             ////cameraControl.DeactivateLimits();
             //cameraControl.MoveCamera(cameraTarget);
         }
-        protected override void ReactToDamageDealt()
+        protected override void ReactToDamageDealt(bool noIFrames = false)
         {
             // use this method for i-frames or triggering animations
             StartCoroutine(FlashSprite());
-            base.ReactToDamageDealt();
+            base.ReactToDamageDealt(noIFrames);
         }
         private IEnumerator FlashSprite()
         {

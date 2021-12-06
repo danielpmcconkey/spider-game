@@ -15,6 +15,7 @@ namespace Assets.Scripts.CharacterControl
         [SerializeField] public GameObject bulletImpactPrefab;
         [SerializeField] public GameObject muzzleFlash;
         [SerializeField] public LineRenderer bulletTraceLinePrefab;
+        [SerializeField] public float shootingDamageDealt = 5;
 
         private float _firingTimer = 0f;
         private int _bulletCount = 0;
@@ -71,7 +72,9 @@ namespace Assets.Scripts.CharacterControl
                 didHitSomething = true;
                 impactPoint = hitInfoEnemy.point;
 
-                // todo: make damage happen
+                // make damage happen
+                var characterScript = hitInfoEnemy.collider.gameObject.GetComponent<ControllableCharacter>();
+                characterScript.TakeDamage(shootingDamageDealt, true);
             }
             if(hitInfoPlatform)
             {

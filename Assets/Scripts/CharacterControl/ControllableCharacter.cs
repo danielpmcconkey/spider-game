@@ -93,24 +93,24 @@ namespace Assets.Scripts.CharacterControl
         protected bool _isInvincible;
         
         // min and max limiters on movement parameters
-        private const float _maxHorizontalAcceleration = 12f;
-        private const float _minHorizontalAcceleration = 0.5f;
-        private const float _maxHorizontalVelocityLimit = 25f;
-        private const float _minHorizontalVelocityLimit = 3f;
-        private const float _maxInitialJumpThrust = 3000f;
-        private const float _minInitialJumpThrust = 500f;
-        private const float _maxJumpThrustOverTime = 1600f;
-        private const float _minJumpThrustOverTime = 100f;
-        private const float _maxJumpThrustLimit = 3200f;
-        private const float _minJumpThrustLimit = 200f;
-        private const float _maxGravityOnCharacter = 100f;
-        private const float _minGravityOnCharacter = 0f;
-        private const float _maxCorneringTimeRequired = 5f;
-        private const float _minCorneringTimeRequired = 0.5f;
-        private const float _maxBreaksPressure = 60.0f;
-        private const float _minBreaksPressure = 0.0f;
-        private float _minKnockBackForce = 0.0f;
-        private float _maxKnockBackForce = 30.0f;
+        protected const float _maxHorizontalAcceleration = 12f;
+        protected const float _minHorizontalAcceleration = 0.5f;
+        protected const float _maxHorizontalVelocityLimit = 25f;
+        protected const float _minHorizontalVelocityLimit = 3f;
+        protected const float _maxInitialJumpThrust = 3000f;
+        protected const float _minInitialJumpThrust = 500f;
+        protected const float _maxJumpThrustOverTime = 1600f;
+        protected const float _minJumpThrustOverTime = 100f;
+        protected const float _maxJumpThrustLimit = 3200f;
+        protected const float _minJumpThrustLimit = 200f;
+        protected const float _maxGravityOnCharacter = 100f;
+        protected const float _minGravityOnCharacter = 0f;
+        protected const float _maxCorneringTimeRequired = 5f;
+        protected const float _minCorneringTimeRequired = 0.5f;
+        protected const float _maxBreaksPressure = 60.0f;
+        protected const float _minBreaksPressure = 0.0f;
+        protected const float _minKnockBackForce = 0.0f;
+        protected const float _maxKnockBackForce = 30.0f;
 
 
         #endregion
@@ -873,10 +873,10 @@ namespace Assets.Scripts.CharacterControl
                 movement.y = -distance;
             transform.position += movement;
         }
-        protected virtual void ReactToDamageDealt()
+        protected virtual void ReactToDamageDealt(bool noIFrames = false)
         {
             // use this method for i-frames or triggering animations
-            StartCoroutine(InvokeInvincibility());
+            if(!noIFrames) StartCoroutine(InvokeInvincibility());
             KnockBack();
         }
         private void ReduceHealth(float amount)
@@ -908,8 +908,16 @@ namespace Assets.Scripts.CharacterControl
             characterOrienter.SetHeadingDirection(heading);
             characterOrienter.SetThrustingDirection(thrusting);
         }
-        protected virtual void TakeContactDamage(float damageAmount)
+        internal virtual void TakeDamage(float damageAmount)
         {
+            TakeDamage(damageAmount, false);
+        }
+        internal virtual void TakeDamage(float damageAmount, bool noIFrames)
+        {
+            // using noIFrames passes instruction to the reaction
+            // method not to invoke iframes. use for light, 
+            // frequent attacks
+
             if (_isInvincible) return;
 
             // deduct armor class
@@ -917,7 +925,7 @@ namespace Assets.Scripts.CharacterControl
             if (damageDone > 0)
             {
                 ReduceHealth(damageDone);
-                ReactToDamageDealt();
+                ReactToDamageDealt(noIFrames);
             }
         }
         private bool TriggerCorner()
