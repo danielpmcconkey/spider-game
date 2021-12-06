@@ -11,5 +11,6 @@ namespace Assets.Scripts.WorldBuilder
         public const float tileWidthInUnityMeters = 1.0f;
         public const float tileHeightInUnityMeters = 1.0f;
         public const int doorHeightInTiles = 3;
+        public const float pixelsInAUnityMeter = 48f;
     }
 }

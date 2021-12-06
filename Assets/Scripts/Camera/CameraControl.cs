@@ -3,6 +3,7 @@ using System.Collections;
 using Assets.Scripts.CharacterControl;
 using System;
 using Assets.Scripts.Utility;
+using Assets.Scripts.WorldBuilder;
 
 namespace Assets.Scripts.Camera
 {
@@ -97,8 +98,8 @@ namespace Assets.Scripts.Camera
             float distanceFromCenterY = _gameCamera.orthographicSize;
             float distanceFromCenterX = _gameCamera.orthographicSize * _gameCamera.aspect;
 
-            float minX = _roomUpLeft.x + distanceFromCenterX - roomPadLeft;
-            float maxX = _roomDownRight.x - distanceFromCenterX + roomPadRight;
+            float minX = _roomUpLeft.x + distanceFromCenterX - (roomPadLeft +1);    // added an extra 1 to the side pads because it's not showing right on wider monitors
+            float maxX = _roomDownRight.x - distanceFromCenterX + (roomPadRight + 1);
             float minY = _roomDownRight.y + distanceFromCenterY - roomPadBottom;
             float maxY = _roomUpLeft.y - distanceFromCenterY + roomPadTop;
 
