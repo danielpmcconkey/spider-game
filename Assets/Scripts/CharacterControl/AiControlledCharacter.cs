@@ -28,7 +28,7 @@ namespace Assets.Scripts.CharacterControl
         }
         protected override void CheckUserInput()
         {
-            if (!_isAlive) return; // no movement for deadies
+            if (!isAlive) return; // no movement for deadies
 
             // every frame check whether user has changed input
             _userInput = GetNextMove();

@@ -120,7 +120,7 @@ TextureImporter:
       rect:
         serializedVersion: 2
         x: 0
-        y: 432
+        y: 648
         width: 144
         height: 72
       alignment: 0
@@ -141,7 +141,7 @@ TextureImporter:
       rect:
         serializedVersion: 2
         x: 144
-        y: 432
+        y: 648
         width: 144
         height: 72
       alignment: 0
@@ -162,7 +162,7 @@ TextureImporter:
       rect:
         serializedVersion: 2
         x: 288
-        y: 432
+        y: 648
         width: 144
         height: 72
       alignment: 0
@@ -183,7 +183,7 @@ TextureImporter:
       rect:
         serializedVersion: 2
         x: 432
-        y: 432
+        y: 648
         width: 144
         height: 72
       alignment: 0
@@ -204,7 +204,7 @@ TextureImporter:
       rect:
         serializedVersion: 2
         x: 0
-        y: 360
+        y: 576
         width: 144
         height: 72
       alignment: 0
@@ -225,7 +225,7 @@ TextureImporter:
       rect:
         serializedVersion: 2
         x: 144
-        y: 360
+        y: 576
         width: 144
         height: 72
       alignment: 0
@@ -246,7 +246,7 @@ TextureImporter:
       rect:
         serializedVersion: 2
         x: 288
-        y: 360
+        y: 576
         width: 144
         height: 72
       alignment: 0
@@ -267,7 +267,7 @@ TextureImporter:
       rect:
         serializedVersion: 2
         x: 432
-        y: 360
+        y: 576
         width: 144
         height: 72
       alignment: 0
@@ -288,7 +288,7 @@ TextureImporter:
       rect:
         serializedVersion: 2
         x: 0
-        y: 288
+        y: 504
         width: 144
         height: 72
       alignment: 0
@@ -309,7 +309,7 @@ TextureImporter:
       rect:
         serializedVersion: 2
         x: 144
-        y: 288
+        y: 504
         width: 144
         height: 72
       alignment: 0
@@ -330,7 +330,7 @@ TextureImporter:
       rect:
         serializedVersion: 2
         x: 288
-        y: 288
+        y: 504
         width: 144
         height: 72
       alignment: 0
@@ -351,7 +351,7 @@ TextureImporter:
       rect:
         serializedVersion: 2
         x: 432
-        y: 288
+        y: 504
         width: 144
         height: 72
       alignment: 0
@@ -372,7 +372,7 @@ TextureImporter:
       rect:
         serializedVersion: 2
         x: 0
-        y: 216
+        y: 432
         width: 144
         height: 72
       alignment: 0
@@ -393,7 +393,7 @@ TextureImporter:
       rect:
         serializedVersion: 2
         x: 144
-        y: 216
+        y: 432
         width: 144
         height: 72
       alignment: 0
@@ -414,7 +414,7 @@ TextureImporter:
       rect:
         serializedVersion: 2
         x: 288
-        y: 216
+        y: 432
         width: 144
         height: 72
       alignment: 0
@@ -435,7 +435,7 @@ TextureImporter:
       rect:
         serializedVersion: 2
         x: 432
-        y: 216
+        y: 432
         width: 144
         height: 72
       alignment: 0
@@ -456,7 +456,7 @@ TextureImporter:
       rect:
         serializedVersion: 2
         x: 0
-        y: 144
+        y: 360
         width: 144
         height: 72
       alignment: 0
@@ -477,7 +477,7 @@ TextureImporter:
       rect:
         serializedVersion: 2
         x: 144
-        y: 144
+        y: 360
         width: 144
         height: 72
       alignment: 0
@@ -498,7 +498,7 @@ TextureImporter:
       rect:
         serializedVersion: 2
         x: 288
-        y: 144
+        y: 360
         width: 144
         height: 72
       alignment: 0
@@ -519,7 +519,7 @@ TextureImporter:
       rect:
         serializedVersion: 2
         x: 432
-        y: 144
+        y: 360
         width: 144
         height: 72
       alignment: 0
@@ -540,7 +540,7 @@ TextureImporter:
       rect:
         serializedVersion: 2
         x: 0
-        y: 72
+        y: 288
         width: 144
         height: 72
       alignment: 0
@@ -561,7 +561,7 @@ TextureImporter:
       rect:
         serializedVersion: 2
         x: 144
-        y: 72
+        y: 288
         width: 144
         height: 72
       alignment: 0
@@ -582,7 +582,7 @@ TextureImporter:
       rect:
         serializedVersion: 2
         x: 288
-        y: 72
+        y: 288
         width: 144
         height: 72
       alignment: 0
@@ -603,7 +603,7 @@ TextureImporter:
       rect:
         serializedVersion: 2
         x: 432
-        y: 72
+        y: 288
         width: 144
         height: 72
       alignment: 0
@@ -624,7 +624,7 @@ TextureImporter:
       rect:
         serializedVersion: 2
         x: 0
-        y: 0
+        y: 216
         width: 144
         height: 72
       alignment: 0
@@ -645,7 +645,7 @@ TextureImporter:
       rect:
         serializedVersion: 2
         x: 144
-        y: 0
+        y: 216
         width: 144
         height: 72
       alignment: 0
@@ -666,7 +666,7 @@ TextureImporter:
       rect:
         serializedVersion: 2
         x: 288
-        y: 0
+        y: 216
         width: 144
         height: 72
       alignment: 0
@@ -687,7 +687,7 @@ TextureImporter:
       rect:
         serializedVersion: 2
         x: 432
-        y: 0
+        y: 216
         width: 144
         height: 72
       alignment: 0
@@ -703,6 +703,258 @@ TextureImporter:
       indices: 
       edges: []
       weights: []
+    - serializedVersion: 2
+      name: spiderMovementSheet144x72_28
+      rect:
+        serializedVersion: 2
+        x: 0
+        y: 144
+        width: 144
+        height: 72
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 351ccd3fbe1324d43a2ae0ebd966d154
+      internalID: -360461858
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: spiderMovementSheet144x72_29
+      rect:
+        serializedVersion: 2
+        x: 144
+        y: 144
+        width: 144
+        height: 72
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: f5e05a27576d0904ab3d1146f557e62f
+      internalID: -954106597
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: spiderMovementSheet144x72_30
+      rect:
+        serializedVersion: 2
+        x: 288
+        y: 144
+        width: 144
+        height: 72
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: d42b8d803673dc5409b77507405a67ab
+      internalID: -2118812434
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: spiderMovementSheet144x72_31
+      rect:
+        serializedVersion: 2
+        x: 432
+        y: 144
+        width: 144
+        height: 72
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 51840911bd117b34ea6198ab8fdb06a4
+      internalID: -180737660
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: spiderMovementSheet144x72_32
+      rect:
+        serializedVersion: 2
+        x: 0
+        y: 72
+        width: 144
+        height: 72
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 344acef1eef16024cbdc84b5464a6cda
+      internalID: -698119855
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: spiderMovementSheet144x72_33
+      rect:
+        serializedVersion: 2
+        x: 144
+        y: 72
+        width: 144
+        height: 72
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 49d8e6588cca74e45b78798f23cb2d9b
+      internalID: -1261725977
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: spiderMovementSheet144x72_34
+      rect:
+        serializedVersion: 2
+        x: 288
+        y: 72
+        width: 144
+        height: 72
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: d351fc04658fe0f42aa59a2f5ee0a1ba
+      internalID: 882194760
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: spiderMovementSheet144x72_35
+      rect:
+        serializedVersion: 2
+        x: 432
+        y: 72
+        width: 144
+        height: 72
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: c7966055740705a43a720f7421b78916
+      internalID: -1776688978
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: spiderMovementSheet144x72_36
+      rect:
+        serializedVersion: 2
+        x: 0
+        y: 0
+        width: 144
+        height: 72
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 124e72a43889a2a41a4e1c148a12cee9
+      internalID: 1088965923
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: spiderMovementSheet144x72_37
+      rect:
+        serializedVersion: 2
+        x: 144
+        y: 0
+        width: 144
+        height: 72
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 4f54d90118729dc46bd0d29970cee1f8
+      internalID: 2023745580
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: spiderMovementSheet144x72_38
+      rect:
+        serializedVersion: 2
+        x: 288
+        y: 0
+        width: 144
+        height: 72
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: b6ffd32022851fd4d8d2472f80306738
+      internalID: 1046390812
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: spiderMovementSheet144x72_39
+      rect:
+        serializedVersion: 2
+        x: 432
+        y: 0
+        width: 144
+        height: 72
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 865b034b402d2784bb956c0c8c398404
+      internalID: 1010485363
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
     outline: []
     physicsShape: []
     bones: []
@@ -714,33 +966,45 @@ TextureImporter:
     weights: []
     secondaryTextures: []
     nameFileIdTable:
+      spiderMovementSheet144x72_28: -360461858
       spiderMovementSheet144x72_1: -1306119234
       spiderMovementSheet144x72_17: 1437723811
+      spiderMovementSheet144x72_31: -180737660
       spiderMovementSheet144x72_13: -1324312884
+      spiderMovementSheet144x72_30: -2118812434
+      spiderMovementSheet144x72_39: 1010485363
+      spiderMovementSheet144x72_32: -698119855
       spiderMovementSheet144x72_22: 84145151
+      spiderMovementSheet144x72_34: 882194760
       spiderMovementSheet144x72_6: 1551962746
       spiderMovementSheet144x72_0: -451794201
       spiderMovementSheet144x72_4: 1935195943
       spiderMovementSheet144x72_14: 1646399091
+      spiderMovementSheet144x72_36: 1088965923
       spiderMovementSheet144x72_12: 546672692
       spiderMovementSheet144x72_11: 1763059472
       spiderMovementSheet144x72_20: 395024129
       spiderMovementSheet144x72_9: -2004671100
       spiderMovementSheet144x72_8: -847325459
       spiderMovementSheet144x72_3: 1834900038
+      spiderMovementSheet144x72_33: -1261725977
+      spiderMovementSheet144x72_37: 2023745580
       spiderMovementSheet144x72_5: 337454919
       spiderMovementSheet144x72_10: -1403762782
       spiderMovementSheet144x72_27: -1294502415
       spiderMovementSheet144x72_16: 425261739
       spiderMovementSheet144x72_2: -896746109
+      spiderMovementSheet144x72_35: -1776688978
       spiderMovementSheet144x72_25: -1537411542
       spiderMovementSheet144x72_19: -1007153690
       spiderMovementSheet144x72_26: 1666346446
       spiderMovementSheet144x72_21: 139697205
+      spiderMovementSheet144x72_38: 1046390812
       spiderMovementSheet144x72_15: -1960687646
       spiderMovementSheet144x72_23: -895206267
       spiderMovementSheet144x72_7: 20491968
       spiderMovementSheet144x72_24: -527134045
+      spiderMovementSheet144x72_29: -954106597
       spiderMovementSheet144x72_18: 2032267309
   spritePackingTag: 
   pSDRemoveMatte: 0

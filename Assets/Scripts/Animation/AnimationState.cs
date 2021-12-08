@@ -13,5 +13,6 @@ namespace Assets.Scripts.Animation
         FALLING,
         JUMPING,
         TAKING_DAMAGE,
+        DEAD,
     }
 }

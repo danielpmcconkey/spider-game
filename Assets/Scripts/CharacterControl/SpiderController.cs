@@ -196,9 +196,9 @@ namespace Assets.Scripts.CharacterControl
             }
             
         }
-        protected virtual void Die()
+        protected override void Die()
         {
-            _isAlive = false;
+            isAlive = false;
             // todo: build a death animation
             // todo: transition to death scene
         }
@@ -218,8 +218,11 @@ namespace Assets.Scripts.CharacterControl
         protected override void ReactToDamageDealt(bool noIFrames = false)
         {
             // use this method for i-frames or triggering animations
-            StartCoroutine(FlashSprite());
-            base.ReactToDamageDealt(noIFrames);
+            if (isAlive)
+            {
+                StartCoroutine(FlashSprite());
+                base.ReactToDamageDealt(noIFrames);
+            }
         }
         private IEnumerator FlashSprite()
         {

@@ -50,6 +50,7 @@ namespace Assets.Scripts.CharacterControl
         [SerializeField] public string jumpingAnimationName;
         [SerializeField] public string fallingAnimationName;
         [SerializeField] public string damageAnimationName;
+        [SerializeField] public string deathAnimationName;
 
         [Header("Combat Properties")]
         [Space(10)]
@@ -71,6 +72,7 @@ namespace Assets.Scripts.CharacterControl
         public float jumpThrustLimit { get; private set; }  // this is calculated every frame. we make it a member var because the state controller needs access
         public float corneringTimeRequired { get; private set; }  // this is calculated every frame. we make it a member var because the state controller needs access
         public bool isTakingDamage { get; private set; }    // used to control the animator
+        public bool isAlive { get; protected set; } = true;
 
         // private and protected members
         protected CharacterMovementStateController _stateController;
@@ -88,7 +90,7 @@ namespace Assets.Scripts.CharacterControl
         protected Vector2 _groundCheckRay2TargetPoint = Vector2.zero;
         private Transform _groundedTransform;    // the game object we're grounded to if grounded
         private Vector2 _groundedStrikePoint;    // the vector 2 where we struck the grounded transform
-        protected bool _isAlive = true;
+        
         
         protected bool _isInvincible;
         
@@ -526,7 +528,7 @@ namespace Assets.Scripts.CharacterControl
         }
         protected virtual void Die()
         {
-            _isAlive = false;
+            isAlive = false;
             // todo: trigger death timer before disappearing
             Destroy(gameObject);
         }

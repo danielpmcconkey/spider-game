@@ -87,11 +87,17 @@ namespace Assets.Scripts.WorldBuilder
             //room0.AddPlatformTiles(new Vector2(28f, -1f), 1, 8);
             //room0.AddPlatformTiles(new Vector2(30f, -2f), 1, 7);
             room0.AddStartingEnemy(floatingBot, new Vector2(26f, -4f), playerCharacter);
-            //room0.AddStartingEnemy(floatingBot, new Vector2(28f, 0f), playerCharacter);
-            //room0.AddStartingEnemy(floatingBot, new Vector2(30f, 0f), playerCharacter);
-            //room0.AddStartingEnemy(floatingBot, new Vector2(32f, 0f), playerCharacter);
-            //room0.AddStartingEnemy(floatingBot, new Vector2(34f, 0f), playerCharacter);
-            //room0.AddStartingEnemy(floatingBot, new Vector2(36f, 0f), playerCharacter);
+            room0.AddStartingEnemy(floatingBot, new Vector2(28f, 0f), playerCharacter);
+            room0.AddStartingEnemy(floatingBot, new Vector2(30f, 0f), playerCharacter);
+            room0.AddStartingEnemy(floatingBot, new Vector2(32f, 0f), playerCharacter);
+            room0.AddStartingEnemy(floatingBot, new Vector2(34f, 0f), playerCharacter);
+            room0.AddStartingEnemy(floatingBot, new Vector2(36f, 0f), playerCharacter);
+            room0.AddStartingEnemy(floatingBot, new Vector2(26f, -5f), playerCharacter);
+            room0.AddStartingEnemy(floatingBot, new Vector2(28f, 1f), playerCharacter);
+            room0.AddStartingEnemy(floatingBot, new Vector2(30f, 1f), playerCharacter);
+            room0.AddStartingEnemy(floatingBot, new Vector2(32f, 1f), playerCharacter);
+            room0.AddStartingEnemy(floatingBot, new Vector2(34f, 1f), playerCharacter);
+            room0.AddStartingEnemy(floatingBot, new Vector2(36f, 1f), playerCharacter);
 
 
             GameObject room001 = Instantiate(new GameObject("Room001"), roomsParent.transform, false);
@@ -105,6 +111,7 @@ namespace Assets.Scripts.WorldBuilder
             //room1.AddStartingEnemy(floatingBot, new Vector2(44f, 0f), playerCharacter);
             //room1.AddStartingEnemy(floatingBot, new Vector2(46f, 0f), playerCharacter);
             //room1.AddStartingEnemy(floatingBot, new Vector2(48f, 0f), playerCharacter);
+           
 
 
             // draw the door between them
