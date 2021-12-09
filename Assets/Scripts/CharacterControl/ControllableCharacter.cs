@@ -31,6 +31,7 @@ namespace Assets.Scripts.CharacterControl
         [SerializeField] public bool canCeilingCrawl = true;
         [SerializeField] public bool canGrapple = true;
         [SerializeField] public bool canFly = false;
+        [SerializeField] public bool canHighJump = false;
 
         [Header("Movement references")]
         [Space(10)]
@@ -90,8 +91,10 @@ namespace Assets.Scripts.CharacterControl
         protected Vector2 _groundCheckRay2TargetPoint = Vector2.zero;
         private Transform _groundedTransform;    // the game object we're grounded to if grounded
         private Vector2 _groundedStrikePoint;    // the vector 2 where we struck the grounded transform
-        
-        
+        protected float _highJumpMultiplier = 1.4f;
+
+
+
         protected bool _isInvincible;
         
         // min and max limiters on movement parameters
@@ -99,12 +102,12 @@ namespace Assets.Scripts.CharacterControl
         protected const float _minHorizontalAcceleration = 0.5f;
         protected const float _maxHorizontalVelocityLimit = 25f;
         protected const float _minHorizontalVelocityLimit = 3f;
-        protected const float _maxInitialJumpThrust = 3000f;
-        protected const float _minInitialJumpThrust = 500f;
-        protected const float _maxJumpThrustOverTime = 1600f;
-        protected const float _minJumpThrustOverTime = 100f;
-        protected const float _maxJumpThrustLimit = 3200f;
-        protected const float _minJumpThrustLimit = 200f;
+        protected const float _maxInitialJumpThrust = 60f; //3000f;
+        protected const float _minInitialJumpThrust = 0f; //500f;
+        protected const float _maxJumpThrustOverTime = 32f; //1600f;
+        protected const float _minJumpThrustOverTime = 0f; //100f;
+        protected const float _maxJumpThrustLimit = 120f; //3200f;
+        protected const float _minJumpThrustLimit = 0f; //200f;
         protected const float _maxGravityOnCharacter = 100f;
         protected const float _minGravityOnCharacter = 0f;
         protected const float _maxCorneringTimeRequired = 5f;
@@ -165,6 +168,11 @@ namespace Assets.Scripts.CharacterControl
             jumpThrustLimit = _minJumpThrustLimit +
                 (jumpThrustLimitPercent * (_maxJumpThrustLimit - _minJumpThrustLimit));
 
+            if (canHighJump)
+            {
+                jumpThrustLimit = jumpThrustLimit * _highJumpMultiplier;
+            }
+
             // calculate cornering time required every frame in case it updated outside of the script
             corneringTimeRequired = _minCorneringTimeRequired +
                 (corneringTimeRequiredPercent * (_maxCorneringTimeRequired - _minCorneringTimeRequired));
@@ -196,11 +204,21 @@ namespace Assets.Scripts.CharacterControl
                 {
                     float jumpThrustLimit = _minJumpThrustLimit +
                         (jumpThrustLimitPercent * (_maxJumpThrustLimit - _minJumpThrustLimit));
+
+                    if (canHighJump)
+                    {
+                        jumpThrustLimit = jumpThrustLimit * _highJumpMultiplier;
+                    }
+
                     if (currentJumpThrust < jumpThrustLimit)
                     {
                         float jumpThrustOverTime = _minJumpThrustOverTime +
                             (jumpThrustOverTimePercent * (_maxJumpThrustOverTime - _minJumpThrustOverTime));
-                        AddJumpForce((jumpThrustOverTime * Time.deltaTime));
+                        if (canHighJump)
+                        {
+                            jumpThrustOverTime = jumpThrustOverTime * _highJumpMultiplier;
+                        }
+                        AddJumpForce(jumpThrustOverTime * Time.deltaTime);
                     }
                 }
             }
@@ -264,14 +282,18 @@ namespace Assets.Scripts.CharacterControl
                 rigidBody2D.velocity = new Vector2((horizontalVelocityLimit * -1), rigidBody2D.velocity.y);
             }
 
-            // also constrain the vertical
-            if (rigidBody2D.velocity.y > horizontalVelocityLimit)
+            // also constrain the vertical, unless jump accelerating
+            // this means we constrain fall velocity but not jump
+            if (_stateController.currentMovementState != MovementState.JUMP_ACCELERATING)
             {
-                rigidBody2D.velocity = new Vector2(rigidBody2D.velocity.x, horizontalVelocityLimit);
-            }
-            if (rigidBody2D.velocity.y < (horizontalVelocityLimit * -1))
-            {
-                rigidBody2D.velocity = new Vector2(rigidBody2D.velocity.x, (horizontalVelocityLimit * -1));
+                if (rigidBody2D.velocity.y > horizontalVelocityLimit)
+                {
+                    rigidBody2D.velocity = new Vector2(rigidBody2D.velocity.x, horizontalVelocityLimit);
+                }
+                if (rigidBody2D.velocity.y < (horizontalVelocityLimit * -1))
+                {
+                    rigidBody2D.velocity = new Vector2(rigidBody2D.velocity.x, (horizontalVelocityLimit * -1));
+                }
             }
 
             // reset the accumulation
@@ -989,6 +1011,10 @@ namespace Assets.Scripts.CharacterControl
             currentJumpThrust = 0;
             float initialJumpThrust = _minInitialJumpThrust +
                 (initialJumpThrustPercent * (_maxInitialJumpThrust - _minInitialJumpThrust));
+            if (canHighJump)
+            {
+                initialJumpThrust = initialJumpThrust * _highJumpMultiplier;
+            }
             AddJumpForce(initialJumpThrust);
             return true;
         }
