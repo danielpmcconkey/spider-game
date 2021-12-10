@@ -20,7 +20,7 @@ namespace Assets.Scripts.CharacterControl
 #if DEBUG
 
         /* 
-        E:\Unity Projects\SpiderPocGit\Logs\CustomLogger\spiderReplay-2021-12-06.16.35.43.458.json
+        E:\Unity Projects\SpiderPocGit\Logs\CustomLogger\---.json
         */
         [SerializeField] public string replayFile = string.Empty;
 
@@ -199,21 +199,17 @@ namespace Assets.Scripts.CharacterControl
         protected override void Die()
         {
             isAlive = false;
-            // todo: build a death animation
+            
             // todo: transition to death scene
         }
         private void OnDoorwayExit(Vector2 doorPosition)
         {
             currentRoom = worldBuilder.WhichRoomAreWeIn(transform.position);
             UpdateCameraConstraints();
-            //cameraControl.MoveCameraToConstraint();
-            // todo: rework camera doorway interactivity
         }
         private void OnDoorwayEnter(Vector2 doorPosition)
         {
-            //Vector2 cameraTarget = new Vector2(doorPosition.x, cameraControl.GetCameraPosition().y);
-            ////cameraControl.DeactivateLimits();
-            //cameraControl.MoveCamera(cameraTarget);
+            
         }
         protected override void ReactToDamageDealt(bool noIFrames = false)
         {
