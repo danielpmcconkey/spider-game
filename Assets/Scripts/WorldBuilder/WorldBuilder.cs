@@ -77,11 +77,11 @@ namespace Assets.Scripts.WorldBuilder
             room0.AddPerimiterTiles();
             // tile above the floor = -7.68
             room0.AddPlatformTiles(new Vector2(-1f, -4.0f), 4, 5);
-            //room0.AddPlatformTiles(new Vector2(5f, -5f), 12, 1);
-            //room0.AddPlatformTiles(new Vector2(5f, -1f), 5, 1);
-            //room0.AddPlatformTiles(new Vector2(12.0f, -1f), 5, 1);
-            //room0.AddPlatformTiles(new Vector2(5f, 3f), 12, 1);
-            //room0.AddPlatformTiles(new Vector2(20f, 0f), 2, 7);
+            room0.AddPlatformTiles(new Vector2(5f, -5f), 12, 1);
+            room0.AddPlatformTiles(new Vector2(5f, -1f), 5, 1);
+            room0.AddPlatformTiles(new Vector2(12.0f, -1f), 5, 1);
+            room0.AddPlatformTiles(new Vector2(5f, 3f), 12, 1);
+            room0.AddPlatformTiles(new Vector2(20f, 0f), 2, 7);
             //room0.AddPlatformTiles(new Vector2(24f, 1f), 1, 10);
             //room0.AddPlatformTiles(new Vector2(26f, 0f), 1, 9);
             //room0.AddPlatformTiles(new Vector2(28f, -1f), 1, 8);

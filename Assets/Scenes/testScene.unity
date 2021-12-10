@@ -1511,6 +1511,16 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 3251419005602766872, guid: e5aa7d7847a68704f8237d0bc6043afb,
         type: 3}
+      propertyPath: m_Mass
+      value: 0.0001
+      objectReference: {fileID: 0}
+    - target: {fileID: 3251419005602766872, guid: e5aa7d7847a68704f8237d0bc6043afb,
+        type: 3}
+      propertyPath: m_AngularDrag
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 3251419005602766872, guid: e5aa7d7847a68704f8237d0bc6043afb,
+        type: 3}
       propertyPath: m_Constraints
       value: 4
       objectReference: {fileID: 0}
@@ -1677,6 +1687,11 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 3251419005602766951, guid: e5aa7d7847a68704f8237d0bc6043afb,
         type: 3}
+      propertyPath: debugName
+      value: billy
+      objectReference: {fileID: 0}
+    - target: {fileID: 3251419005602766951, guid: e5aa7d7847a68704f8237d0bc6043afb,
+        type: 3}
       propertyPath: m_Enabled
       value: 1
       objectReference: {fileID: 0}
@@ -1809,7 +1824,7 @@ PrefabInstance:
     - target: {fileID: 3251419005602766951, guid: e5aa7d7847a68704f8237d0bc6043afb,
         type: 3}
       propertyPath: jumpThrustLimitPercent
-      value: 0.791
+      value: 0.503
       objectReference: {fileID: 0}
     - target: {fileID: 3251419005602766951, guid: e5aa7d7847a68704f8237d0bc6043afb,
         type: 3}
@@ -1829,7 +1844,7 @@ PrefabInstance:
     - target: {fileID: 3251419005602766951, guid: e5aa7d7847a68704f8237d0bc6043afb,
         type: 3}
       propertyPath: initialJumpThrustPercent
-      value: 0.717
+      value: 0.44
       objectReference: {fileID: 0}
     - target: {fileID: 3251419005602766951, guid: e5aa7d7847a68704f8237d0bc6043afb,
         type: 3}
@@ -1839,7 +1854,7 @@ PrefabInstance:
     - target: {fileID: 3251419005602766951, guid: e5aa7d7847a68704f8237d0bc6043afb,
         type: 3}
       propertyPath: jumpThrustOverTimePercent
-      value: 0.577
+      value: 0.24
       objectReference: {fileID: 0}
     - target: {fileID: 3251419005602766951, guid: e5aa7d7847a68704f8237d0bc6043afb,
         type: 3}

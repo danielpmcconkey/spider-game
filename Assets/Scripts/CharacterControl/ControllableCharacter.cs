@@ -91,7 +91,7 @@ namespace Assets.Scripts.CharacterControl
         protected Vector2 _groundCheckRay2TargetPoint = Vector2.zero;
         private Transform _groundedTransform;    // the game object we're grounded to if grounded
         private Vector2 _groundedStrikePoint;    // the vector 2 where we struck the grounded transform
-        protected float _highJumpMultiplier = 1.4f;
+        protected float _highJumpMultiplier = 1.2f;
 
 
 
@@ -104,7 +104,7 @@ namespace Assets.Scripts.CharacterControl
         protected const float _minHorizontalVelocityLimit = 3f;
         protected const float _maxInitialJumpThrust = 60f; //3000f;
         protected const float _minInitialJumpThrust = 0f; //500f;
-        protected const float _maxJumpThrustOverTime = 32f; //1600f;
+        protected const float _maxJumpThrustOverTime = 160f; //1600f;
         protected const float _minJumpThrustOverTime = 0f; //100f;
         protected const float _maxJumpThrustLimit = 120f; //3200f;
         protected const float _minJumpThrustLimit = 0f; //200f;
@@ -284,17 +284,17 @@ namespace Assets.Scripts.CharacterControl
 
             // also constrain the vertical, unless jump accelerating
             // this means we constrain fall velocity but not jump
-            if (_stateController.currentMovementState != MovementState.JUMP_ACCELERATING)
-            {
-                if (rigidBody2D.velocity.y > horizontalVelocityLimit)
-                {
-                    rigidBody2D.velocity = new Vector2(rigidBody2D.velocity.x, horizontalVelocityLimit);
-                }
-                if (rigidBody2D.velocity.y < (horizontalVelocityLimit * -1))
-                {
-                    rigidBody2D.velocity = new Vector2(rigidBody2D.velocity.x, (horizontalVelocityLimit * -1));
-                }
-            }
+            //if (_stateController.currentMovementState != MovementState.JUMP_ACCELERATING)
+            //{
+            //    if (rigidBody2D.velocity.y > horizontalVelocityLimit)
+            //    {
+            //        rigidBody2D.velocity = new Vector2(rigidBody2D.velocity.x, horizontalVelocityLimit);
+            //    }
+            //    if (rigidBody2D.velocity.y < (horizontalVelocityLimit * -1))
+            //    {
+            //        rigidBody2D.velocity = new Vector2(rigidBody2D.velocity.x, (horizontalVelocityLimit * -1));
+            //    }
+            //}
 
             // reset the accumulation
             _floatingForcesAccumulated = Vector2.zero;
@@ -435,45 +435,25 @@ namespace Assets.Scripts.CharacterControl
         protected virtual void AddArtificalGravity()
         {
             // turn off gravity when grounded to avoid jittery behavior in the y axis
-            //if (_stateController.currentMovementState == MovementState.GROUNDED) return;
+            // the below line was commented out for a while and messed up jumping
+            // I'm not sure why it was commented out
+            // https://github.com/danielpmcconkey/spider-game/commit/ae8ba4241c52060f067d54ea6521010ad78456a5#diff-d2020435ed56fc5b22ba7e3c0eb491d17993071ccd6a61898e45d8588df5a7b6
+            // is the commit where it happened. can't really tell why, though
+            if (_stateController.currentMovementState == MovementState.GROUNDED) return;
 
-            FacingDirection formerGravityDirection = characterOrienter.gravityDirection;
+            // otherwise, gravity should always push down
 
             float gravityOnCharacter = _minGravityOnCharacter +
                 (gravityOnCharacterPercent * (_maxGravityOnCharacter - _minGravityOnCharacter));
 
             float thrustMultiplier = gravityOnCharacter * Time.deltaTime;
+            characterOrienter.SetGravityDirection(FacingDirection.DOWN);
 
-            if (characterOrienter.headingDirection == FacingDirection.RIGHT
-                || characterOrienter.headingDirection == FacingDirection.LEFT)
-            {
-                if (characterOrienter.thrustingDirection == FacingDirection.UP)
-                {
-                    characterOrienter.SetGravityDirection(FacingDirection.DOWN);
-                    thrustMultiplier *= -1f;
-                }
-                else if (characterOrienter.thrustingDirection == FacingDirection.DOWN)
-                {
-                    characterOrienter.SetGravityDirection(FacingDirection.UP);
-                    thrustMultiplier *= 1f;
-                }
-                _floatingForcesAccumulated += new Vector2(0, thrustMultiplier);
-            }
-            if (characterOrienter.headingDirection == FacingDirection.UP
-                || characterOrienter.headingDirection == FacingDirection.DOWN)
-            {
-                if (characterOrienter.thrustingDirection == FacingDirection.LEFT)
-                {
-                    characterOrienter.SetGravityDirection(FacingDirection.RIGHT);
-                    thrustMultiplier *= 1f;
-                }
-                else if (characterOrienter.thrustingDirection == FacingDirection.RIGHT)
-                {
-                    characterOrienter.SetGravityDirection(FacingDirection.LEFT);
-                    thrustMultiplier *= -1f;
-                }
-                _floatingForcesAccumulated += new Vector2(thrustMultiplier, 0);
-            }
+            // mulitply by negative 1 because, in Unity, down is lower Y than up
+            thrustMultiplier *= -1f;
+                
+            _floatingForcesAccumulated += new Vector2(0, thrustMultiplier);
+            
         }
         private void AddDirectionalMovementForceHFloating()
         {
@@ -809,17 +789,9 @@ namespace Assets.Scripts.CharacterControl
         }
         private void PopulatePlatformCollisionVars()
         {
-            //characterContactsPriorFrame = characterContactsCurrentFrame;
             characterContactsCurrentFrame = new CharacterContacts();
             characterContactsCurrentFrame.isTouchingPlatformWithBase = IsGroundedRayCast();
-            //if (IsCollidingWithPlatform(bellyCheckTransform))
-            //{
-            //    characterContactsCurrentFrame.isTouchingPlatformWithBase = true;
-            //}
-            //else
-            //{
-            //    characterContactsCurrentFrame.isTouchingPlatformWithBase = false;
-            //}
+           
             if (IsCollidingWithPlatform(forwardCheckTransform))
             {
                 characterContactsCurrentFrame.isTouchingPlatformForward = true;
@@ -983,7 +955,9 @@ namespace Assets.Scripts.CharacterControl
         {
             LoggerCustom.DEBUG("Begin falling");
 
-            FacingDirection targetHeading = characterOrienter.headingDirection;
+            // default it to right to avoid any weird accidental combinations
+            FacingDirection targetHeading = FacingDirection.RIGHT;
+
             if (characterOrienter.headingDirection == FacingDirection.UP && characterOrienter.thrustingDirection == FacingDirection.LEFT)
             {
                 targetHeading = FacingDirection.RIGHT;
