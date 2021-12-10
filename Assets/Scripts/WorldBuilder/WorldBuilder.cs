@@ -35,18 +35,27 @@ namespace Assets.Scripts.WorldBuilder
         [Header("Enemies")]
         [Space(10)]
         [SerializeField] public GameObject floatingBot;
-        public Room[] rooms;
+        private Room[] _rooms;
+        private List<Door> _doors;
 
         private TileSet _tileSetRock1; 
 
+        public Door GetDoorAtPosition(Vector2 globalPosition)
+        {
+            foreach(Door d in _doors)
+            {
+                if (d.positionInGlobalSpace == globalPosition) return d;             
+            }
+            return null;
+        }
         public int WhichRoomAreWeIn(Vector2 currentLocation)
         {
-            for(int i = 0; i < rooms.Length; i++)
+            for(int i = 0; i < _rooms.Length; i++)
             {
-                if(rooms[i].upperLeftInGlobalSpace.x < currentLocation.x
-                    && rooms[i].lowerRightInGlobalSpace.x > currentLocation.x
-                    && rooms[i].upperLeftInGlobalSpace.y > currentLocation.y
-                    && rooms[i].lowerRightInGlobalSpace.y < currentLocation.y)
+                if(_rooms[i].upperLeftInGlobalSpace.x < currentLocation.x
+                    && _rooms[i].lowerRightInGlobalSpace.x > currentLocation.x
+                    && _rooms[i].upperLeftInGlobalSpace.y > currentLocation.y
+                    && _rooms[i].lowerRightInGlobalSpace.y < currentLocation.y)
                 {
                     return i;
                 }
@@ -58,14 +67,15 @@ namespace Assets.Scripts.WorldBuilder
             int howManyRooms = 2;
             PopulateTileSets();
 
-            rooms = new Room[howManyRooms];
+            _rooms = new Room[howManyRooms];
+            _doors = new List<Door>();
             BuildStarterRoom();
         }
 
         public (Vector2 upperLeft, Vector2 lowerRight) GetRoomDimensions(int roomId)
         {
-            Vector2 upperLeft = rooms[roomId].upperLeftInGlobalSpace;
-            Vector2 lowerRight = rooms[roomId].lowerRightInGlobalSpace;
+            Vector2 upperLeft = _rooms[roomId].upperLeftInGlobalSpace;
+            Vector2 lowerRight = _rooms[roomId].lowerRightInGlobalSpace;
             return (upperLeft, lowerRight);
         }
         private void BuildStarterRoom()
@@ -73,7 +83,7 @@ namespace Assets.Scripts.WorldBuilder
             GameObject room000 = Instantiate(new GameObject("Room000"), roomsParent.transform, false);
 
             Room room0 = new Room(_tileSetRock1, 40, 20, new Vector2(-6.0f, 10.0F), room000);
-            rooms[0] = room0;
+            _rooms[0] = room0;
             room0.AddPerimiterTiles();
             // tile above the floor = -7.68
             room0.AddPlatformTiles(new Vector2(-1f, -4.0f), 4, 5);
@@ -103,7 +113,7 @@ namespace Assets.Scripts.WorldBuilder
             GameObject room001 = Instantiate(new GameObject("Room001"), roomsParent.transform, false);
 
             Room room1 = new Room(_tileSetRock1, 20, 20, new Vector2(34.0f, 10.0F), room001);
-            rooms[1] = room1;
+            _rooms[1] = room1;
             room1.AddPerimiterTiles();
             room1.AddPlatformTiles(new Vector2(38f, 6f), 1, 11);
             //room1.AddStartingEnemy(floatingBot, new Vector2(40f, 0f), playerCharacter);
@@ -155,6 +165,8 @@ namespace Assets.Scripts.WorldBuilder
             Vector3 position = new Vector2(posX, posY);
             Quaternion rotation = new Quaternion(0, 0, 0, 0);
             Instantiate(prefab, position, rotation, roomsParent.transform);
+
+            _doors.Add(new Door() { roomLeft = roomLeft, roomRight = roomRight, positionInGlobalSpace = position });
         }
     }
 }
