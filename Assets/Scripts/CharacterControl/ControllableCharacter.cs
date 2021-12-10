@@ -282,20 +282,6 @@ namespace Assets.Scripts.CharacterControl
                 rigidBody2D.velocity = new Vector2((horizontalVelocityLimit * -1), rigidBody2D.velocity.y);
             }
 
-            // also constrain the vertical, unless jump accelerating
-            // this means we constrain fall velocity but not jump
-            //if (_stateController.currentMovementState != MovementState.JUMP_ACCELERATING)
-            //{
-            //    if (rigidBody2D.velocity.y > horizontalVelocityLimit)
-            //    {
-            //        rigidBody2D.velocity = new Vector2(rigidBody2D.velocity.x, horizontalVelocityLimit);
-            //    }
-            //    if (rigidBody2D.velocity.y < (horizontalVelocityLimit * -1))
-            //    {
-            //        rigidBody2D.velocity = new Vector2(rigidBody2D.velocity.x, (horizontalVelocityLimit * -1));
-            //    }
-            //}
-
             // reset the accumulation
             _floatingForcesAccumulated = Vector2.zero;
 
