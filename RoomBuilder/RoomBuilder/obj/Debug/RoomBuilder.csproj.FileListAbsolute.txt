@@ -1,0 +1,10 @@
+E:\Unity Projects\SpiderPocGit\RoomBuilder\RoomBuilder\bin\Debug\RoomBuilder.exe.config
+E:\Unity Projects\SpiderPocGit\RoomBuilder\RoomBuilder\bin\Debug\RoomBuilder.exe
+E:\Unity Projects\SpiderPocGit\RoomBuilder\RoomBuilder\bin\Debug\RoomBuilder.pdb
+E:\Unity Projects\SpiderPocGit\RoomBuilder\RoomBuilder\obj\Debug\RoomBuilder.csprojAssemblyReference.cache
+E:\Unity Projects\SpiderPocGit\RoomBuilder\RoomBuilder\obj\Debug\RoomBuilder.RoomBuilder.resources
+E:\Unity Projects\SpiderPocGit\RoomBuilder\RoomBuilder\obj\Debug\RoomBuilder.Properties.Resources.resources
+E:\Unity Projects\SpiderPocGit\RoomBuilder\RoomBuilder\obj\Debug\RoomBuilder.csproj.GenerateResource.cache
+E:\Unity Projects\SpiderPocGit\RoomBuilder\RoomBuilder\obj\Debug\RoomBuilder.csproj.CoreCompileInputs.cache
+E:\Unity Projects\SpiderPocGit\RoomBuilder\RoomBuilder\obj\Debug\RoomBuilder.exe
+E:\Unity Projects\SpiderPocGit\RoomBuilder\RoomBuilder\obj\Debug\RoomBuilder.pdb
