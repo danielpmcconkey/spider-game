@@ -2,10 +2,27 @@
 using System.Collections.Generic;
 using System.Drawing;
 using System.Windows.Forms;
+using System.Text.Json;
 
 namespace RoomBuilder
 {
     public struct Position { public int column; public int row; }
+    [Serializable]
+    public struct TilePlacement
+    {
+        public bool isSolid { get; set; }
+        public int tileNum { get; set; }
+    }
+    [Serializable]
+    public struct RoomSave
+    {
+        public string roomName { get; set; }
+        public int tileWidth { get; set; }
+        public int tileHeight { get; set; }
+        public int roomWidth { get; set; }
+        public int roomHeight { get; set; }
+        public TilePlacement[] tiles { get; set; }
+    }
     public struct TileNeighbors
     {
         public bool isUpLeft;
@@ -22,67 +39,97 @@ namespace RoomBuilder
         public Image image;
         public int tileWidth = 48;
         public int tileHeight = 48;
+        public string roomName;
+        public int roomWidth = -1;
+        public int roomHeight = -1;
 
-        private int _roomWidth = -1;
-        private int _roomHeight = -1;
         private List<int> _topRowTiles;
         private List<int> _bottomRowTiles;
         private List<int> _leftColumnTiles;
         private List<int> _rightColumnTiles;
 
-        private (bool isSolid, int tileNum)[] _tiles;
+        private TilePlacement[] _tiles;
 
+        public string SerializeRoom()
+        {
+            RoomSave save = new RoomSave();
+            save.roomName = roomName;
+            save.tileWidth = tileWidth;
+            save.tileHeight = tileHeight;
+            save.roomWidth = roomWidth;
+            save.roomHeight = roomHeight;
+            save.tiles = _tiles;
+            string json = JsonSerializer.Serialize(save);
+            return json;
+        }
+        public void DeSerializeRoom(string jsonFromFile)
+        {
+            RoomSave restore = JsonSerializer.Deserialize<RoomSave>(jsonFromFile);
+            roomName = restore.roomName;
+            tileWidth = restore.tileWidth;
+            tileHeight = restore.tileHeight;
+            roomWidth = restore.roomWidth;
+            roomHeight = restore.roomHeight;
+            _tiles = restore.tiles;
+            AddPerimeterTiles(true);
+        }
         public void LoadImage(string path)
         {
             image = Image.FromFile(path);
         }
         public void SetRoomDimensions(int width, int height)
         {
-            _roomWidth = width;
-            _roomHeight = height;
-            _tiles = new (bool,int) [width * height];
+            roomWidth = width;
+            roomHeight = height;
+            _tiles = new TilePlacement[width * height];
             AddPerimeterTiles();
         }
         public void DrawRoom(PaintEventArgs e)
         {
-            if (_roomWidth > 0 && _roomHeight > 0)
+            if (roomWidth > 0 && roomHeight > 0)
             {
                 DrawTiles(e);
                 DrawGrid(e);
             }
         }
-        private void AddPerimeterTiles()
+        private void AddPerimeterTiles(bool fromFileLoad = false)
         {
             _topRowTiles = new List<int>();
             _bottomRowTiles = new List<int>();
             _leftColumnTiles = new List<int>();
             _rightColumnTiles = new List<int>();
 
-            int bottomRowStart = 0 + (_roomHeight * _roomWidth) - _roomWidth;
+            int bottomRowStart = 0 + (roomHeight * roomWidth) - roomWidth;
             // floor and ceiling
-            for (int i = 0; i < _roomWidth; i++)
+            for (int i = 0; i < roomWidth; i++)
             {
-                _tiles[i] = (true, 2);
-                _tiles[i + bottomRowStart] = (true, 2);
+                if (!fromFileLoad)
+                {
+                    _tiles[i] = new TilePlacement() { isSolid = true, tileNum = 2 };
+                    _tiles[i + bottomRowStart] = new TilePlacement() { isSolid = true, tileNum = 2 };
+                }
                 _topRowTiles.Add(i);
                 _bottomRowTiles.Add(i + bottomRowStart);
             }
             // left and right
-            for (int i = 0; i < _roomWidth * _roomHeight; i+= _roomWidth)
+            for (int i = 0; i < roomWidth * roomHeight; i+= roomWidth)
             {
-                _tiles[i] = (true, 2);
-                _tiles[i + _roomWidth - 1] = (true, 2);
+                if (!fromFileLoad)
+                {
+                    _tiles[i] = new TilePlacement() { isSolid = true, tileNum = 2 };
+                    _tiles[i + roomWidth - 1] = new TilePlacement() { isSolid = true, tileNum = 2 };
+                }
                 _leftColumnTiles.Add(i);
-                _rightColumnTiles.Add(i + _roomWidth - 1);
+                _rightColumnTiles.Add(i + roomWidth - 1);
             }
         }
         private void DrawTiles(PaintEventArgs e)
         {
             
-            for(int i = 0; i < _roomWidth * _roomHeight; i++)
+            for(int i = 0; i < roomWidth * roomHeight; i++)
             {
-                int column = i % _roomWidth;
-                int row = (int)Math.Floor(i / (float)_roomWidth);
+                int column = i % roomWidth;
+                int row = (int)Math.Floor(i / (float)roomWidth);
 
                 TileNeighbors neighbors = GetTileNeighbors(i);
 
@@ -98,67 +145,67 @@ namespace RoomBuilder
                     if (neighbors.isDown && neighbors.isDownLeft && neighbors.isDownRight && neighbors.isLeft 
                         && neighbors.isRight && neighbors.isUp && neighbors.isUpLeft && neighbors.isUpRight)
                     {
-                        tileNumToDraw = 2;
+                        tileNumToDraw = 1;
                     }
                     else if (neighbors.isUp && neighbors.isDown && neighbors.isUpRight && neighbors.isRight &&
                         neighbors.isDownRight && !neighbors.isLeft)
                     {
-                        tileNumToDraw = 11;
+                        tileNumToDraw = 2;
                     }
                     else if (!neighbors.isUpRight && neighbors.isDown && neighbors.isUp && neighbors.isRight
                         && neighbors.isDownRight && !neighbors.isLeft)
                     {
-                        tileNumToDraw = 44;
+                        tileNumToDraw = 3;
                     }
                     else if (neighbors.isUp && neighbors.isDown && neighbors.isUpRight && neighbors.isRight
                         && !neighbors.isDownRight && !neighbors.isLeft)
                     {
-                        tileNumToDraw = 45;
+                        tileNumToDraw = 4;
                     }
                     else if (!neighbors.isLeft && !neighbors.isUpRight && !neighbors.isDownRight && neighbors.isRight
                         && neighbors.isDown && neighbors.isUp)
                     {
-                        tileNumToDraw = 39;
+                        tileNumToDraw = 5;
                     }
                     else if (neighbors.isDown && neighbors.isDownLeft && neighbors.isLeft && !neighbors.isRight
                         && neighbors.isUp && neighbors.isUpLeft)
                     {
-                        tileNumToDraw = 12;
+                        tileNumToDraw = 6;
                     }
                     else if (neighbors.isDown && neighbors.isDownLeft && neighbors.isLeft && !neighbors.isRight
                         && neighbors.isUp && !neighbors.isUpLeft)
                     {
-                        tileNumToDraw = 42;
+                        tileNumToDraw = 7;
                     }
                     else if (neighbors.isDown && neighbors.isUpLeft && neighbors.isLeft && !neighbors.isRight
                         && neighbors.isUp && !neighbors.isDownLeft)
                     {
-                        tileNumToDraw = 43;
+                        tileNumToDraw = 8;
                     }
                     else if (neighbors.isDown && !neighbors.isUpLeft && neighbors.isLeft && !neighbors.isRight
                         && neighbors.isUp && !neighbors.isDownLeft)
                     {
-                        tileNumToDraw = 40;
+                        tileNumToDraw = 9;
                     }
                     else if (!neighbors.isUp && neighbors.isLeft && neighbors.isRight && neighbors.isDown 
                         && neighbors.isDownLeft && neighbors.isDownRight)
                     {
-                        tileNumToDraw = 13;
+                        tileNumToDraw = 10;
                     }
                     else if (!neighbors.isUp && neighbors.isLeft && neighbors.isRight && neighbors.isDown
                         && !neighbors.isDownLeft && neighbors.isDownRight)
                     {
-                        tileNumToDraw = 47;
+                        tileNumToDraw = 11;
                     }
                     else if (!neighbors.isUp && neighbors.isLeft && neighbors.isRight && neighbors.isDown
                         && neighbors.isDownLeft && !neighbors.isDownRight)
                     {
-                        tileNumToDraw = 46;
+                        tileNumToDraw = 12;
                     }
                     else if (!neighbors.isUp && neighbors.isLeft && neighbors.isRight && neighbors.isDown
                         && !neighbors.isDownLeft && !neighbors.isDownRight)
                     {
-                        tileNumToDraw = 53;
+                        tileNumToDraw = 13;
                     }
                     else if (!neighbors.isDown && neighbors.isLeft && neighbors.isRight && neighbors.isUp 
                         && neighbors.isUpLeft && neighbors.isUpRight)
@@ -168,137 +215,137 @@ namespace RoomBuilder
                     else if (!neighbors.isDown && neighbors.isLeft && neighbors.isRight && neighbors.isUp 
                         && !neighbors.isUpLeft && neighbors.isUpRight)
                     {
-                        tileNumToDraw = 41;
+                        tileNumToDraw = 15;
                     }
                     else if (!neighbors.isDown && neighbors.isLeft && neighbors.isRight && neighbors.isUp
                         && neighbors.isUpLeft && !neighbors.isUpRight)
                     {
-                        tileNumToDraw = 54;
+                        tileNumToDraw = 16;
                     }
                     else if (!neighbors.isDown && neighbors.isLeft && neighbors.isRight && neighbors.isUp
                         && !neighbors.isUpLeft && !neighbors.isUpRight)
                     {
-                        tileNumToDraw = 52;
+                        tileNumToDraw = 17;
                     }
                     else if (neighbors.isDown && neighbors.isDownRight && !neighbors.isLeft
                         && neighbors.isRight && !neighbors.isUp)
                     {
-                        tileNumToDraw = 5;
+                        tileNumToDraw = 18;
                     }
                     else if (neighbors.isDown && !neighbors.isDownRight && !neighbors.isLeft
                         && neighbors.isRight && !neighbors.isUp)
                     {
-                        tileNumToDraw = 36;
+                        tileNumToDraw = 19;
                     }
                     else if (neighbors.isDown && neighbors.isDownLeft && neighbors.isLeft
                         && !neighbors.isRight && !neighbors.isUp )
                     {
-                        tileNumToDraw = 6;
+                        tileNumToDraw = 20;
                     }
                     else if (neighbors.isDown && !neighbors.isDownLeft && neighbors.isLeft
                         && !neighbors.isRight && !neighbors.isUp)
                     {
-                        tileNumToDraw = 35;
+                        tileNumToDraw = 21;
                     }
                     else if (!neighbors.isDown && !neighbors.isLeft
                         && neighbors.isRight && neighbors.isUp  && neighbors.isUpRight)
                     {
-                        tileNumToDraw = 3;
+                        tileNumToDraw = 22;
                     }
                     else if (!neighbors.isDown && !neighbors.isLeft
                         && neighbors.isRight && neighbors.isUp && !neighbors.isUpRight)
                     {
-                        tileNumToDraw = 37;
+                        tileNumToDraw = 23;
                     }
                     else if (!neighbors.isDown && neighbors.isLeft
                         && !neighbors.isRight && neighbors.isUp && neighbors.isUpLeft)
                     {
-                        tileNumToDraw = 4;
+                        tileNumToDraw = 24;
                     }
                     else if (!neighbors.isDown && neighbors.isLeft
                         && !neighbors.isRight && neighbors.isUp && !neighbors.isUpLeft)
                     {
-                        tileNumToDraw = 38;
+                        tileNumToDraw = 25;
                     }
                     else if (!neighbors.isDown && !neighbors.isLeft
                         && !neighbors.isRight && !neighbors.isUp)
                     {
-                        tileNumToDraw = 1;
+                        tileNumToDraw = 26;
                     }
                     else if (!neighbors.isDown && !neighbors.isLeft
                         && neighbors.isRight && !neighbors.isUp)
                     {
-                        tileNumToDraw = 8;
+                        tileNumToDraw = 27;
                     }
                     else if (!neighbors.isDown && neighbors.isLeft
                         && !neighbors.isRight && !neighbors.isUp)
                     {
-                        tileNumToDraw = 9;
+                        tileNumToDraw = 28;
                     }
                     else if (neighbors.isDown && !neighbors.isLeft
                         && !neighbors.isRight && !neighbors.isUp)
                     {
-                        tileNumToDraw = 10;
+                        tileNumToDraw = 29;
                     }
                     else if (!neighbors.isDown && !neighbors.isLeft
                         && !neighbors.isRight && neighbors.isUp)
                     {
-                        tileNumToDraw = 7;
+                        tileNumToDraw = 30;
                     }
                     else if (!neighbors.isDown && neighbors.isLeft
                         && neighbors.isRight && !neighbors.isUp)
                     {
-                        tileNumToDraw = 15;
+                        tileNumToDraw = 31;
                     }
                     else if (neighbors.isDown && !neighbors.isLeft
                         && !neighbors.isRight && neighbors.isUp)
                     {
-                        tileNumToDraw = 16;
+                        tileNumToDraw = 32;
                     }
                     else if (neighbors.isDown && neighbors.isDownLeft && neighbors.isDownRight && neighbors.isLeft
                         && neighbors.isRight && neighbors.isUp && !neighbors.isUpLeft && neighbors.isUpRight )
                     {
-                        tileNumToDraw = 17;
+                        tileNumToDraw = 33;
                     }
                     else if (neighbors.isDown && neighbors.isDownLeft && neighbors.isDownRight && neighbors.isLeft
                         && neighbors.isRight && neighbors.isUp && neighbors.isUpLeft && !neighbors.isUpRight)
                     {
-                        tileNumToDraw = 18;
+                        tileNumToDraw = 34;
                     }
                     else if (neighbors.isDown && !neighbors.isDownLeft && neighbors.isDownRight && neighbors.isLeft
                         && neighbors.isRight && neighbors.isUp && neighbors.isUpLeft  && neighbors.isUpRight)
                     {
-                        tileNumToDraw = 19;
+                        tileNumToDraw = 35;
                     }
                     else if (neighbors.isDown && neighbors.isDownLeft && !neighbors.isDownRight && neighbors.isLeft
                         && neighbors.isRight && neighbors.isUp && neighbors.isUpLeft && neighbors.isUpRight)
                     {
-                        tileNumToDraw = 20;
+                        tileNumToDraw = 36;
                     }
                     else if (neighbors.isDown && neighbors.isDownLeft && neighbors.isDownRight && neighbors.isLeft
                         && neighbors.isRight && neighbors.isUp && !neighbors.isUpLeft && !neighbors.isUpRight)
                     {
-                        tileNumToDraw = 22;
-                    }
-                    else if (neighbors.isDown && !neighbors.isDownLeft && neighbors.isDownRight && neighbors.isLeft
-                        && neighbors.isRight && neighbors.isUp && !neighbors.isUpLeft && neighbors.isUpRight)
-                    {
-                        tileNumToDraw = 24;
+                        tileNumToDraw = 37;
                     }
                     else if (neighbors.isDown && !neighbors.isDownLeft && !neighbors.isDownRight && neighbors.isLeft
                         && neighbors.isRight && neighbors.isUp && neighbors.isUpLeft && neighbors.isUpRight)
                     {
-                        tileNumToDraw = 23;
+                        tileNumToDraw = 38;
+                    }
+                    else if (neighbors.isDown && !neighbors.isDownLeft && neighbors.isDownRight && neighbors.isLeft
+                        && neighbors.isRight && neighbors.isUp && !neighbors.isUpLeft && neighbors.isUpRight)
+                    {
+                        tileNumToDraw = 39;
                     }
                     else if (neighbors.isDown && neighbors.isDownLeft && !neighbors.isDownRight && neighbors.isLeft
                         && neighbors.isRight && neighbors.isUp && neighbors.isUpLeft && !neighbors.isUpRight)
                     {
-                        tileNumToDraw = 25;
+                        tileNumToDraw = 40;
                     }
                     else if (neighbors.isDown && !neighbors.isDownLeft && !neighbors.isDownRight && neighbors.isLeft
                         && neighbors.isRight && neighbors.isUp && !neighbors.isUpLeft && !neighbors.isUpRight)
                     {
-                        tileNumToDraw = 21;
+                        tileNumToDraw = 41;
                     }
                     if (neighbors.isDown && !neighbors.isDownLeft && !neighbors.isDownRight && neighbors.isLeft
                         && neighbors.isRight && neighbors.isUp && !neighbors.isUpLeft && neighbors.isUpRight)
@@ -328,79 +375,79 @@ namespace RoomBuilder
                     if (!neighbors.isDown && neighbors.isLeft
                         && !neighbors.isRight && neighbors.isUp && neighbors.isUpLeft)
                     {
-                        tileNumToDraw = 26;
+                        tileNumToDraw = 42;
                         shouldDrawATile = true;
                     }
                     else if (!neighbors.isDown && !neighbors.isLeft
                         && neighbors.isRight && neighbors.isUp && neighbors.isUpRight)
                     {
-                        tileNumToDraw = 27;
+                        tileNumToDraw = 43;
                         shouldDrawATile = true;
                     }
                     else if (neighbors.isDown && neighbors.isDownLeft && neighbors.isLeft
                         && !neighbors.isRight && !neighbors.isUp )
                     {
-                        tileNumToDraw = 28;
+                        tileNumToDraw = 44;
                         shouldDrawATile = true;
                     }
                     else if (neighbors.isDown && neighbors.isDownRight && !neighbors.isLeft
                         && neighbors.isRight && !neighbors.isUp)
                     {
-                        tileNumToDraw = 29;
+                        tileNumToDraw = 45;
                         shouldDrawATile = true;
                     }
                     else if (!neighbors.isDown && neighbors.isLeft
                         && neighbors.isRight && neighbors.isUp && neighbors.isUpLeft && neighbors.isUpRight)
                     {
-                        tileNumToDraw = 31;
+                        tileNumToDraw = 46;
                         shouldDrawATile = true;
                     }
                     else if (!neighbors.isUp && neighbors.isLeft
                         && neighbors.isRight && neighbors.isDown && neighbors.isDownLeft && neighbors.isDownRight)
                     {
-                        tileNumToDraw = 32;
+                        tileNumToDraw = 47;
                         shouldDrawATile = true;
                     }
                     else if (neighbors.isDown && neighbors.isDownLeft && neighbors.isLeft
                         && !neighbors.isRight && neighbors.isUp && neighbors.isUpLeft)
                     {
-                        tileNumToDraw = 33;
+                        tileNumToDraw = 48;
                         shouldDrawATile = true;
                     }
                     else if (neighbors.isDown && neighbors.isDownRight && neighbors.isRight
                         && !neighbors.isLeft && neighbors.isUp && neighbors.isUpRight)
                     {
-                        tileNumToDraw = 34;
+                        tileNumToDraw = 49;
                         shouldDrawATile = true;
                     }
                     else if (neighbors.isDown && neighbors.isDownLeft && neighbors.isDownRight && neighbors.isLeft
                         && neighbors.isRight && neighbors.isUp && !neighbors.isUpLeft && neighbors.isUpRight)
                     {
-                        tileNumToDraw = 48;
+                        tileNumToDraw = 50;
                         shouldDrawATile = true;
                     }
                     else if (neighbors.isDown && neighbors.isDownLeft && neighbors.isDownRight && neighbors.isLeft
                         && neighbors.isRight && neighbors.isUp && neighbors.isUpLeft && !neighbors.isUpRight)
                     {
-                        tileNumToDraw = 49;
+                        tileNumToDraw = 51;
                         shouldDrawATile = true;
                     }
                     else if (neighbors.isDown && !neighbors.isDownLeft && neighbors.isDownRight && neighbors.isLeft
                         && neighbors.isRight && neighbors.isUp && neighbors.isUpLeft && neighbors.isUpRight)
                     {
-                        tileNumToDraw = 50;
+                        tileNumToDraw = 52;
                         shouldDrawATile = true;
                     }
                     else if (neighbors.isDown && neighbors.isDownLeft && !neighbors.isDownRight && neighbors.isLeft
                         && neighbors.isRight && neighbors.isUp && neighbors.isUpLeft && neighbors.isUpRight)
                     {
-                        tileNumToDraw = 51;
+                        tileNumToDraw = 53;
                         shouldDrawATile = true;
                     }
                     else if (neighbors.isDown && neighbors.isDownLeft && neighbors.isDownRight && neighbors.isLeft
                         && neighbors.isRight && neighbors.isUp && neighbors.isUpLeft && neighbors.isUpRight)
                     {
-                        tileNumToDraw = 30;
+                        tileNumToDraw = 54;
                         shouldDrawATile = true;
                     }
                     else if (neighbors.isDown && neighbors.isDownLeft && !neighbors.isDownRight && neighbors.isLeft
@@ -426,8 +473,8 @@ namespace RoomBuilder
         {
             const int startX = 0;
             const int startY = 0;
-            int lineWidth = _roomWidth * tileWidth;
-            int lineHeight = _roomHeight * tileHeight;
+            int lineWidth = roomWidth * tileWidth;
+            int lineHeight = roomHeight * tileHeight;
             using (Pen pen = new Pen( Color.Gray, 1))
             {
                 for (int x = startX; x <= lineWidth + startX; x += tileWidth)
@@ -442,259 +489,250 @@ namespace RoomBuilder
                 }
             }
         }
-
         public void DrawSprite(PaintEventArgs e, int spriteNum, float x, float y)
         {
-            Position position = GetPositionOfSpriteNum(spriteNum);
+            Position position = GetSpriteSheetPositionOfSpriteNum(spriteNum);
             RectangleF srcRect = new RectangleF(position.column * tileWidth, position.row * tileHeight, tileWidth, tileHeight);
             GraphicsUnit units = GraphicsUnit.Pixel;
             e.Graphics.DrawImage(image, x, y, srcRect, units);
         }
-        private Position GetPositionOfSpriteNum(int spriteNum)
+        private Position GetSpriteSheetPositionOfSpriteNum(int spriteNum)
         {
             Position position = new Position() { column = 0, row = 0 };
             switch (spriteNum)
             {
-                case 2:
+                case 0:
                     position.column = 0;
                     position.row = 0;
                     break;
-                case 11:
+                case 1:
                     position.column = 1;
                     position.row = 0;
                     break;
-                case 44:
+                case 2:
                     position.column = 2;
                     position.row = 0;
                     break;
-                case 45:
+                case 3:
                     position.column = 3;
                     position.row = 0;
                     break;
-                case 39:
+                case 4:
                     position.column = 4;
                     position.row = 0;
+                    break;
+                case 5:
+                    position.column = 5;
+                    position.row = 0;
+                    break;
+                case 6:
+                    position.column = 6;
+                    position.row = 0;
+                    break;
+
+                case 7:
+                    position.column = 0;
+                    position.row = 1;
+                    break;
+                case 8:
+                    position.column = 1;
+                    position.row = 1;
+                    break;
+                case 9:
+                    position.column = 2;
+                    position.row = 1;
+                    break;
+                case 10:
+                    position.column = 3;
+                    position.row = 1;
+                    break;
+                case 11:
+                    position.column = 4;
+                    position.row = 1;
                     break;
                 case 12:
                     position.column = 5;
-                    position.row = 0;
-                    break;
-                case 42:
-                    position.column = 6;
-                    position.row = 0;
-                    break;
-                case 43:
-                    position.column = 0;
-                    position.row = 1;
-                    break;
-                case 40:
-                    position.column = 1;
                     position.row = 1;
                     break;
                 case 13:
-                    position.column = 2;
+                    position.column = 6;
                     position.row = 1;
                     break;
-                case 47:
-                    position.column = 3;
-                    position.row = 1;
-                    break;
-                case 46:
-                    position.column = 4;
-                    position.row = 1;
-                    break;
-                case 53:
-                    position.column = 5;
-                    position.row = 1;
-                    break;
+
                 case 14:
-                    position.column = 6;
-                    position.row = 1;
-                    break;
-                case 41:
                     position.column = 0;
                     position.row = 2;
-                    break;            
-                case 54:              
-                    position.column = 1; 
-                    position.row = 2;
-                    break;            
-                case 52:              
-                    position.column = 2; 
-                    position.row = 2;
-                    break;            
-                case 5:              
-                    position.column = 3; 
-                    position.row = 2;
-                    break;            
-                case 36:              
-                    position.column = 4; 
-                    position.row = 2;
-                    break;            
-                case 6:              
-                    position.column = 5; 
-                    position.row = 2;
-                    break;            
-                case 35:              
-                    position.column = 6; 
-                    position.row = 2;
-                    break;
-                case 3:
-                    position.column = 0;
-                    position.row = 3;
-                    break;
-                case 37:
-                    position.column = 1;
-                    position.row = 3;
-                    break;
-                case 4:
-                    position.column = 2;
-                    position.row = 3;
-                    break;
-                case 38:
-                    position.column = 3;
-                    position.row = 3;
-                    break;
-                case 1:
-                    position.column = 4;
-                    position.row = 3;
-                    break;
-                case 8:
-                    position.column = 5;
-                    position.row = 3;
-                    break;
-                case 9:
-                    position.column = 6;
-                    position.row = 3;
-                    break;
-                case 10:
-                    position.column = 0;
-                    position.row = 4;
-                    break;
-                case 7:
-                    position.column = 1;
-                    position.row = 4;
                     break;
                 case 15:
-                    position.column = 2;
-                    position.row = 4;
+                    position.column = 1;
+                    position.row = 2;
                     break;
                 case 16:
-                    position.column = 3;
-                    position.row = 4;
+                    position.column = 2;
+                    position.row = 2;
                     break;
                 case 17:
-                    position.column = 4;
-                    position.row = 4;
+                    position.column = 3;
+                    position.row = 2;
                     break;
                 case 18:
-                    position.column = 5;
-                    position.row = 4;
+                    position.column = 4;
+                    position.row = 2;
                     break;
                 case 19:
-                    position.column = 6;
-                    position.row = 4;
+                    position.column = 5;
+                    position.row = 2;
                     break;
                 case 20:
+                    position.column = 6;
+                    position.row = 2;
+                    break;
+
+                case 21:
                     position.column = 0;
-                    position.row = 5;
+                    position.row = 3;
                     break;
                 case 22:
                     position.column = 1;
-                    position.row = 5;
+                    position.row = 3;
                     break;
                 case 23:
                     position.column = 2;
-                    position.row = 5;
+                    position.row = 3;
                     break;
                 case 24:
                     position.column = 3;
-                    position.row = 5;
+                    position.row = 3;
                     break;
                 case 25:
                     position.column = 4;
-                    position.row = 5;
-                    break;
-                case 21:
-                    position.column = 5;
-                    position.row = 5;
+                    position.row = 3;
                     break;
                 case 26:
-                    position.column = 6;
-                    position.row = 5;
+                    position.column = 5;
+                    position.row = 3;
                     break;
                 case 27:
-                    position.column = 0;
-                    position.row = 6;
+                    position.column = 6;
+                    position.row = 3;
                     break;
+
                 case 28:
-                    position.column = 1;
-                    position.row = 6;
+                    position.column = 0;
+                    position.row = 4;
                     break;
                 case 29:
+                    position.column = 1;
+                    position.row = 4;
+                    break;
+                case 30:
                     position.column = 2;
-                    position.row = 6;
+                    position.row = 4;
                     break;
                 case 31:
                     position.column = 3;
-                    position.row = 6;
+                    position.row = 4;
                     break;
                 case 32:
                     position.column = 4;
-                    position.row = 6;
+                    position.row = 4;
                     break;
                 case 33:
                     position.column = 5;
-                    position.row = 6;
+                    position.row = 4;
                     break;
                 case 34:
                     position.column = 6;
+                    position.row = 4;
+                    break;
+
+                case 35:
+                    position.column = 0;
+                    position.row = 5;
+                    break;
+                case 36:
+                    position.column = 1;
+                    position.row = 5;
+                    break;
+                case 37:
+                    position.column = 2;
+                    position.row = 5;
+                    break;
+                case 38:
+                    position.column = 3;
+                    position.row = 5;
+                    break;
+                case 39:
+                    position.column = 4;
+                    position.row = 5;
+                    break;
+                case 40:
+                    position.column = 5;
+                    position.row = 5;
+                    break;
+                case 41:
+                    position.column = 6;
+                    position.row = 5;
+                    break;
+
+                case 42:
+                    position.column = 0;
+                    position.row = 6;
+                    break;
+                case 43:
+                    position.column = 1;
+                    position.row = 6;
+                    break;
+                case 44:
+                    position.column = 2;
+                    position.row = 6;
+                    break;
+                case 45:
+                    position.column = 3;
+                    position.row = 6;
+                    break;
+                case 46:
+                    position.column = 4;
+                    position.row = 6;
+                    break;
+                case 47:
+                    position.column = 5;
                     position.row = 6;
                     break;
                 case 48:
-                    position.column = 0;
-                    position.row = 7;
+                    position.column = 6;
+                    position.row = 6;
                     break;
+
                 case 49:
-                    position.column = 1;
+                    position.column = 0;
                     position.row = 7;
                     break;
                 case 50:
-                    position.column = 2;
+                    position.column = 1;
                     position.row = 7;
                     break;
                 case 51:
+                    position.column = 2;
+                    position.row = 7;
+                    break;
+                case 52:
                     position.column = 3;
                     position.row = 7;
                     break;
-                case 30:
+                case 53:
                     position.column = 4;
                     position.row = 7;
                     break;
-                case 55:
+                case 54:
                     position.column = 5;
                     position.row = 7;
                     break;
-                case 56:
+                case 55:
                     position.column = 6;
                     position.row = 7;
                     break;
-                case 57:
-                    position.column = 0;
-                    position.row = 8;
-                    break;
-                case 58:
-                    position.column = 1;
-                    position.row = 8;
-                    break;
-                case 59:
-                    position.column = 2;
-                    position.row = 8;
-                    break;
-                case 60:
-                    position.column = 3;
-                    position.row = 8;
-                    break;
+
             }
 
             return position;
@@ -703,18 +741,18 @@ namespace RoomBuilder
         {
             int column = (int)Math.Floor(mouseDownLocation.X / (float)tileWidth);
             int row = (int)Math.Floor(mouseDownLocation.Y / (float)tileHeight);
-            int tileNum = (row * _roomWidth) + column;
+            int tileNum = (row * roomWidth) + column;
             return tileNum;
         }
         public void ReverseTile(int tileNum)
         {
             if (_tiles[tileNum].isSolid)
             {
-                _tiles[tileNum] = (false, -1);
+                _tiles[tileNum] = new TilePlacement() { isSolid = false, tileNum = -1 };
             }
             else
             {
-                _tiles[tileNum] = (true, 2);
+                _tiles[tileNum] = new TilePlacement() { isSolid = true, tileNum = 2 };
             }
         }
         private TileNeighbors GetTileNeighbors(int tileNum)
@@ -732,7 +770,7 @@ namespace RoomBuilder
             }
             else
             {
-                int upLeftNum = tileNum - 1 - _roomWidth; 
+                int upLeftNum = tileNum - 1 - roomWidth; 
                 neighbors.isUpLeft = _tiles[upLeftNum].isSolid;
             }
             // up
@@ -742,7 +780,7 @@ namespace RoomBuilder
             }
             else
             {
-                int upNum = tileNum - _roomWidth;
+                int upNum = tileNum - roomWidth;
                 neighbors.isUp = _tiles[upNum].isSolid;
             }
             // upRight
@@ -752,7 +790,7 @@ namespace RoomBuilder
             }
             else
             {
-                int upRightNum = tileNum - _roomWidth + 1;
+                int upRightNum = tileNum - roomWidth + 1;
                 neighbors.isUpRight = _tiles[upRightNum].isSolid;
             }
             // left
@@ -782,7 +820,7 @@ namespace RoomBuilder
             }
             else
             {
-                int downLeftNum = tileNum - 1 + _roomWidth;
+                int downLeftNum = tileNum - 1 + roomWidth;
                 neighbors.isDownLeft = _tiles[downLeftNum].isSolid;
             }
             // down
@@ -792,7 +830,7 @@ namespace RoomBuilder
             }
             else
             {
-                int downNum = tileNum + _roomWidth;
+                int downNum = tileNum + roomWidth;
                 neighbors.isDown = _tiles[downNum].isSolid;
             }
             // downRight
@@ -802,7 +840,7 @@ namespace RoomBuilder
             }
             else
             {
-                int downRightNum = tileNum + _roomWidth + 1;
+                int downRightNum = tileNum + roomWidth + 1;
                 neighbors.isDownRight = _tiles[downRightNum].isSolid;
             }
             return neighbors;

@@ -28,17 +28,22 @@
         /// </summary>
         private void InitializeComponent()
         {
-            this.btn_loadImage = new System.Windows.Forms.Button();
             this.btnCreateNewRoom = new System.Windows.Forms.Button();
             this.label1 = new System.Windows.Forms.Label();
             this.label2 = new System.Windows.Forms.Label();
             this.tbNumTilesWide = new System.Windows.Forms.TextBox();
             this.tbNumTilesHigh = new System.Windows.Forms.TextBox();
             this.splitContainer1 = new System.Windows.Forms.SplitContainer();
-            this.panel1 = new System.Windows.Forms.Panel();
+            this.lblMouseDownPoint = new System.Windows.Forms.Label();
             this.flowLayoutPanel1 = new System.Windows.Forms.FlowLayoutPanel();
             this.pictureBoxMap = new System.Windows.Forms.PictureBox();
-            this.lblMouseDownPoint = new System.Windows.Forms.Label();
+            this.panel1 = new System.Windows.Forms.Panel();
+            this.label3 = new System.Windows.Forms.Label();
+            this.tbRoomName = new System.Windows.Forms.TextBox();
+            this.saveFileDialog1 = new System.Windows.Forms.SaveFileDialog();
+            this.btnSaveFile = new System.Windows.Forms.Button();
+            this.btnLoadFile = new System.Windows.Forms.Button();
+            this.openFileDialog1 = new System.Windows.Forms.OpenFileDialog();
             ((System.ComponentModel.ISupportInitialize)(this.splitContainer1)).BeginInit();
             this.splitContainer1.Panel1.SuspendLayout();
             this.splitContainer1.Panel2.SuspendLayout();
@@ -47,19 +52,9 @@
             ((System.ComponentModel.ISupportInitialize)(this.pictureBoxMap)).BeginInit();
             this.SuspendLayout();
             // 
-            // btn_loadImage
-            // 
-            this.btn_loadImage.Location = new System.Drawing.Point(44, 59);
-            this.btn_loadImage.Name = "btn_loadImage";
-            this.btn_loadImage.Size = new System.Drawing.Size(120, 23);
-            this.btn_loadImage.TabIndex = 0;
-            this.btn_loadImage.Text = "Load Sprite Sheet";
-            this.btn_loadImage.UseVisualStyleBackColor = true;
-            this.btn_loadImage.Click += new System.EventHandler(this.btn_loadImage_Click);
-            // 
             // btnCreateNewRoom
             // 
-            this.btnCreateNewRoom.Location = new System.Drawing.Point(46, 185);
+            this.btnCreateNewRoom.Location = new System.Drawing.Point(24, 99);
             this.btnCreateNewRoom.Name = "btnCreateNewRoom";
             this.btnCreateNewRoom.Size = new System.Drawing.Size(126, 23);
             this.btnCreateNewRoom.TabIndex = 1;
@@ -70,7 +65,7 @@
             // label1
             // 
             this.label1.AutoSize = true;
-            this.label1.Location = new System.Drawing.Point(43, 115);
+            this.label1.Location = new System.Drawing.Point(21, 29);
             this.label1.Name = "label1";
             this.label1.Size = new System.Drawing.Size(82, 13);
             this.label1.TabIndex = 2;
@@ -79,7 +74,7 @@
             // label2
             // 
             this.label2.AutoSize = true;
-            this.label2.Location = new System.Drawing.Point(43, 145);
+            this.label2.Location = new System.Drawing.Point(21, 59);
             this.label2.Name = "label2";
             this.label2.Size = new System.Drawing.Size(79, 13);
             this.label2.TabIndex = 3;
@@ -87,14 +82,14 @@
             // 
             // tbNumTilesWide
             // 
-            this.tbNumTilesWide.Location = new System.Drawing.Point(131, 112);
+            this.tbNumTilesWide.Location = new System.Drawing.Point(109, 26);
             this.tbNumTilesWide.Name = "tbNumTilesWide";
             this.tbNumTilesWide.Size = new System.Drawing.Size(100, 20);
             this.tbNumTilesWide.TabIndex = 4;
             // 
             // tbNumTilesHigh
             // 
-            this.tbNumTilesHigh.Location = new System.Drawing.Point(131, 142);
+            this.tbNumTilesHigh.Location = new System.Drawing.Point(109, 56);
             this.tbNumTilesHigh.Name = "tbNumTilesHigh";
             this.tbNumTilesHigh.Size = new System.Drawing.Size(100, 20);
             this.tbNumTilesHigh.TabIndex = 5;
@@ -106,8 +101,11 @@
             // 
             // splitContainer1.Panel1
             // 
+            this.splitContainer1.Panel1.Controls.Add(this.btnLoadFile);
+            this.splitContainer1.Panel1.Controls.Add(this.btnSaveFile);
+            this.splitContainer1.Panel1.Controls.Add(this.tbRoomName);
+            this.splitContainer1.Panel1.Controls.Add(this.label3);
             this.splitContainer1.Panel1.Controls.Add(this.lblMouseDownPoint);
-            this.splitContainer1.Panel1.Controls.Add(this.btn_loadImage);
             this.splitContainer1.Panel1.Controls.Add(this.tbNumTilesHigh);
             this.splitContainer1.Panel1.Controls.Add(this.btnCreateNewRoom);
             this.splitContainer1.Panel1.Controls.Add(this.tbNumTilesWide);
@@ -125,16 +123,14 @@
             this.splitContainer1.SplitterDistance = 307;
             this.splitContainer1.TabIndex = 6;
             // 
-            // panel1
+            // lblMouseDownPoint
             // 
-            this.panel1.AutoScroll = true;
-            this.panel1.AutoSize = true;
-            this.panel1.BackColor = System.Drawing.SystemColors.HotTrack;
-            this.panel1.Dock = System.Windows.Forms.DockStyle.Top;
-            this.panel1.Location = new System.Drawing.Point(0, 0);
-            this.panel1.Name = "panel1";
-            this.panel1.Size = new System.Drawing.Size(2493, 0);
-            this.panel1.TabIndex = 0;
+            this.lblMouseDownPoint.AutoSize = true;
+            this.lblMouseDownPoint.Location = new System.Drawing.Point(21, 163);
+            this.lblMouseDownPoint.Name = "lblMouseDownPoint";
+            this.lblMouseDownPoint.Size = new System.Drawing.Size(35, 13);
+            this.lblMouseDownPoint.TabIndex = 6;
+            this.lblMouseDownPoint.Text = "label3";
             // 
             // flowLayoutPanel1
             // 
@@ -155,14 +151,59 @@
             this.pictureBoxMap.TabIndex = 0;
             this.pictureBoxMap.TabStop = false;
             // 
-            // lblMouseDownPoint
+            // panel1
             // 
-            this.lblMouseDownPoint.AutoSize = true;
-            this.lblMouseDownPoint.Location = new System.Drawing.Point(41, 267);
-            this.lblMouseDownPoint.Name = "lblMouseDownPoint";
-            this.lblMouseDownPoint.Size = new System.Drawing.Size(35, 13);
-            this.lblMouseDownPoint.TabIndex = 6;
-            this.lblMouseDownPoint.Text = "label3";
+            this.panel1.AutoScroll = true;
+            this.panel1.AutoSize = true;
+            this.panel1.BackColor = System.Drawing.SystemColors.HotTrack;
+            this.panel1.Dock = System.Windows.Forms.DockStyle.Top;
+            this.panel1.Location = new System.Drawing.Point(0, 0);
+            this.panel1.Name = "panel1";
+            this.panel1.Size = new System.Drawing.Size(2493, 0);
+            this.panel1.TabIndex = 0;
+            // 
+            // label3
+            // 
+            this.label3.AutoSize = true;
+            this.label3.Location = new System.Drawing.Point(3, 235);
+            this.label3.Name = "label3";
+            this.label3.Size = new System.Drawing.Size(64, 13);
+            this.label3.TabIndex = 7;
+            this.label3.Text = "Room name";
+            this.label3.TextChanged += new System.EventHandler(this.tbRoomName_TextChanged);
+            // 
+            // tbRoomName
+            // 
+            this.tbRoomName.Location = new System.Drawing.Point(3, 251);
+            this.tbRoomName.Name = "tbRoomName";
+            this.tbRoomName.Size = new System.Drawing.Size(282, 20);
+            this.tbRoomName.TabIndex = 8;
+            this.tbRoomName.TextChanged += new System.EventHandler(this.tbRoomName_TextChanged);
+            // 
+            // btnSaveFile
+            // 
+            this.btnSaveFile.Location = new System.Drawing.Point(6, 313);
+            this.btnSaveFile.Name = "btnSaveFile";
+            this.btnSaveFile.Size = new System.Drawing.Size(75, 23);
+            this.btnSaveFile.TabIndex = 9;
+            this.btnSaveFile.Text = "Save File";
+            this.btnSaveFile.UseVisualStyleBackColor = true;
+            this.btnSaveFile.TextChanged += new System.EventHandler(this.tbRoomName_TextChanged);
+            this.btnSaveFile.Click += new System.EventHandler(this.btnSaveFile_Click);
+            // 
+            // btnLoadFile
+            // 
+            this.btnLoadFile.Location = new System.Drawing.Point(3, 417);
+            this.btnLoadFile.Name = "btnLoadFile";
+            this.btnLoadFile.Size = new System.Drawing.Size(75, 23);
+            this.btnLoadFile.TabIndex = 10;
+            this.btnLoadFile.Text = "Load file";
+            this.btnLoadFile.UseVisualStyleBackColor = true;
+            this.btnLoadFile.Click += new System.EventHandler(this.btnLoadFile_Click);
+            // 
+            // openFileDialog1
+            // 
+            this.openFileDialog1.FileName = "openFileDialog1";
             // 
             // RoomBuilder
             // 
@@ -185,8 +226,6 @@
         }
 
         #endregion
-
-        private System.Windows.Forms.Button btn_loadImage;
         private System.Windows.Forms.Button btnCreateNewRoom;
         private System.Windows.Forms.Label label1;
         private System.Windows.Forms.Label label2;
@@ -197,6 +236,12 @@
         private System.Windows.Forms.FlowLayoutPanel flowLayoutPanel1;
         private System.Windows.Forms.PictureBox pictureBoxMap;
         private System.Windows.Forms.Label lblMouseDownPoint;
+        private System.Windows.Forms.Button btnSaveFile;
+        private System.Windows.Forms.TextBox tbRoomName;
+        private System.Windows.Forms.Label label3;
+        private System.Windows.Forms.SaveFileDialog saveFileDialog1;
+        private System.Windows.Forms.Button btnLoadFile;
+        private System.Windows.Forms.OpenFileDialog openFileDialog1;
     }
 }
 

@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.ComponentModel;
 using System.Data;
 using System.Drawing;
+using System.IO;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -31,11 +32,7 @@ namespace RoomBuilder
             pictureBoxMap.MouseMove += new MouseEventHandler(pictureBoxMap_MouseMove);
         }
 
-        private void btn_loadImage_Click(object sender, EventArgs e)
-        {
-
-            
-        }
+        
         private void LoadSpriteSheet()
         {
             string path = @"E:\Unity Projects\SpiderPocGit\Assets\Sprites\FloorAndWallTiless\WorldBuilderSet\WorldBuilderTilemap48x48.png";
@@ -56,11 +53,15 @@ namespace RoomBuilder
             int width = int.Parse(tbNumTilesWide.Text);
             int height = int.Parse(tbNumTilesHigh.Text);
             builderHelper.SetRoomDimensions(width, height);
-            int picBoxWidth = width * builderHelper.tileWidth;
-            int picBoxHeight = height * builderHelper.tileHeight;
+            ResizeUi();
+            pictureBoxMap.Refresh();
+        }
+        private void ResizeUi()
+        {
+            int picBoxWidth = builderHelper.roomWidth * builderHelper.tileWidth;
+            int picBoxHeight = builderHelper.roomHeight * builderHelper.tileHeight;
             flowLayoutPanel1.Size = new Size(picBoxWidth + 25, picBoxHeight + 25);
             pictureBoxMap.Size = new Size(picBoxWidth, picBoxHeight);
-            pictureBoxMap.Refresh();
         }
         private void pictureBoxMap_MouseDown(object sender, System.Windows.Forms.MouseEventArgs e)
         {
@@ -90,6 +91,41 @@ namespace RoomBuilder
                     _lastTileFlipped = tileNum;
                     pictureBoxMap.Refresh();
                 }
+            }
+        }
+
+        private void tbRoomName_TextChanged(object sender, EventArgs e)
+        {
+            builderHelper.roomName = tbRoomName.Text;
+        }
+
+        private void btnSaveFile_Click(object sender, EventArgs e)
+        {
+            string json = builderHelper.SerializeRoom();
+
+            saveFileDialog1.Filter = "data files (*.dat)|*.dat";
+            saveFileDialog1.RestoreDirectory = true;
+            if(saveFileDialog1.ShowDialog() == DialogResult.OK)
+            {
+                File.WriteAllText(saveFileDialog1.FileName, json);
+            }
+        }
+
+        private void btnLoadFile_Click(object sender, EventArgs e)
+        {
+            openFileDialog1.InitialDirectory = @"E:\Unity Projects\SpiderPocGit\Assets\RoomTemplates";
+            openFileDialog1.CheckFileExists = true;
+            openFileDialog1.CheckPathExists = true;
+            openFileDialog1.Filter = "data files (*.dat)|*.dat";
+            if(openFileDialog1.ShowDialog() == DialogResult.OK)
+            {
+                string json = File.ReadAllText(openFileDialog1.FileName);
+                builderHelper.DeSerializeRoom(json);
+                tbNumTilesHigh.Text = builderHelper.roomHeight.ToString();
+                tbNumTilesWide.Text = builderHelper.roomWidth.ToString();
+                tbRoomName.Text = builderHelper.roomName;
+                ResizeUi();
+                pictureBoxMap.Refresh();
             }
         }
     }
