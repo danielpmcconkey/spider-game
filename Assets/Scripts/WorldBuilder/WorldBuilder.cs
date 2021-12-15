@@ -15,21 +15,22 @@ namespace Assets.Scripts.WorldBuilder
         [Space(10)]
         [Header("Tile sets")]
         [Space(10)]
-        [SerializeField] public GameObject rock1Base;
-        [SerializeField] public GameObject rock1Top;
-        [SerializeField] public GameObject rock1Bottom;
-        [SerializeField] public GameObject rock1Left;
-        [SerializeField] public GameObject rock1Right;
-        [SerializeField] public GameObject rock1CornerUpLeft;
-        [SerializeField] public GameObject rock1CornerUpRight;
-        [SerializeField] public GameObject rock1CornerBottomLeft;
-        [SerializeField] public GameObject rock1CornerBottomRight;
-        [SerializeField] public GameObject rock1EndCapUp;
-        [SerializeField] public GameObject rock1EndCapDown;
-        [SerializeField] public GameObject rock1EndCapLeft;
-        [SerializeField] public GameObject rock1EndCapRight;
-        [SerializeField] public GameObject rock1SingleWide;
-        [SerializeField] public GameObject rock1SingleTall;
+        [SerializeField] public GameObject rock1TileSet;
+        //[SerializeField] public GameObject rock1Base;
+        //[SerializeField] public GameObject rock1Top;
+        //[SerializeField] public GameObject rock1Bottom;
+        //[SerializeField] public GameObject rock1Left;
+        //[SerializeField] public GameObject rock1Right;
+        //[SerializeField] public GameObject rock1CornerUpLeft;
+        //[SerializeField] public GameObject rock1CornerUpRight;
+        //[SerializeField] public GameObject rock1CornerBottomLeft;
+        //[SerializeField] public GameObject rock1CornerBottomRight;
+        //[SerializeField] public GameObject rock1EndCapUp;
+        //[SerializeField] public GameObject rock1EndCapDown;
+        //[SerializeField] public GameObject rock1EndCapLeft;
+        //[SerializeField] public GameObject rock1EndCapRight;
+        //[SerializeField] public GameObject rock1SingleWide;
+        //[SerializeField] public GameObject rock1SingleTall;
         [SerializeField] public GameObject rock1Door;
         [Space(10)]
         [Header("Enemies")]
@@ -84,14 +85,21 @@ namespace Assets.Scripts.WorldBuilder
 
             Room room0 = new Room(_tileSetRock1, 40, 20, new Vector2(-6.0f, 10.0F), room000);
             _rooms[0] = room0;
-            room0.AddPerimiterTiles();
-            // tile above the floor = -7.68
-            room0.AddPlatformTiles(new Vector2(-1f, -4.0f), 4, 5);
-            room0.AddPlatformTiles(new Vector2(5f, -5f), 12, 1);
-            room0.AddPlatformTiles(new Vector2(5f, -1f), 5, 1);
-            room0.AddPlatformTiles(new Vector2(12.0f, -1f), 5, 1);
-            room0.AddPlatformTiles(new Vector2(5f, 3f), 12, 1);
-            room0.AddPlatformTiles(new Vector2(20f, 0f), 2, 7);
+
+
+            Transform tile8 = rock1TileSet.transform.Find("8_origin");
+            Vector3 position = Vector3.zero;
+            Quaternion rotation = new Quaternion(0, 0, 0, 0);
+            UnityEngine.Object.Instantiate(tile8, position, rotation, roomsParent.transform);
+
+            //room0.AddPerimiterTiles();
+            //// tile above the floor = -7.68
+            //room0.AddPlatformTiles(new Vector2(-1f, -4.0f), 4, 5);
+            //room0.AddPlatformTiles(new Vector2(5f, -5f), 12, 1);
+            //room0.AddPlatformTiles(new Vector2(5f, -1f), 5, 1);
+            //room0.AddPlatformTiles(new Vector2(12.0f, -1f), 5, 1);
+            //room0.AddPlatformTiles(new Vector2(5f, 3f), 12, 1);
+            //room0.AddPlatformTiles(new Vector2(20f, 0f), 2, 7);
             //room0.AddPlatformTiles(new Vector2(24f, 1f), 1, 10);
             //room0.AddPlatformTiles(new Vector2(26f, 0f), 1, 9);
             //room0.AddPlatformTiles(new Vector2(28f, -1f), 1, 8);
@@ -110,43 +118,43 @@ namespace Assets.Scripts.WorldBuilder
             //room0.AddStartingEnemy(floatingBot, new Vector2(36f, 1f), playerCharacter);
 
 
-            GameObject room001 = Instantiate(new GameObject("Room001"), roomsParent.transform, false);
+            //GameObject room001 = Instantiate(new GameObject("Room001"), roomsParent.transform, false);
 
-            Room room1 = new Room(_tileSetRock1, 20, 20, new Vector2(34.0f, 10.0F), room001);
-            _rooms[1] = room1;
-            room1.AddPerimiterTiles();
-            room1.AddPlatformTiles(new Vector2(38f, 6f), 1, 11);
+            //Room room1 = new Room(_tileSetRock1, 20, 20, new Vector2(34.0f, 10.0F), room001);
+            //_rooms[1] = room1;
+            //room1.AddPerimiterTiles();
+            //room1.AddPlatformTiles(new Vector2(38f, 6f), 1, 11);
             //room1.AddStartingEnemy(floatingBot, new Vector2(40f, 0f), playerCharacter);
             //room1.AddStartingEnemy(floatingBot, new Vector2(42f, 0f), playerCharacter);
             //room1.AddStartingEnemy(floatingBot, new Vector2(44f, 0f), playerCharacter);
             //room1.AddStartingEnemy(floatingBot, new Vector2(46f, 0f), playerCharacter);
             //room1.AddStartingEnemy(floatingBot, new Vector2(48f, 0f), playerCharacter);
-           
+
 
 
             // draw the door between them
-            ConnectRoomsWithDoor(room0, room1, rock1Door, 1f);
-            room0.DrawSelf();
-            room1.DrawSelf();
+            //ConnectRoomsWithDoor(room0, room1, rock1Door, 1f);
+            //room0.DrawSelf();
+            //room1.DrawSelf();
         }
         private void PopulateTileSets()
         {
             _tileSetRock1 = new TileSet();
-            _tileSetRock1.basePrefab = rock1Base;
-            _tileSetRock1.topPrefab = rock1Top;
-            _tileSetRock1.bottomPrefab = rock1Bottom;
-            _tileSetRock1.leftPrefab = rock1Left;
-            _tileSetRock1.rightPrefab = rock1Right;
-            _tileSetRock1.cornerUpLeftPrefab = rock1CornerUpLeft;
-            _tileSetRock1.cornerUpRightPrefab = rock1CornerUpRight;
-            _tileSetRock1.cornerDownLeftPrefab = rock1CornerBottomLeft;
-            _tileSetRock1.cornerDownRightPrefab = rock1CornerBottomRight;
-            _tileSetRock1.endCapUpPrefab = rock1EndCapUp;
-            _tileSetRock1.endCapDownPrefab = rock1EndCapDown;
-            _tileSetRock1.endCapLeftPrefab = rock1EndCapLeft;
-            _tileSetRock1.endCapRightPrefab = rock1EndCapRight;
-            _tileSetRock1.singleTallPrefab = rock1SingleTall;
-            _tileSetRock1.singleWidePrefab = rock1SingleWide;
+            //_tileSetRock1.basePrefab = rock1Base;
+            //_tileSetRock1.topPrefab = rock1Top;
+            //_tileSetRock1.bottomPrefab = rock1Bottom;
+            //_tileSetRock1.leftPrefab = rock1Left;
+            //_tileSetRock1.rightPrefab = rock1Right;
+            //_tileSetRock1.cornerUpLeftPrefab = rock1CornerUpLeft;
+            //_tileSetRock1.cornerUpRightPrefab = rock1CornerUpRight;
+            //_tileSetRock1.cornerDownLeftPrefab = rock1CornerBottomLeft;
+            //_tileSetRock1.cornerDownRightPrefab = rock1CornerBottomRight;
+            //_tileSetRock1.endCapUpPrefab = rock1EndCapUp;
+            //_tileSetRock1.endCapDownPrefab = rock1EndCapDown;
+            //_tileSetRock1.endCapLeftPrefab = rock1EndCapLeft;
+            //_tileSetRock1.endCapRightPrefab = rock1EndCapRight;
+            //_tileSetRock1.singleTallPrefab = rock1SingleTall;
+            //_tileSetRock1.singleWidePrefab = rock1SingleWide;
         }
         private void ConnectRoomsWithDoor(Room roomLeft, Room roomRight, GameObject prefab, 
             float heightFromLeftFloorInTiles)
