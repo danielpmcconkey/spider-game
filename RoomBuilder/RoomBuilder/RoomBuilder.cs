@@ -103,7 +103,7 @@ namespace RoomBuilder
         {
             string json = builderHelper.SerializeRoom();
 
-            saveFileDialog1.Filter = "data files (*.dat)|*.dat";
+            saveFileDialog1.Filter = "text files (*.txt)|*.txt";
             saveFileDialog1.RestoreDirectory = true;
             if(saveFileDialog1.ShowDialog() == DialogResult.OK)
             {
@@ -116,8 +116,8 @@ namespace RoomBuilder
             openFileDialog1.InitialDirectory = @"E:\Unity Projects\SpiderPocGit\Assets\RoomTemplates";
             openFileDialog1.CheckFileExists = true;
             openFileDialog1.CheckPathExists = true;
-            openFileDialog1.Filter = "data files (*.dat)|*.dat";
-            if(openFileDialog1.ShowDialog() == DialogResult.OK)
+            openFileDialog1.Filter = "text files (*.txt)|*.txt";
+            if (openFileDialog1.ShowDialog() == DialogResult.OK)
             {
                 string json = File.ReadAllText(openFileDialog1.FileName);
                 builderHelper.DeSerializeRoom(json);

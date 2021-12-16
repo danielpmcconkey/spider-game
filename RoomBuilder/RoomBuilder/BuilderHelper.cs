@@ -6,7 +6,12 @@ using System.Text.Json;
 
 namespace RoomBuilder
 {
-    public struct Position { public int column; public int row; }
+    [Serializable]
+    public struct Position
+    {
+        public int column { get; set; }
+        public int row { get; set; }
+    }
     [Serializable]
     public struct TilePlacement
     {
@@ -22,7 +27,9 @@ namespace RoomBuilder
         public int roomWidth { get; set; }
         public int roomHeight { get; set; }
         public TilePlacement[] tiles { get; set; }
+        public Position[] doors { get; set; }
     }
+    
     public struct TileNeighbors
     {
         public bool isUpLeft;
@@ -49,6 +56,7 @@ namespace RoomBuilder
         private List<int> _rightColumnTiles;
 
         private TilePlacement[] _tiles;
+        private List<Position> _doors;
 
         public string SerializeRoom()
         {
@@ -82,6 +90,7 @@ namespace RoomBuilder
             roomWidth = width;
             roomHeight = height;
             _tiles = new TilePlacement[width * height];
+            _doors = new List<Position>();
             AddPerimeterTiles();
         }
         public void DrawRoom(PaintEventArgs e)
@@ -463,7 +472,14 @@ namespace RoomBuilder
                         shouldDrawATile = true;
                     }
                     // update the array with a tile to draw
-                    if (shouldDrawATile) _tiles[i].tileNum = tileNumToDraw;
+                    if (shouldDrawATile)
+                    {
+                        _tiles[i].tileNum = tileNumToDraw;
+                    }
+                    else
+                    {
+                        _tiles[i].tileNum = -1;
+                    }
                 }
                 if (shouldDrawATile) DrawSprite(e, tileNumToDraw, column * tileWidth, row * tileHeight);
             }
