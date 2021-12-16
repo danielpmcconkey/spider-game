@@ -33,7 +33,7 @@ namespace Assets.Scripts.WorldBuilder
             if (doorSlider.transform.position.y > _originalPosition.y && !_isSliding)
             {
                 doorSlider.transform.position = new Vector2(
-                    _originalPosition.x, transform.position.y + doorGravity * Time.deltaTime * -1);
+                    _originalPosition.x, doorSlider.transform.position.y + (doorGravity * Time.deltaTime * -1));
             }
             if (doorSlider.transform.position.y < _originalPosition.y)
             {

@@ -206,7 +206,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   doorSlider: {fileID: 4066844655576508553}
   doorOrigin: {fileID: 9086032544419260718}
-  doorGravity: 91
+  doorGravity: 3
   doorHeight: 3
 --- !u!61 &8143433762886021358
 BoxCollider2D:
