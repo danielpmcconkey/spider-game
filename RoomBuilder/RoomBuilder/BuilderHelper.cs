@@ -43,7 +43,8 @@ namespace RoomBuilder
     }
     public class BuilderHelper
     {
-        public Image image;
+        public Image spriteSheetMainImage;
+        public Image doorImage;
         public int tileWidth = 48;
         public int tileHeight = 48;
         public string roomName;
@@ -67,8 +68,13 @@ namespace RoomBuilder
             save.roomWidth = roomWidth;
             save.roomHeight = roomHeight;
             save.tiles = _tiles;
+            save.doors = _doors.ToArray();
             string json = JsonSerializer.Serialize(save);
             return json;
+        }
+        public void AddDoor(int row, int column)
+        {
+            _doors.Add(new Position() { row = row, column = column });
         }
         public void DeSerializeRoom(string jsonFromFile)
         {
@@ -79,11 +85,17 @@ namespace RoomBuilder
             roomWidth = restore.roomWidth;
             roomHeight = restore.roomHeight;
             _tiles = restore.tiles;
+            if (restore.doors != null) _doors = new List<Position>(restore.doors);
+            else _doors = new List<Position>();
             AddPerimeterTiles(true);
         }
-        public void LoadImage(string path)
+        public void LoadSpriteSheetImage(string path)
         {
-            image = Image.FromFile(path);
+            spriteSheetMainImage = Image.FromFile(path);
+        }
+        public void LoadDoorImage(string path)
+        {
+            doorImage = Image.FromFile(path);
         }
         public void SetRoomDimensions(int width, int height)
         {
@@ -99,6 +111,7 @@ namespace RoomBuilder
             {
                 DrawTiles(e);
                 DrawGrid(e);
+                DrawDoors(e);
             }
         }
         private void AddPerimeterTiles(bool fromFileLoad = false)
@@ -130,6 +143,18 @@ namespace RoomBuilder
                 }
                 _leftColumnTiles.Add(i);
                 _rightColumnTiles.Add(i + roomWidth - 1);
+            }
+        }
+        private void DrawDoors(PaintEventArgs e)
+        {
+            if (_doors == null) _doors = new List<Position>();
+            foreach(Position d in _doors)
+            {
+                float x = d.column * tileWidth;
+                float y = d.row * tileHeight;
+                RectangleF srcRect = new RectangleF(0, 0, 2 * tileWidth, 3 * tileHeight);
+                GraphicsUnit units = GraphicsUnit.Pixel;
+                e.Graphics.DrawImage(doorImage, x, y, srcRect, units);
             }
         }
         private void DrawTiles(PaintEventArgs e)
@@ -510,7 +535,7 @@ namespace RoomBuilder
             Position position = GetSpriteSheetPositionOfSpriteNum(spriteNum);
             RectangleF srcRect = new RectangleF(position.column * tileWidth, position.row * tileHeight, tileWidth, tileHeight);
             GraphicsUnit units = GraphicsUnit.Pixel;
-            e.Graphics.DrawImage(image, x, y, srcRect, units);
+            e.Graphics.DrawImage(spriteSheetMainImage, x, y, srcRect, units);
         }
         private Position GetSpriteSheetPositionOfSpriteNum(int spriteNum)
         {

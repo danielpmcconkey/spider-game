@@ -35,9 +35,10 @@ namespace RoomBuilder
         
         private void LoadSpriteSheet()
         {
-            string path = @"E:\Unity Projects\SpiderPocGit\Assets\Sprites\FloorAndWallTiless\WorldBuilderSet\WorldBuilderTilemap48x48.png";
-            
-            builderHelper.LoadImage(path);
+            string pathToSpriteSheet = @"E:\Unity Projects\SpiderPocGit\Assets\Sprites\FloorAndWallTiless\WorldBuilderSet\WorldBuilderTilemap48x48.png";
+            string pathToDoorImage = @"E:\Unity Projects\SpiderPocGit\Assets\Sprites\FloorAndWallTiless\WorldBuilderSet\WorldBuilderDoor.png";
+            builderHelper.LoadSpriteSheetImage(pathToSpriteSheet);
+            builderHelper.LoadDoorImage(pathToDoorImage);
         }
         private void PictureBox_Paint(object sender, PaintEventArgs e)
         {
@@ -127,6 +128,12 @@ namespace RoomBuilder
                 ResizeUi();
                 pictureBoxMap.Refresh();
             }
+        }
+
+        private void btnAddDoor_Click(object sender, EventArgs e)
+        {
+            builderHelper.AddDoor(int.Parse(tbAddDoorRow.Text), int.Parse(tbAddColumn.Text));
+            pictureBoxMap.Refresh();
         }
     }
 }

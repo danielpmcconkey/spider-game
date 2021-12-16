@@ -33,6 +33,13 @@ namespace Assets.Scripts.WorldBuilder
         public int roomWidth;
         public int roomHeight;
         public TilePlacement[] tiles;
+        public Position[] doors;
+    }
+    [Serializable]
+    public struct Position
+    {
+        public int column;
+        public int row;
     }
     public static class RoomBuilderHelper
     {

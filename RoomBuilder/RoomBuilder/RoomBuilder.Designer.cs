@@ -34,16 +34,21 @@
             this.tbNumTilesWide = new System.Windows.Forms.TextBox();
             this.tbNumTilesHigh = new System.Windows.Forms.TextBox();
             this.splitContainer1 = new System.Windows.Forms.SplitContainer();
+            this.btnLoadFile = new System.Windows.Forms.Button();
+            this.btnSaveFile = new System.Windows.Forms.Button();
+            this.tbRoomName = new System.Windows.Forms.TextBox();
+            this.label3 = new System.Windows.Forms.Label();
             this.lblMouseDownPoint = new System.Windows.Forms.Label();
             this.flowLayoutPanel1 = new System.Windows.Forms.FlowLayoutPanel();
             this.pictureBoxMap = new System.Windows.Forms.PictureBox();
             this.panel1 = new System.Windows.Forms.Panel();
-            this.label3 = new System.Windows.Forms.Label();
-            this.tbRoomName = new System.Windows.Forms.TextBox();
             this.saveFileDialog1 = new System.Windows.Forms.SaveFileDialog();
-            this.btnSaveFile = new System.Windows.Forms.Button();
-            this.btnLoadFile = new System.Windows.Forms.Button();
             this.openFileDialog1 = new System.Windows.Forms.OpenFileDialog();
+            this.btnAddDoor = new System.Windows.Forms.Button();
+            this.label4 = new System.Windows.Forms.Label();
+            this.tbAddDoorRow = new System.Windows.Forms.TextBox();
+            this.label5 = new System.Windows.Forms.Label();
+            this.tbAddColumn = new System.Windows.Forms.TextBox();
             ((System.ComponentModel.ISupportInitialize)(this.splitContainer1)).BeginInit();
             this.splitContainer1.Panel1.SuspendLayout();
             this.splitContainer1.Panel2.SuspendLayout();
@@ -101,6 +106,11 @@
             // 
             // splitContainer1.Panel1
             // 
+            this.splitContainer1.Panel1.Controls.Add(this.tbAddColumn);
+            this.splitContainer1.Panel1.Controls.Add(this.label5);
+            this.splitContainer1.Panel1.Controls.Add(this.tbAddDoorRow);
+            this.splitContainer1.Panel1.Controls.Add(this.label4);
+            this.splitContainer1.Panel1.Controls.Add(this.btnAddDoor);
             this.splitContainer1.Panel1.Controls.Add(this.btnLoadFile);
             this.splitContainer1.Panel1.Controls.Add(this.btnSaveFile);
             this.splitContainer1.Panel1.Controls.Add(this.tbRoomName);
@@ -122,6 +132,45 @@
             this.splitContainer1.Size = new System.Drawing.Size(2804, 957);
             this.splitContainer1.SplitterDistance = 307;
             this.splitContainer1.TabIndex = 6;
+            // 
+            // btnLoadFile
+            // 
+            this.btnLoadFile.Location = new System.Drawing.Point(3, 417);
+            this.btnLoadFile.Name = "btnLoadFile";
+            this.btnLoadFile.Size = new System.Drawing.Size(75, 23);
+            this.btnLoadFile.TabIndex = 10;
+            this.btnLoadFile.Text = "Load file";
+            this.btnLoadFile.UseVisualStyleBackColor = true;
+            this.btnLoadFile.Click += new System.EventHandler(this.btnLoadFile_Click);
+            // 
+            // btnSaveFile
+            // 
+            this.btnSaveFile.Location = new System.Drawing.Point(6, 313);
+            this.btnSaveFile.Name = "btnSaveFile";
+            this.btnSaveFile.Size = new System.Drawing.Size(75, 23);
+            this.btnSaveFile.TabIndex = 9;
+            this.btnSaveFile.Text = "Save File";
+            this.btnSaveFile.UseVisualStyleBackColor = true;
+            this.btnSaveFile.TextChanged += new System.EventHandler(this.tbRoomName_TextChanged);
+            this.btnSaveFile.Click += new System.EventHandler(this.btnSaveFile_Click);
+            // 
+            // tbRoomName
+            // 
+            this.tbRoomName.Location = new System.Drawing.Point(3, 251);
+            this.tbRoomName.Name = "tbRoomName";
+            this.tbRoomName.Size = new System.Drawing.Size(282, 20);
+            this.tbRoomName.TabIndex = 8;
+            this.tbRoomName.TextChanged += new System.EventHandler(this.tbRoomName_TextChanged);
+            // 
+            // label3
+            // 
+            this.label3.AutoSize = true;
+            this.label3.Location = new System.Drawing.Point(3, 235);
+            this.label3.Name = "label3";
+            this.label3.Size = new System.Drawing.Size(64, 13);
+            this.label3.TabIndex = 7;
+            this.label3.Text = "Room name";
+            this.label3.TextChanged += new System.EventHandler(this.tbRoomName_TextChanged);
             // 
             // lblMouseDownPoint
             // 
@@ -162,48 +211,51 @@
             this.panel1.Size = new System.Drawing.Size(2493, 0);
             this.panel1.TabIndex = 0;
             // 
-            // label3
-            // 
-            this.label3.AutoSize = true;
-            this.label3.Location = new System.Drawing.Point(3, 235);
-            this.label3.Name = "label3";
-            this.label3.Size = new System.Drawing.Size(64, 13);
-            this.label3.TabIndex = 7;
-            this.label3.Text = "Room name";
-            this.label3.TextChanged += new System.EventHandler(this.tbRoomName_TextChanged);
-            // 
-            // tbRoomName
-            // 
-            this.tbRoomName.Location = new System.Drawing.Point(3, 251);
-            this.tbRoomName.Name = "tbRoomName";
-            this.tbRoomName.Size = new System.Drawing.Size(282, 20);
-            this.tbRoomName.TabIndex = 8;
-            this.tbRoomName.TextChanged += new System.EventHandler(this.tbRoomName_TextChanged);
-            // 
-            // btnSaveFile
-            // 
-            this.btnSaveFile.Location = new System.Drawing.Point(6, 313);
-            this.btnSaveFile.Name = "btnSaveFile";
-            this.btnSaveFile.Size = new System.Drawing.Size(75, 23);
-            this.btnSaveFile.TabIndex = 9;
-            this.btnSaveFile.Text = "Save File";
-            this.btnSaveFile.UseVisualStyleBackColor = true;
-            this.btnSaveFile.TextChanged += new System.EventHandler(this.tbRoomName_TextChanged);
-            this.btnSaveFile.Click += new System.EventHandler(this.btnSaveFile_Click);
-            // 
-            // btnLoadFile
-            // 
-            this.btnLoadFile.Location = new System.Drawing.Point(3, 417);
-            this.btnLoadFile.Name = "btnLoadFile";
-            this.btnLoadFile.Size = new System.Drawing.Size(75, 23);
-            this.btnLoadFile.TabIndex = 10;
-            this.btnLoadFile.Text = "Load file";
-            this.btnLoadFile.UseVisualStyleBackColor = true;
-            this.btnLoadFile.Click += new System.EventHandler(this.btnLoadFile_Click);
-            // 
             // openFileDialog1
             // 
             this.openFileDialog1.FileName = "openFileDialog1";
+            // 
+            // btnAddDoor
+            // 
+            this.btnAddDoor.Location = new System.Drawing.Point(6, 706);
+            this.btnAddDoor.Name = "btnAddDoor";
+            this.btnAddDoor.Size = new System.Drawing.Size(75, 23);
+            this.btnAddDoor.TabIndex = 11;
+            this.btnAddDoor.Text = "Add door";
+            this.btnAddDoor.UseVisualStyleBackColor = true;
+            this.btnAddDoor.Click += new System.EventHandler(this.btnAddDoor_Click);
+            // 
+            // label4
+            // 
+            this.label4.AutoSize = true;
+            this.label4.Location = new System.Drawing.Point(6, 617);
+            this.label4.Name = "label4";
+            this.label4.Size = new System.Drawing.Size(24, 13);
+            this.label4.TabIndex = 12;
+            this.label4.Text = "row";
+            // 
+            // tbAddDoorRow
+            // 
+            this.tbAddDoorRow.Location = new System.Drawing.Point(6, 646);
+            this.tbAddDoorRow.Name = "tbAddDoorRow";
+            this.tbAddDoorRow.Size = new System.Drawing.Size(100, 20);
+            this.tbAddDoorRow.TabIndex = 13;
+            // 
+            // label5
+            // 
+            this.label5.AutoSize = true;
+            this.label5.Location = new System.Drawing.Point(114, 616);
+            this.label5.Name = "label5";
+            this.label5.Size = new System.Drawing.Size(41, 13);
+            this.label5.TabIndex = 14;
+            this.label5.Text = "column";
+            // 
+            // tbAddColumn
+            // 
+            this.tbAddColumn.Location = new System.Drawing.Point(112, 646);
+            this.tbAddColumn.Name = "tbAddColumn";
+            this.tbAddColumn.Size = new System.Drawing.Size(100, 20);
+            this.tbAddColumn.TabIndex = 15;
             // 
             // RoomBuilder
             // 
@@ -242,6 +294,11 @@
         private System.Windows.Forms.SaveFileDialog saveFileDialog1;
         private System.Windows.Forms.Button btnLoadFile;
         private System.Windows.Forms.OpenFileDialog openFileDialog1;
+        private System.Windows.Forms.TextBox tbAddDoorRow;
+        private System.Windows.Forms.Label label4;
+        private System.Windows.Forms.Button btnAddDoor;
+        private System.Windows.Forms.TextBox tbAddColumn;
+        private System.Windows.Forms.Label label5;
     }
 }
 
