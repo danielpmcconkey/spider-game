@@ -338,7 +338,6 @@ namespace Assets.Scripts.CharacterControl
                 else //if (distanceToStrikePoint < distanceToForwardCollider)
                 {
                     // we're inside of a wall already
-                    string burp = "true";
                     float distanceBetweenMiddleAndForwardCollider = Vector2.Distance(transform.position, hitInfo.point);
 
                     if (characterOrienter.headingDirection == FacingDirection.LEFT)

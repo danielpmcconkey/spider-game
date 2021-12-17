@@ -55,23 +55,10 @@ namespace RoomBuilder
         private List<int> _bottomRowTiles;
         private List<int> _leftColumnTiles;
         private List<int> _rightColumnTiles;
-
         private TilePlacement[] _tiles;
         private List<Position> _doors;
 
-        public string SerializeRoom()
-        {
-            RoomSave save = new RoomSave();
-            save.roomName = roomName;
-            save.tileWidth = tileWidth;
-            save.tileHeight = tileHeight;
-            save.roomWidth = roomWidth;
-            save.roomHeight = roomHeight;
-            save.tiles = _tiles;
-            save.doors = _doors.ToArray();
-            string json = JsonSerializer.Serialize(save);
-            return json;
-        }
+        
         public void AddDoor(int row, int column)
         {
             _doors.Add(new Position() { row = row, column = column });
@@ -89,22 +76,6 @@ namespace RoomBuilder
             else _doors = new List<Position>();
             AddPerimeterTiles(true);
         }
-        public void LoadSpriteSheetImage(string path)
-        {
-            spriteSheetMainImage = Image.FromFile(path);
-        }
-        public void LoadDoorImage(string path)
-        {
-            doorImage = Image.FromFile(path);
-        }
-        public void SetRoomDimensions(int width, int height)
-        {
-            roomWidth = width;
-            roomHeight = height;
-            _tiles = new TilePlacement[width * height];
-            _doors = new List<Position>();
-            AddPerimeterTiles();
-        }
         public void DrawRoom(PaintEventArgs e)
         {
             if (roomWidth > 0 && roomHeight > 0)
@@ -114,6 +85,61 @@ namespace RoomBuilder
                 DrawDoors(e);
             }
         }
+        public void DrawSprite(PaintEventArgs e, int spriteNum, float x, float y)
+        {
+            Position position = GetSpriteSheetPositionOfSpriteNum(spriteNum);
+            RectangleF srcRect = new RectangleF(position.column * tileWidth, position.row * tileHeight, tileWidth, tileHeight);
+            GraphicsUnit units = GraphicsUnit.Pixel;
+            e.Graphics.DrawImage(spriteSheetMainImage, x, y, srcRect, units);
+        }
+        public int GetTileNumbFromMousePosition(Point mouseDownLocation)
+        {
+            int column = (int)Math.Floor(mouseDownLocation.X / (float)tileWidth);
+            int row = (int)Math.Floor(mouseDownLocation.Y / (float)tileHeight);
+            int tileNum = (row * roomWidth) + column;
+            return tileNum;
+        }
+        public void LoadDoorImage(string path)
+        {
+            doorImage = Image.FromFile(path);
+        }
+        public void LoadSpriteSheetImage(string path)
+        {
+            spriteSheetMainImage = Image.FromFile(path);
+        }
+        public void ReverseTile(int tileNum)
+        {
+            if (_tiles[tileNum].isSolid)
+            {
+                _tiles[tileNum] = new TilePlacement() { isSolid = false, tileNum = -1 };
+            }
+            else
+            {
+                _tiles[tileNum] = new TilePlacement() { isSolid = true, tileNum = 2 };
+            }
+        }
+        public string SerializeRoom()
+        {
+            RoomSave save = new RoomSave();
+            save.roomName = roomName;
+            save.tileWidth = tileWidth;
+            save.tileHeight = tileHeight;
+            save.roomWidth = roomWidth;
+            save.roomHeight = roomHeight;
+            save.tiles = _tiles;
+            save.doors = _doors.ToArray();
+            string json = JsonSerializer.Serialize(save);
+            return json;
+        }
+        public void SetRoomDimensions(int width, int height)
+        {
+            roomWidth = width;
+            roomHeight = height;
+            _tiles = new TilePlacement[width * height];
+            _doors = new List<Position>();
+            AddPerimeterTiles();
+        }
+
         private void AddPerimeterTiles(bool fromFileLoad = false)
         {
             _topRowTiles = new List<int>();
@@ -157,10 +183,30 @@ namespace RoomBuilder
                 e.Graphics.DrawImage(doorImage, x, y, srcRect, units);
             }
         }
+        private void DrawGrid(PaintEventArgs e)
+        {
+            const int startX = 0;
+            const int startY = 0;
+            int lineWidth = roomWidth * tileWidth;
+            int lineHeight = roomHeight * tileHeight;
+            using (Pen pen = new Pen( Color.Gray, 1))
+            {
+                for (int x = startX; x <= lineWidth + startX; x += tileWidth)
+                {
+
+                    e.Graphics.DrawLine(pen, x, startY, x, startY + lineHeight);
+                }
+                for (int y = startY; y <= lineHeight + startY; y += tileHeight)
+                {
+
+                    e.Graphics.DrawLine(pen, startX, y, startX + lineWidth, y);
+                }
+            }
+        }
         private void DrawTiles(PaintEventArgs e)
         {
-            
-            for(int i = 0; i < roomWidth * roomHeight; i++)
+
+            for (int i = 0; i < roomWidth * roomHeight; i++)
             {
                 int column = i % roomWidth;
                 int row = (int)Math.Floor(i / (float)roomWidth);
@@ -176,7 +222,7 @@ namespace RoomBuilder
 
 
 
-                    if (neighbors.isDown && neighbors.isDownLeft && neighbors.isDownRight && neighbors.isLeft 
+                    if (neighbors.isDown && neighbors.isDownLeft && neighbors.isDownRight && neighbors.isLeft
                         && neighbors.isRight && neighbors.isUp && neighbors.isUpLeft && neighbors.isUpRight)
                     {
                         tileNumToDraw = 1;
@@ -221,7 +267,7 @@ namespace RoomBuilder
                     {
                         tileNumToDraw = 9;
                     }
-                    else if (!neighbors.isUp && neighbors.isLeft && neighbors.isRight && neighbors.isDown 
+                    else if (!neighbors.isUp && neighbors.isLeft && neighbors.isRight && neighbors.isDown
                         && neighbors.isDownLeft && neighbors.isDownRight)
                     {
                         tileNumToDraw = 10;
@@ -241,12 +287,12 @@ namespace RoomBuilder
                     {
                         tileNumToDraw = 13;
                     }
-                    else if (!neighbors.isDown && neighbors.isLeft && neighbors.isRight && neighbors.isUp 
+                    else if (!neighbors.isDown && neighbors.isLeft && neighbors.isRight && neighbors.isUp
                         && neighbors.isUpLeft && neighbors.isUpRight)
                     {
                         tileNumToDraw = 14;
                     }
-                    else if (!neighbors.isDown && neighbors.isLeft && neighbors.isRight && neighbors.isUp 
+                    else if (!neighbors.isDown && neighbors.isLeft && neighbors.isRight && neighbors.isUp
                         && !neighbors.isUpLeft && neighbors.isUpRight)
                     {
                         tileNumToDraw = 15;
@@ -272,7 +318,7 @@ namespace RoomBuilder
                         tileNumToDraw = 19;
                     }
                     else if (neighbors.isDown && neighbors.isDownLeft && neighbors.isLeft
-                        && !neighbors.isRight && !neighbors.isUp )
+                        && !neighbors.isRight && !neighbors.isUp)
                     {
                         tileNumToDraw = 20;
                     }
@@ -282,7 +328,7 @@ namespace RoomBuilder
                         tileNumToDraw = 21;
                     }
                     else if (!neighbors.isDown && !neighbors.isLeft
-                        && neighbors.isRight && neighbors.isUp  && neighbors.isUpRight)
+                        && neighbors.isRight && neighbors.isUp && neighbors.isUpRight)
                     {
                         tileNumToDraw = 22;
                     }
@@ -337,7 +383,7 @@ namespace RoomBuilder
                         tileNumToDraw = 32;
                     }
                     else if (neighbors.isDown && neighbors.isDownLeft && neighbors.isDownRight && neighbors.isLeft
-                        && neighbors.isRight && neighbors.isUp && !neighbors.isUpLeft && neighbors.isUpRight )
+                        && neighbors.isRight && neighbors.isUp && !neighbors.isUpLeft && neighbors.isUpRight)
                     {
                         tileNumToDraw = 33;
                     }
@@ -347,7 +393,7 @@ namespace RoomBuilder
                         tileNumToDraw = 34;
                     }
                     else if (neighbors.isDown && !neighbors.isDownLeft && neighbors.isDownRight && neighbors.isLeft
-                        && neighbors.isRight && neighbors.isUp && neighbors.isUpLeft  && neighbors.isUpRight)
+                        && neighbors.isRight && neighbors.isUp && neighbors.isUpLeft && neighbors.isUpRight)
                     {
                         tileNumToDraw = 35;
                     }
@@ -419,7 +465,7 @@ namespace RoomBuilder
                         shouldDrawATile = true;
                     }
                     else if (neighbors.isDown && neighbors.isDownLeft && neighbors.isLeft
-                        && !neighbors.isRight && !neighbors.isUp )
+                        && !neighbors.isRight && !neighbors.isUp)
                     {
                         tileNumToDraw = 44;
                         shouldDrawATile = true;
@@ -509,33 +555,6 @@ namespace RoomBuilder
                 if (shouldDrawATile) DrawSprite(e, tileNumToDraw, column * tileWidth, row * tileHeight);
             }
 
-        }
-        private void DrawGrid(PaintEventArgs e)
-        {
-            const int startX = 0;
-            const int startY = 0;
-            int lineWidth = roomWidth * tileWidth;
-            int lineHeight = roomHeight * tileHeight;
-            using (Pen pen = new Pen( Color.Gray, 1))
-            {
-                for (int x = startX; x <= lineWidth + startX; x += tileWidth)
-                {
-
-                    e.Graphics.DrawLine(pen, x, startY, x, startY + lineHeight);
-                }
-                for (int y = startY; y <= lineHeight + startY; y += tileHeight)
-                {
-
-                    e.Graphics.DrawLine(pen, startX, y, startX + lineWidth, y);
-                }
-            }
-        }
-        public void DrawSprite(PaintEventArgs e, int spriteNum, float x, float y)
-        {
-            Position position = GetSpriteSheetPositionOfSpriteNum(spriteNum);
-            RectangleF srcRect = new RectangleF(position.column * tileWidth, position.row * tileHeight, tileWidth, tileHeight);
-            GraphicsUnit units = GraphicsUnit.Pixel;
-            e.Graphics.DrawImage(spriteSheetMainImage, x, y, srcRect, units);
         }
         private Position GetSpriteSheetPositionOfSpriteNum(int spriteNum)
         {
@@ -773,29 +792,31 @@ namespace RoomBuilder
                     position.column = 6;
                     position.row = 7;
                     break;
+                case 56:
+                    position.column = 0;
+                    position.row = 8;
+                    break;
+                case 57:
+                    position.column = 1;
+                    position.row = 8;
+                    break;
+                case 58:
+                    position.column = 2;
+                    position.row = 8;
+                    break;
+                case 59:
+                    position.column = 3;
+                    position.row = 8;
+                    break;
+                case 60:
+                    position.column = 4;
+                    position.row = 8;
+                    break;
 
             }
 
             return position;
-        }
-        public int GetTileNumbFromMousePosition(Point mouseDownLocation)
-        {
-            int column = (int)Math.Floor(mouseDownLocation.X / (float)tileWidth);
-            int row = (int)Math.Floor(mouseDownLocation.Y / (float)tileHeight);
-            int tileNum = (row * roomWidth) + column;
-            return tileNum;
-        }
-        public void ReverseTile(int tileNum)
-        {
-            if (_tiles[tileNum].isSolid)
-            {
-                _tiles[tileNum] = new TilePlacement() { isSolid = false, tileNum = -1 };
-            }
-            else
-            {
-                _tiles[tileNum] = new TilePlacement() { isSolid = true, tileNum = 2 };
-            }
-        }
+        }      
         private TileNeighbors GetTileNeighbors(int tileNum)
         {
             TileNeighbors neighbors = new TileNeighbors();
@@ -813,7 +834,8 @@ namespace RoomBuilder
             {
                 int upLeftNum = tileNum - 1 - roomWidth; 
                 neighbors.isUpLeft = _tiles[upLeftNum].isSolid;
-            }
+                if (IsDoorAtPosition(upLeftNum)) neighbors.isUpLeft = true;
+            }            
             // up
             if (isInTopRow)
             {
@@ -823,6 +845,7 @@ namespace RoomBuilder
             {
                 int upNum = tileNum - roomWidth;
                 neighbors.isUp = _tiles[upNum].isSolid;
+                if (IsDoorAtPosition(upNum)) neighbors.isUp = true;
             }
             // upRight
             if (isInTopRow || isInRightColumn)
@@ -833,6 +856,7 @@ namespace RoomBuilder
             {
                 int upRightNum = tileNum - roomWidth + 1;
                 neighbors.isUpRight = _tiles[upRightNum].isSolid;
+                if (IsDoorAtPosition(upRightNum)) neighbors.isUpRight = true;
             }
             // left
             if (isInLeftColumn)
@@ -843,6 +867,7 @@ namespace RoomBuilder
             {
                 int leftNum = tileNum - 1;
                 neighbors.isLeft = _tiles[leftNum].isSolid;
+                if (IsDoorAtPosition(leftNum)) neighbors.isLeft = true;
             }
             // right
             if (isInRightColumn)
@@ -853,6 +878,7 @@ namespace RoomBuilder
             {
                 int rightNum = tileNum + 1;
                 neighbors.isRight = _tiles[rightNum].isSolid;
+                if (IsDoorAtPosition(rightNum)) neighbors.isRight = true;
             }
             // down left
             if (isInBottomRow || isInLeftColumn)
@@ -863,6 +889,7 @@ namespace RoomBuilder
             {
                 int downLeftNum = tileNum - 1 + roomWidth;
                 neighbors.isDownLeft = _tiles[downLeftNum].isSolid;
+                if (IsDoorAtPosition(downLeftNum)) neighbors.isDownLeft = true;
             }
             // down
             if (isInBottomRow)
@@ -873,6 +900,7 @@ namespace RoomBuilder
             {
                 int downNum = tileNum + roomWidth;
                 neighbors.isDown = _tiles[downNum].isSolid;
+                if (IsDoorAtPosition(downNum)) neighbors.isDown = true;
             }
             // downRight
             if (isInBottomRow || isInRightColumn)
@@ -883,8 +911,41 @@ namespace RoomBuilder
             {
                 int downRightNum = tileNum + roomWidth + 1;
                 neighbors.isDownRight = _tiles[downRightNum].isSolid;
+                if (IsDoorAtPosition(downRightNum)) neighbors.isDownRight = true;
             }
             return neighbors;
+        }
+        private bool IsDoorAtPosition(int tileIndex)
+        {
+            foreach(var door in _doors)
+            {
+                // get the index of the left brick in each of the door's rows
+                int indexAtDoorUL = (door.row * roomWidth) + door.column;
+                int indexAtDoorML = indexAtDoorUL + roomWidth;
+                int indexAtDoorBL = indexAtDoorML + roomWidth;
+
+                // if door is on the left wall, check the right side of it
+                if (door.column == -1)
+                {
+                    // upper row
+                    if (indexAtDoorUL + 1 == tileIndex) return true;
+                    // middle row
+                    if (indexAtDoorML + 1 == tileIndex) return true;
+                    // bottom row
+                    if (indexAtDoorBL + 1 == tileIndex) return true;
+                }
+                // if door is on the right wall, check the left side of it
+                else if (door.column == roomWidth - 1)
+                {
+                    // upper row
+                    if (indexAtDoorUL == tileIndex) return true;
+                    // middle row
+                    if (indexAtDoorML == tileIndex) return true;
+                    // bottom row
+                    if (indexAtDoorBL == tileIndex) return true;
+                }
+            }
+            return false;
         }
     }
 }
