@@ -13,6 +13,25 @@ namespace RoomBuilder
         public int row { get; set; }
     }
     [Serializable]
+    public struct RoomSaveDoor
+    {
+        public int idInRoom { get; set; }
+        public Position position { get; set; }
+        public RoomSaveDoorConnection[] doorConnections { get; set; }
+    }
+    [Serializable]
+    public struct RoomSaveDoorConnection
+    {
+        // use this to track movement abilities required
+        // to get from one door to another
+        public int doorIdEntered { get; set; }
+        public int doorIdExeted { get; set; }
+        public bool requiresWallCrawl { get; set; }
+        public bool requiresCeilingCrawl { get; set; }
+        public bool requiresGrapple { get; set; }
+        public bool requiresHighJump { get; set; }
+    }
+    [Serializable]
     public struct TilePlacement
     {
         public bool isSolid { get; set; }
@@ -76,13 +95,17 @@ namespace RoomBuilder
             else _doors = new List<Position>();
             AddPerimeterTiles(true);
         }
-        public void DrawRoom(PaintEventArgs e)
+        public void DrawRoom(PaintEventArgs e, EditMode editMode)
         {
             if (roomWidth > 0 && roomHeight > 0)
             {
                 DrawTiles(e);
                 DrawGrid(e);
                 DrawDoors(e);
+                if(editMode == EditMode.DOOR)
+                {
+
+                }
             }
         }
         public void DrawSprite(PaintEventArgs e, int spriteNum, float x, float y)
@@ -92,10 +115,23 @@ namespace RoomBuilder
             GraphicsUnit units = GraphicsUnit.Pixel;
             e.Graphics.DrawImage(spriteSheetMainImage, x, y, srcRect, units);
         }
+
         public int GetTileNumbFromMousePosition(Point mouseDownLocation)
         {
-            int column = (int)Math.Floor(mouseDownLocation.X / (float)tileWidth);
-            int row = (int)Math.Floor(mouseDownLocation.Y / (float)tileHeight);
+            int mouseXToUse = mouseDownLocation.X;
+            int mouseYToUse = mouseDownLocation.Y;
+            // if < the zero line or > right border, set it 
+            // to the closest in-bounds point
+            if (mouseXToUse < tileWidth) mouseXToUse = tileWidth;
+            if (mouseXToUse > tileWidth * roomWidth) mouseXToUse = tileWidth * roomWidth;
+            if (mouseYToUse < tileHeight) mouseYToUse = tileHeight;
+            if (mouseYToUse > tileHeight * roomHeight) mouseYToUse = tileHeight * roomHeight;
+
+            // now map to row and column
+            int column = (int)Math.Floor(mouseXToUse / (float)tileWidth);
+            int row = (int)Math.Floor(mouseYToUse / (float)tileHeight);
+            column -= 1;
+            row -= 1;
             int tileNum = (row * roomWidth) + column;
             return tileNum;
         }
@@ -109,6 +145,8 @@ namespace RoomBuilder
         }
         public void ReverseTile(int tileNum)
         {
+            if (tileNum < 0) return;
+            if (tileNum >= roomWidth * roomHeight) return;
             if (_tiles[tileNum].isSolid)
             {
                 _tiles[tileNum] = new TilePlacement() { isSolid = false, tileNum = -1 };
@@ -171,6 +209,19 @@ namespace RoomBuilder
                 _rightColumnTiles.Add(i + roomWidth - 1);
             }
         }
+        private void DrawDoorConnectors(PaintEventArgs e)
+        {
+            if (_doors == null) return;
+
+            foreach (Position d in _doors)
+            {
+                float x = d.column * tileWidth;
+                float y = d.row * tileHeight;
+                RectangleF srcRect = new RectangleF(0, 0, 2 * tileWidth, 3 * tileHeight);
+                GraphicsUnit units = GraphicsUnit.Pixel;
+                e.Graphics.DrawImage(doorImage, x, y, srcRect, units);
+            }
+        }
         private void DrawDoors(PaintEventArgs e)
         {
             if (_doors == null) _doors = new List<Position>();
@@ -187,8 +238,8 @@ namespace RoomBuilder
         {
             const int startX = 0;
             const int startY = 0;
-            int lineWidth = roomWidth * tileWidth;
-            int lineHeight = roomHeight * tileHeight;
+            int lineWidth = (roomWidth + 2) * tileWidth;
+            int lineHeight = (roomHeight + 2) * tileHeight;
             using (Pen pen = new Pen( Color.Gray, 1))
             {
                 for (int x = startX; x <= lineWidth + startX; x += tileWidth)
@@ -552,7 +603,7 @@ namespace RoomBuilder
                         _tiles[i].tileNum = -1;
                     }
                 }
-                if (shouldDrawATile) DrawSprite(e, tileNumToDraw, column * tileWidth, row * tileHeight);
+                if (shouldDrawATile) DrawSprite(e, tileNumToDraw, (column +1) * tileWidth, (row +1) * tileHeight);
             }
 
         }

@@ -11,11 +11,14 @@ using System.Windows.Forms;
 
 namespace RoomBuilder
 {
+    public enum EditMode { TILE, DOOR }
     public partial class RoomBuilder : Form
     {
         BuilderHelper builderHelper;
         private bool _isMouseDown = false;
         private int _lastTileFlipped = -1;
+        private bool _hasUnsavedChanges;
+        private EditMode _editMode;
         
 
         public RoomBuilder()
@@ -30,6 +33,9 @@ namespace RoomBuilder
             pictureBoxMap.MouseDown += new MouseEventHandler(pictureBoxMap_MouseDown);
             pictureBoxMap.MouseUp += new MouseEventHandler(pictureBoxMap_MouseUp);
             pictureBoxMap.MouseMove += new MouseEventHandler(pictureBoxMap_MouseMove);
+
+            _editMode = EditMode.TILE;
+            _hasUnsavedChanges = false;
         }
 
         
@@ -40,15 +46,20 @@ namespace RoomBuilder
             builderHelper.LoadSpriteSheetImage(pathToSpriteSheet);
             builderHelper.LoadDoorImage(pathToDoorImage);
         }
-        private void PictureBox_Paint(object sender, PaintEventArgs e)
+        private void ResizeUi()
         {
-            //if (builderHelper.image == null) LoadSpriteSheet();
-
-            builderHelper.DrawRoom(e);
-            
-
+            int picBoxWidth = (builderHelper.roomWidth + 2) * builderHelper.tileWidth;
+            int picBoxHeight = (builderHelper.roomHeight + 2) * builderHelper.tileHeight;
+            flowLayoutPanel1.Size = new Size(picBoxWidth + 25, picBoxHeight + 25);
+            pictureBoxMap.Size = new Size(picBoxWidth, picBoxHeight);
         }
-
+        
+        #region event handlers
+        private void btnAddDoor_Click(object sender, EventArgs e)
+        {
+            builderHelper.AddDoor(int.Parse(tbAddDoorRow.Text), int.Parse(tbAddColumn.Text));
+            pictureBoxMap.Refresh();
+        }
         private void btnCreateNewRoom_Click(object sender, EventArgs e)
         {
             int width = int.Parse(tbNumTilesWide.Text);
@@ -56,62 +67,9 @@ namespace RoomBuilder
             builderHelper.SetRoomDimensions(width, height);
             ResizeUi();
             pictureBoxMap.Refresh();
-        }
-        private void ResizeUi()
-        {
-            int picBoxWidth = builderHelper.roomWidth * builderHelper.tileWidth;
-            int picBoxHeight = builderHelper.roomHeight * builderHelper.tileHeight;
-            flowLayoutPanel1.Size = new Size(picBoxWidth + 25, picBoxHeight + 25);
-            pictureBoxMap.Size = new Size(picBoxWidth, picBoxHeight);
-        }
-        private void pictureBoxMap_MouseDown(object sender, System.Windows.Forms.MouseEventArgs e)
-        {
-            _isMouseDown = true;
 
-            Point mouseDownLocation = new Point(e.X, e.Y);
-            int tileNum = builderHelper.GetTileNumbFromMousePosition(mouseDownLocation);
-            lblMouseDownPoint.Text = string.Format("tile num: {0}", tileNum);
-            builderHelper.ReverseTile(tileNum);
-            _lastTileFlipped = tileNum;
-            pictureBoxMap.Refresh();
+            _hasUnsavedChanges = true;
         }
-        private void pictureBoxMap_MouseUp(object sender, System.Windows.Forms.MouseEventArgs e)
-        {
-            _isMouseDown = false;
-            _lastTileFlipped = -1;
-        }
-        private void pictureBoxMap_MouseMove(object sender, System.Windows.Forms.MouseEventArgs e)
-        {
-            if(_isMouseDown)
-            {
-                Point mouseLocation = new Point(e.X, e.Y);
-                int tileNum = builderHelper.GetTileNumbFromMousePosition(mouseLocation);
-                if(tileNum != _lastTileFlipped)
-                {
-                    builderHelper.ReverseTile(tileNum);
-                    _lastTileFlipped = tileNum;
-                    pictureBoxMap.Refresh();
-                }
-            }
-        }
-
-        private void tbRoomName_TextChanged(object sender, EventArgs e)
-        {
-            builderHelper.roomName = tbRoomName.Text;
-        }
-
-        private void btnSaveFile_Click(object sender, EventArgs e)
-        {
-            string json = builderHelper.SerializeRoom();
-
-            saveFileDialog1.Filter = "text files (*.txt)|*.txt";
-            saveFileDialog1.RestoreDirectory = true;
-            if(saveFileDialog1.ShowDialog() == DialogResult.OK)
-            {
-                File.WriteAllText(saveFileDialog1.FileName, json);
-            }
-        }
-
         private void btnLoadFile_Click(object sender, EventArgs e)
         {
             openFileDialog1.InitialDirectory = @"E:\Unity Projects\SpiderPocGit\Assets\RoomTemplates";
@@ -128,12 +86,60 @@ namespace RoomBuilder
                 ResizeUi();
                 pictureBoxMap.Refresh();
             }
+            _hasUnsavedChanges = false;
         }
-
-        private void btnAddDoor_Click(object sender, EventArgs e)
+        private void btnSaveFile_Click(object sender, EventArgs e)
         {
-            builderHelper.AddDoor(int.Parse(tbAddDoorRow.Text), int.Parse(tbAddColumn.Text));
-            pictureBoxMap.Refresh();
+            string json = builderHelper.SerializeRoom();
+
+            saveFileDialog1.Filter = "text files (*.txt)|*.txt";
+            saveFileDialog1.RestoreDirectory = true;
+            if (saveFileDialog1.ShowDialog() == DialogResult.OK)
+            {
+                File.WriteAllText(saveFileDialog1.FileName, json);
+            }
+            _hasUnsavedChanges = false;
         }
+        private void PictureBox_Paint(object sender, PaintEventArgs e)
+        {
+            builderHelper.DrawRoom(e, _editMode);
+        }
+        private void pictureBoxMap_MouseDown(object sender, System.Windows.Forms.MouseEventArgs e)
+        {
+            _isMouseDown = true;
+
+            Point mouseDownLocation = new Point(e.X, e.Y);
+            int tileNum = builderHelper.GetTileNumbFromMousePosition(mouseDownLocation);
+            builderHelper.ReverseTile(tileNum);
+            _lastTileFlipped = tileNum;
+            pictureBoxMap.Refresh();
+            _hasUnsavedChanges = true;
+        }
+        private void pictureBoxMap_MouseMove(object sender, System.Windows.Forms.MouseEventArgs e)
+        {
+            if (_isMouseDown)
+            {
+                Point mouseLocation = new Point(e.X, e.Y);
+                int tileNum = builderHelper.GetTileNumbFromMousePosition(mouseLocation);
+                if (tileNum != _lastTileFlipped)
+                {
+                    builderHelper.ReverseTile(tileNum);
+                    _lastTileFlipped = tileNum;
+                    pictureBoxMap.Refresh();
+                    _hasUnsavedChanges = true;
+                }
+            }
+        }
+        private void pictureBoxMap_MouseUp(object sender, System.Windows.Forms.MouseEventArgs e)
+        {
+            _isMouseDown = false;
+            _lastTileFlipped = -1;
+        }
+        private void tbRoomName_TextChanged(object sender, EventArgs e)
+        {
+            builderHelper.roomName = tbRoomName.Text;
+            _hasUnsavedChanges = true;
+        }
+        #endregion
     }
 }
