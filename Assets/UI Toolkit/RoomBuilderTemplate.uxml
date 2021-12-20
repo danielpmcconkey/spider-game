@@ -2,8 +2,13 @@
     <Style src="project://database/Assets/UI%20Toolkit/UIStyleSheet.uss?fileID=7433441132597879392&amp;guid=d1d27f0d6f253a345a253d269e46fd78&amp;type=3#UIStyleSheet" />
     <ui:VisualElement name="veMainUi" style="position: relative; left: auto; top: auto; right: auto; height: auto; background-color: rgba(124, 153, 241, 0.49); width: 650px;">
         <ui:VisualElement name="veButtonColumn" style="width: 100px; position: relative; left: auto; top: auto; right: auto; flex-direction: row; flex-wrap: nowrap;">
-            <ui:Button text="Save" display-tooltip-when-elided="true" name="btnOpenSaveDialog" class="iconButton" style="background-image: url(&apos;project://database/Assets/Sprites/Interface/SaveIcon.png?fileID=2800000&amp;guid=469dd790911bd9443a3e7c190fbeea79&amp;type=3#SaveIcon&apos;); width: 75px; height: 75px; overflow: visible; flex-direction: column;" />
-            <ui:Button text="Load" display-tooltip-when-elided="true" name="btnOpenLoadDialog" class="iconButton" style="background-image: url(&apos;project://database/Assets/Sprites/Interface/LoadIcon.png?fileID=2800000&amp;guid=22fbf388e71b10044bdbaf398b394eb9&amp;type=3#LoadIcon&apos;); width: 75px; height: 75px; -unity-background-scale-mode: stretch-to-fill; overflow: visible; flex-direction: column;" />
+            <ui:Button name="btnOpenSaveDialog" class="iconButton" style="background-image: url(&apos;project://database/Assets/Sprites/Interface/SaveIcon.png?fileID=2800000&amp;guid=469dd790911bd9443a3e7c190fbeea79&amp;type=3#SaveIcon&apos;);" />
+            <ui:Button name="btnOpenLoadDialog" class="iconButton" style="background-image: url(&apos;project://database/Assets/Sprites/Interface/LoadIcon.png?fileID=2800000&amp;guid=22fbf388e71b10044bdbaf398b394eb9&amp;type=3#LoadIcon&apos;);" />
+            <ui:Button name="btnOpenNewDialog" class="iconButton" style="background-image: url(&apos;project://database/Assets/Sprites/Interface/NewRoom.png?fileID=2800000&amp;guid=580633e261805b740af346031832fc35&amp;type=3#NewRoom&apos;);" />
+            <ui:VisualElement name="veHighlightTileEditMode" class="activeEditModeIcon" style="width: 69px; height: 69px; position: absolute; left: 270px; top: 8px; bottom: 7px; visibility: visible; border-left-color: rgb(255, 0, 0); border-right-color: rgb(255, 0, 0); border-top-color: rgb(255, 0, 0); border-bottom-color: rgb(255, 0, 0); border-left-width: 3px; border-right-width: 3px; border-top-width: 3px; border-bottom-width: 3px;" />
+            <ui:VisualElement name="veHighlightDoorEditMode" class="activeEditModeIcon" style="width: 69px; height: 69px; position: absolute; left: 343px; top: 8px; bottom: 8px; visibility: visible; border-left-color: rgb(255, 0, 0); border-right-color: rgb(255, 0, 0); border-top-color: rgb(255, 0, 0); border-bottom-color: rgb(255, 0, 0); border-left-width: 3px; border-right-width: 3px; border-top-width: 3px; border-bottom-width: 3px;" />
+            <ui:Button name="btnTileEditMode" class="iconButton" style="margin-left: 50px; background-image: url(&apos;project://database/Assets/Sprites/Interface/TileEditIcon.png?fileID=2800000&amp;guid=357b5ca054fe2db48aeaf7a3a4d3f38e&amp;type=3#TileEditIcon&apos;);" />
+            <ui:Button name="btnDoorEditMode" class="iconButton" style="background-image: url(&apos;project://database/Assets/Sprites/Interface/DoorEditIcon.png?fileID=2800000&amp;guid=e88be9edc801aee47aa3894af0925c54&amp;type=3#DoorEditIcon&apos;);" />
         </ui:VisualElement>
         <ui:VisualElement name="veLoadDialog" class="builderDialog">
             <ui:VisualElement class="closeButtonRow">
@@ -20,18 +25,26 @@
             <ui:TextField name="textFileName" picking-mode="Ignore" label="File name" text="filler text" class="formField" />
             <ui:Button text="Save room" display-tooltip-when-elided="true" name="btnSaveRoom" class="button-style" />
         </ui:VisualElement>
-      <ui:VisualElement name="veConfirmOverwriteDialog" class="builderDialog">
-        <ui:VisualElement class="closeButtonRow">
-          <ui:Button text="X" display-tooltip-when-elided="true" name="btnCloseConfirmOverwriteDialog" class="closeButton" style="flex-direction: row-reverse; align-items: stretch;" />
+        <ui:VisualElement name="veNewRoomDialog" class="builderDialog">
+            <ui:VisualElement class="closeButtonRow">
+                <ui:Button text="X" display-tooltip-when-elided="true" name="btnCloseNewRoomDialog" class="closeButton" style="flex-direction: row-reverse; align-items: stretch;" />
+            </ui:VisualElement>
+            <ui:TextField name="textRoomWidth" picking-mode="Ignore" label="Room width" text="filler text" class="formField" />
+            <ui:TextField name="textRoomHeight" picking-mode="Ignore" label="Room height" text="filler text" class="formField" />
+            <ui:Button text="New room" display-tooltip-when-elided="true" name="btnNewRoom" class="button-style" />
         </ui:VisualElement>
-        <ui:Label text="Warning! A room with that name already existis. Do you want to overwrite it?" display-tooltip-when-elided="true" />
-        <ui:Button text="Confirm" display-tooltip-when-elided="true" name="btnConfirmOverwrite" class="button-style" />
-      </ui:VisualElement>
-      <ui:VisualElement name="veSaveSuccessDialog" class="builderDialog">
-        <ui:VisualElement class="closeButtonRow">
-          <ui:Button text="X" display-tooltip-when-elided="true" name="btnCloseSaveSuccessDialog" class="closeButton" style="flex-direction: row-reverse; align-items: stretch;" />
+        <ui:VisualElement name="veConfirmDialog" class="builderDialog">
+            <ui:VisualElement class="closeButtonRow">
+                <ui:Button text="X" display-tooltip-when-elided="true" name="btnCloseConfirmDialog" class="closeButton" style="flex-direction: row-reverse; align-items: stretch;" />
+            </ui:VisualElement>
+            <ui:Label name="lblConfirmWarning" text="Placeholder text" display-tooltip-when-elided="true" />
+            <ui:Button text="Confirm" name="btnConfirm" class="button-style" />
         </ui:VisualElement>
-        <ui:Label text="Success! The room file has been saved." display-tooltip-when-elided="true" />
-      </ui:VisualElement>
+        <ui:VisualElement name="veSaveSuccessDialog" class="builderDialog">
+            <ui:VisualElement class="closeButtonRow">
+                <ui:Button text="X" display-tooltip-when-elided="true" name="btnCloseSaveSuccessDialog" class="closeButton" style="flex-direction: row-reverse; align-items: stretch;" />
+            </ui:VisualElement>
+            <ui:Label text="Success! The room file has been saved." display-tooltip-when-elided="true" />
+        </ui:VisualElement>
     </ui:VisualElement>
 </ui:UXML>
