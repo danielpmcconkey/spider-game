@@ -145,8 +145,6 @@ namespace Assets.Scripts.CharacterControl
         
         protected virtual void FixedUpdate()
         {
-            //Update(); // todo: determine if Update() call here is necessary
-
             if (_stateController.currentMovementState == MovementState.GROUNDED)
             {
                 ApplyForcesGrounded();
@@ -282,20 +280,6 @@ namespace Assets.Scripts.CharacterControl
                 rigidBody2D.velocity = new Vector2((horizontalVelocityLimit * -1), rigidBody2D.velocity.y);
             }
 
-            // also constrain the vertical, unless jump accelerating
-            // this means we constrain fall velocity but not jump
-            //if (_stateController.currentMovementState != MovementState.JUMP_ACCELERATING)
-            //{
-            //    if (rigidBody2D.velocity.y > horizontalVelocityLimit)
-            //    {
-            //        rigidBody2D.velocity = new Vector2(rigidBody2D.velocity.x, horizontalVelocityLimit);
-            //    }
-            //    if (rigidBody2D.velocity.y < (horizontalVelocityLimit * -1))
-            //    {
-            //        rigidBody2D.velocity = new Vector2(rigidBody2D.velocity.x, (horizontalVelocityLimit * -1));
-            //    }
-            //}
-
             // reset the accumulation
             _floatingForcesAccumulated = Vector2.zero;
 
@@ -369,12 +353,6 @@ namespace Assets.Scripts.CharacterControl
                             );
                     }
                 }
-                //else
-                //{
-                //    // moving here would put us inside a wall
-                //    // don't do it
-                //    string burp = "true";
-                //}
             }
 
 
@@ -460,8 +438,7 @@ namespace Assets.Scripts.CharacterControl
         }
         private void AddDirectionalMovementForceHGrounded()
         {
-            if (_userInput.moveHPressure == 0) ApplyBreaks();
-            else
+            if (_userInput.moveHPressure != 0)
             {
                 _groundedForcesAccumulated = MoveH(_groundedForcesAccumulated);
 
@@ -474,8 +451,7 @@ namespace Assets.Scripts.CharacterControl
         }
         private void AddDirectionalMovementForceVGrounded()
         {
-            if (_userInput.moveVPressure == 0) ApplyBreaks();
-            else
+            if (_userInput.moveVPressure != 0) 
             {
                 _groundedForcesAccumulated = MoveV(_groundedForcesAccumulated);
             }
@@ -504,29 +480,7 @@ namespace Assets.Scripts.CharacterControl
             }
             _floatingForcesAccumulated += thrust;
         }
-        private void ApplyBreaks()
-        {
-            // if the character has velocity in the X
-            // axis, add force in the opposite direction
-            // to make stopping more forceful
-
-            // todo: fix this velocity
-            //float breaksPressure = minBreaksPressure +
-            //        (breaksPressurePercent * (maxBreaksPressure - minBreaksPressure));
-
-            //float pressureToApply = breaksPressure * Time.deltaTime;
-            //if (rigidBody2D.velocity.x > breaksThreshold)
-            //{
-            //    if (pressureToApply < rigidBody2D.velocity.x)
-            //        _floatingForcesAccumulated += new Vector2(-pressureToApply, 0);
-            //}
-            //else if (rigidBody2D.velocity.x < -breaksThreshold)
-            //{
-            //    if (pressureToApply < (rigidBody2D.velocity.x * -1))
-            //        _floatingForcesAccumulated += new Vector2(pressureToApply, 0);
-            //}
-            //else return;
-        }
+        
         protected virtual void Die()
         {
             isAlive = false;
