@@ -1,0 +1,89 @@
+.button-style {
+    height: 36px;
+    width: 119px;
+    background-color: rgb(10, 110, 171);
+    border-left-width: 3px;
+    border-right-width: 3px;
+    border-top-width: 3px;
+    border-bottom-width: 3px;
+}
+
+.button-style:hover {
+    height: 36px;
+    width: 119px;
+    background-color: rgb(135, 181, 209);
+    border-left-width: 3px;
+    border-right-width: 3px;
+    border-top-width: 3px;
+    border-bottom-width: 3px;
+    border-left-color: rgb(16, 30, 84);
+    border-right-color: rgb(16, 30, 84);
+    border-top-color: rgb(16, 30, 84);
+    border-bottom-color: rgb(16, 30, 84);
+}
+
+.button-style:active {
+    height: 36px;
+    width: 119px;
+    background-color: rgb(255, 255, 255);
+    border-left-width: 3px;
+    border-right-width: 3px;
+    border-top-width: 3px;
+    border-bottom-width: 3px;
+    border-left-color: rgb(16, 30, 84);
+    border-right-color: rgb(16, 30, 84);
+    border-top-color: rgb(16, 30, 84);
+    border-bottom-color: rgb(16, 30, 84);
+    color: rgb(3, 14, 84);
+}
+
+.iconButton {
+    display: flex;
+    flex-wrap: wrap;
+    margin-left: 10px;
+    margin-right: 10px;
+    margin-top: 10px;
+    margin-bottom: 10px;
+}
+
+.iconButton:hover {
+    background-color: rgb(148, 227, 236);
+}
+
+.closeButton {
+    align-items: auto;
+    font-size: 10px;
+    height: 20px;
+    width: 17px;
+    background-color: rgb(255, 0, 0);
+    color: rgb(255, 255, 255);
+    -unity-font-style: bold;
+}
+
+.closeButtonRow {
+    width: 100%;
+    flex-direction: row-reverse;
+    flex-wrap: nowrap;
+}
+
+.builderDialog {
+    background-color: rgb(255, 255, 255);
+    width: 600px;
+    margin-left: 4%;
+    margin-right: 4%;
+    margin-top: 4%;
+    margin-bottom: 4%;
+    position: absolute;
+    left: 5px;
+    top: 100px;
+    right: auto;
+    visibility: visible;
+}
+
+.formField {
+    margin-left: auto;
+    margin-right: auto;
+    margin-top: auto;
+    margin-bottom: auto;
+    width: 100%;
+}

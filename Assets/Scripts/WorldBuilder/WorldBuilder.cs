@@ -1,4 +1,5 @@
 ﻿using Assets.Scripts.CharacterControl;
+using Assets.Scripts.WorldBuilder.RoomBuilder;
 using System;
 using System.Collections.Generic;
 using System.IO;
@@ -84,13 +85,7 @@ namespace Assets.Scripts.WorldBuilder
         }
         private void BuildStarterRoom()
         {
-            TextAsset[] roomTemplates = Resources.LoadAll<TextAsset>("RoomTemplates");
-            _roomSaves = new RoomSave[roomTemplates.Length];
-            for(int i = 0; i < _roomSaves.Length; i++)
-            {
-                string json = roomTemplates[i].text;
-                _roomSaves[i] = RoomBuilderHelper.DeserializeFromJson(json);
-            }
+            _roomSaves = RoomBuilderHelper.GetAllRoomSaves();
 
             Vector2 startingPointForRooms = new Vector2(-5.0f, 5.0F);
 
