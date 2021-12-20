@@ -20,7 +20,7 @@ namespace Assets.Scripts.CharacterControl
 #if DEBUG
 
         /* 
-        E:\Unity Projects\SpiderPocGit\Logs\CustomLogger\---.json
+        E:\Unity Projects\SpiderPocGit\Logs\CustomLogger\spiderReplay-2021-12-06.16.35.43.458.json
         */
         [SerializeField] public string replayFile = string.Empty;
 
@@ -108,8 +108,9 @@ namespace Assets.Scripts.CharacterControl
             Events.GameEvents.current.onDoorwayTriggerEnter += OnDoorwayEnter;
             Events.GameEvents.current.onDoorwayTriggerExit += OnDoorwayExit;
 
-            
-            UpdateCameraConstraints();
+            // set the cam controls to the starting room
+            (Vector2 upperLeft, Vector2 lowerRight) roomDimensions = worldBuilder.GetRoomDimensions(currentRoom);
+            cameraControl.UpdateRoomDimensions(roomDimensions.upperLeft, roomDimensions.lowerRight);
         }
         protected override void Update()
         {
@@ -199,17 +200,26 @@ namespace Assets.Scripts.CharacterControl
         protected override void Die()
         {
             isAlive = false;
-            
+            // todo: build a death animation
             // todo: transition to death scene
         }
         private void OnDoorwayExit(Vector2 doorPosition)
         {
             currentRoom = worldBuilder.WhichRoomAreWeIn(transform.position);
-            UpdateCameraConstraints();
+
+            (Vector2 upperLeft, Vector2 lowerRight) roomDimensions = worldBuilder.GetRoomDimensions(currentRoom);
+            cameraControl.UpdateRoomDimensions(roomDimensions.upperLeft, roomDimensions.lowerRight);
+            
         }
         private void OnDoorwayEnter(Vector2 doorPosition)
         {
-            
+            Door d = worldBuilder.GetDoorAtPosition(doorPosition);
+            if(d != null)
+            {
+                (Vector2 upperLeft, Vector2 lowerRight) roomDimensionsL = worldBuilder.GetRoomDimensions(d.roomLeft.id);
+                (Vector2 upperLeft, Vector2 lowerRight) roomDimensionsR = worldBuilder.GetRoomDimensions(d.roomRight.id);
+                cameraControl.UpdateRoomDimensions(roomDimensionsL.upperLeft, roomDimensionsR.lowerRight);
+            }            
         }
         protected override void ReactToDamageDealt(bool noIFrames = false)
         {
@@ -260,19 +270,7 @@ namespace Assets.Scripts.CharacterControl
                 new Vector3(_userInput.mouseX, _userInput.mouseY, 0));
             mousePosition.z = -10;  // mouse position in front of platforms and enemies, but behind the camera
             targetingReticuleTransform.position = mousePosition;
-        }
-        private void UpdateCameraConstraints()
-        {
-            (Vector2 upperLeft, Vector2 lowerRight) roomDimensions = worldBuilder.GetRoomDimensions(currentRoom);
-            cameraControl.UpdateRoomDimensions(roomDimensions.upperLeft, roomDimensions.lowerRight);
-            //const float camMargin = 6.0f;
-            
-            //cameraControl.ActivateLimits(
-            //    roomDimensions.upperLeft.x + camMargin, 
-            //    roomDimensions.lowerRight.x - camMargin,
-            //    roomDimensions.lowerRight.y + camMargin, 
-            //    roomDimensions.upperLeft.y - camMargin);
-        }
+        }        
         #endregion
 
         #region utilities

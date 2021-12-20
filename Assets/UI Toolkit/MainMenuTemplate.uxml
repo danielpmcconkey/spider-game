@@ -1,0 +1,10 @@
+<ui:UXML xmlns:ui="UnityEngine.UIElements" xmlns:uie="UnityEditor.UIElements" xsi="http://www.w3.org/2001/XMLSchema-instance" engine="UnityEngine.UIElements" editor="UnityEditor.UIElements" noNamespaceSchemaLocation="../../UIElementsSchema/UIElements.xsd" editor-extension-mode="False">
+    <Style src="project://database/Assets/UI%20Toolkit/UIStyleSheet.uss?fileID=7433441132597879392&amp;guid=d1d27f0d6f253a345a253d269e46fd78&amp;type=3#UIStyleSheet" />
+    <ui:VisualElement name="Background" style="background-color: rgb(0, 0, 0); height: 89px; flex-grow: 1; align-items: center; justify-content: center;">
+        <ui:VisualElement name="ButtonBox" class="button-style" style="height: 259px; width: 442px; background-color: rgba(255, 255, 255, 0.33); border-top-left-radius: 10px; border-bottom-left-radius: 10px; border-top-right-radius: 10px; border-bottom-right-radius: 10px; align-items: center; justify-content: center;">
+            <ui:Label text="Main Menu" display-tooltip-when-elided="true" style="font-size: 20px; color: rgba(255, 255, 255, 255); position: absolute; top: 20px;" />
+            <ui:Button text="Start game" display-tooltip-when-elided="true" name="BtnStart" class="button-style" />
+            <ui:Button text="Room Builder" display-tooltip-when-elided="true" name="BtnRoomBuilder" class="button-style" />
+        </ui:VisualElement>
+    </ui:VisualElement>
+</ui:UXML>

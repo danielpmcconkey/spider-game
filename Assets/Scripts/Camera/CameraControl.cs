@@ -11,7 +11,7 @@ namespace Assets.Scripts.Camera
     {
         #region stuff to keep
         [SerializeField] public float idealDistanceInFrontOfPlayer = 3f;
-        [SerializeField] public float moveSpeed = 150f; // the full velocity, not when lazing back to the player while idle
+        [SerializeField] public float moveSpeed = 2.5f; // the full velocity, not when lazing back to the player while idle
         [SerializeField] public GameObject player;
         [SerializeField] public float roomPadBottom = 1.0f; // how much you want to see beyond the room border
         [SerializeField] public float roomPadTop = 1.0f;
@@ -27,6 +27,7 @@ namespace Assets.Scripts.Camera
         private float _idleTimer;
         private float _moveSpeedCurrent;
         private UnityEngine.Camera _gameCamera;
+        //private Vector2 _momentum;
 
 
         public void UpdateRoomDimensions(Vector2 upLeft, Vector2 downRight)
@@ -92,6 +93,8 @@ namespace Assets.Scripts.Camera
             _camPositionWithoutZ = _playerPositionWithoutZ;
             _idleTimer = 0;
             _gameCamera = transform.gameObject.GetComponent<UnityEngine.Camera>();
+            _moveSpeedCurrent = moveSpeed;
+            //_momentum = Vector2.zero;
         }
         private void ClampCamTargetPosition()
         {
@@ -116,14 +119,26 @@ namespace Assets.Scripts.Camera
         }
         private void MoveTowardTarget()
         {
-            //const float snapDistance = 0.1f;
+            const float snapDistance = 0.1f;
 
-            if (_camTargetPosition == null) return;
+            if (_camTargetPosition == null || Vector2.Distance(_camTargetPosition, _camPositionWithoutZ) < snapDistance)
+                return;
 
-            _camPositionWithoutZ = Vector3.MoveTowards(
-                transform.position, _camTargetPosition, _moveSpeedCurrent * Time.deltaTime);
+            //Vector2 oldPosition = new Vector2(transform.position.x, transform.position.y); 
+
+            transform.position = Vector3.Lerp(
+                new Vector3(_camPositionWithoutZ.x, _camPositionWithoutZ.y, _camZ),
+                new Vector3(_camTargetPosition.x, _camTargetPosition.y, _camZ),
+                _moveSpeedCurrent * Time.deltaTime);
+
+            //Vector2 newPosition = new Vector2(transform.position.x, transform.position.y);
+
+            //_momentum += (newPosition - oldPosition) * 0.1f;
+
+            //transform.position += new Vector3(_momentum.x, _momentum.y, 0); 
             
-            transform.position = new Vector3(_camPositionWithoutZ.x, _camPositionWithoutZ.y, _camZ);
+            
+             
 
         }
         #endregion

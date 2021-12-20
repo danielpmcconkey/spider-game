@@ -1,6 +1,8 @@
 ﻿using Assets.Scripts.CharacterControl;
+using Assets.Scripts.WorldBuilder.RoomBuilder;
 using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -15,38 +17,49 @@ namespace Assets.Scripts.WorldBuilder
         [Space(10)]
         [Header("Tile sets")]
         [Space(10)]
-        [SerializeField] public GameObject rock1Base;
-        [SerializeField] public GameObject rock1Top;
-        [SerializeField] public GameObject rock1Bottom;
-        [SerializeField] public GameObject rock1Left;
-        [SerializeField] public GameObject rock1Right;
-        [SerializeField] public GameObject rock1CornerUpLeft;
-        [SerializeField] public GameObject rock1CornerUpRight;
-        [SerializeField] public GameObject rock1CornerBottomLeft;
-        [SerializeField] public GameObject rock1CornerBottomRight;
-        [SerializeField] public GameObject rock1EndCapUp;
-        [SerializeField] public GameObject rock1EndCapDown;
-        [SerializeField] public GameObject rock1EndCapLeft;
-        [SerializeField] public GameObject rock1EndCapRight;
-        [SerializeField] public GameObject rock1SingleWide;
-        [SerializeField] public GameObject rock1SingleTall;
-        [SerializeField] public GameObject rock1Door;
+        [SerializeField] public GameObject rock1TileSet;
+        //[SerializeField] public GameObject rock1Base;
+        //[SerializeField] public GameObject rock1Top;
+        //[SerializeField] public GameObject rock1Bottom;
+        //[SerializeField] public GameObject rock1Left;
+        //[SerializeField] public GameObject rock1Right;
+        //[SerializeField] public GameObject rock1CornerUpLeft;
+        //[SerializeField] public GameObject rock1CornerUpRight;
+        //[SerializeField] public GameObject rock1CornerBottomLeft;
+        //[SerializeField] public GameObject rock1CornerBottomRight;
+        //[SerializeField] public GameObject rock1EndCapUp;
+        //[SerializeField] public GameObject rock1EndCapDown;
+        //[SerializeField] public GameObject rock1EndCapLeft;
+        //[SerializeField] public GameObject rock1EndCapRight;
+        //[SerializeField] public GameObject rock1SingleWide;
+        //[SerializeField] public GameObject rock1SingleTall;
+        //[SerializeField] public GameObject rock1Door;
         [Space(10)]
         [Header("Enemies")]
         [Space(10)]
         [SerializeField] public GameObject floatingBot;
-        public Room[] rooms;
+        private Room[] _rooms;
+        private List<Door> _doors;
+        private RoomSave[] _roomSaves;
 
-        private TileSet _tileSetRock1; 
+        
 
+        public Door GetDoorAtPosition(Vector2 globalPosition)
+        {
+            foreach(Door d in _doors)
+            {
+                if (d.positionInGlobalSpace == globalPosition) return d;             
+            }
+            return null;
+        }
         public int WhichRoomAreWeIn(Vector2 currentLocation)
         {
-            for(int i = 0; i < rooms.Length; i++)
+            for(int i = 0; i < _rooms.Length; i++)
             {
-                if(rooms[i].upperLeftInGlobalSpace.x < currentLocation.x
-                    && rooms[i].lowerRightInGlobalSpace.x > currentLocation.x
-                    && rooms[i].upperLeftInGlobalSpace.y > currentLocation.y
-                    && rooms[i].lowerRightInGlobalSpace.y < currentLocation.y)
+                if(_rooms[i].upperLeftInGlobalSpace.x < currentLocation.x
+                    && _rooms[i].lowerRightInGlobalSpace.x > currentLocation.x
+                    && _rooms[i].upperLeftInGlobalSpace.y > currentLocation.y
+                    && _rooms[i].lowerRightInGlobalSpace.y < currentLocation.y)
                 {
                     return i;
                 }
@@ -56,32 +69,60 @@ namespace Assets.Scripts.WorldBuilder
         void Awake()
         {
             int howManyRooms = 2;
-            PopulateTileSets();
+            _rooms = new Room[howManyRooms];
 
-            rooms = new Room[howManyRooms];
+
+
+            _doors = new List<Door>();
             BuildStarterRoom();
         }
 
         public (Vector2 upperLeft, Vector2 lowerRight) GetRoomDimensions(int roomId)
         {
-            Vector2 upperLeft = rooms[roomId].upperLeftInGlobalSpace;
-            Vector2 lowerRight = rooms[roomId].lowerRightInGlobalSpace;
+            Vector2 upperLeft = _rooms[roomId].upperLeftInGlobalSpace;
+            Vector2 lowerRight = _rooms[roomId].lowerRightInGlobalSpace;
             return (upperLeft, lowerRight);
         }
         private void BuildStarterRoom()
         {
-            GameObject room000 = Instantiate(new GameObject("Room000"), roomsParent.transform, false);
+            _roomSaves = RoomBuilderHelper.GetAllRoomSaves();
 
-            Room room0 = new Room(_tileSetRock1, 40, 20, new Vector2(-6.0f, 10.0F), room000);
-            rooms[0] = room0;
-            room0.AddPerimiterTiles();
-            // tile above the floor = -7.68
-            room0.AddPlatformTiles(new Vector2(-1f, -4.0f), 4, 5);
-            room0.AddPlatformTiles(new Vector2(5f, -5f), 12, 1);
-            room0.AddPlatformTiles(new Vector2(5f, -1f), 5, 1);
-            room0.AddPlatformTiles(new Vector2(12.0f, -1f), 5, 1);
-            room0.AddPlatformTiles(new Vector2(5f, 3f), 12, 1);
-            room0.AddPlatformTiles(new Vector2(20f, 0f), 2, 7);
+            Vector2 startingPointForRooms = new Vector2(-5.0f, 5.0F);
+
+            GameObject room000 = Instantiate(new GameObject("Room000"), roomsParent.transform, false);
+            Room room0 = new Room(rock1TileSet, _roomSaves[0], startingPointForRooms, room000);
+            _rooms[0] = room0;
+
+            // room000 door right is in row 6
+            // room001 door left is in row 14
+            // so need to start room001 14 rows above room000's right door
+            int room000DoorRightRow = _roomSaves[0].doors.Where(x => x.column == _roomSaves[0].roomWidth - 1).First().row;
+            int room001DoorLeftRow = _roomSaves[1].doors.Where(x => x.column == - 1).First().row;
+            float room001YPosition = startingPointForRooms.y - room000DoorRightRow + room001DoorLeftRow;
+            Vector2 startingPointForRoom001 = new Vector2(
+                startingPointForRooms.x + room0.roomWidthInTiles,
+                room001YPosition
+                );
+            GameObject room001 = Instantiate(new GameObject("Room001"), roomsParent.transform, false);
+            Room room1 = new Room(rock1TileSet, _roomSaves[1], startingPointForRoom001, room001);
+            _rooms[1] = room1;
+
+
+            // draw the door between them
+            Transform doorTransform = rock1TileSet.transform.Find("Door_origin");
+            ConnectRoomsWithDoor(room0, room1, doorTransform.gameObject, 1.0f);
+            room0.DrawSelf();
+            room1.DrawSelf();
+
+
+            //room0.AddPerimiterTiles();
+            //// tile above the floor = -7.68
+            //room0.AddPlatformTiles(new Vector2(-1f, -4.0f), 4, 5);
+            //room0.AddPlatformTiles(new Vector2(5f, -5f), 12, 1);
+            //room0.AddPlatformTiles(new Vector2(5f, -1f), 5, 1);
+            //room0.AddPlatformTiles(new Vector2(12.0f, -1f), 5, 1);
+            //room0.AddPlatformTiles(new Vector2(5f, 3f), 12, 1);
+            //room0.AddPlatformTiles(new Vector2(20f, 0f), 2, 7);
             //room0.AddPlatformTiles(new Vector2(24f, 1f), 1, 10);
             //room0.AddPlatformTiles(new Vector2(26f, 0f), 1, 9);
             //room0.AddPlatformTiles(new Vector2(28f, -1f), 1, 8);
@@ -100,43 +141,20 @@ namespace Assets.Scripts.WorldBuilder
             //room0.AddStartingEnemy(floatingBot, new Vector2(36f, 1f), playerCharacter);
 
 
-            GameObject room001 = Instantiate(new GameObject("Room001"), roomsParent.transform, false);
+            //
 
-            Room room1 = new Room(_tileSetRock1, 20, 20, new Vector2(34.0f, 10.0F), room001);
-            rooms[1] = room1;
-            room1.AddPerimiterTiles();
-            room1.AddPlatformTiles(new Vector2(38f, 6f), 1, 11);
+            //Room room1 = new Room(_tileSetRock1, 20, 20, new Vector2(34.0f, 10.0F), room001);
+            //_rooms[1] = room1;
+            //room1.AddPerimiterTiles();
+            //room1.AddPlatformTiles(new Vector2(38f, 6f), 1, 11);
             //room1.AddStartingEnemy(floatingBot, new Vector2(40f, 0f), playerCharacter);
             //room1.AddStartingEnemy(floatingBot, new Vector2(42f, 0f), playerCharacter);
             //room1.AddStartingEnemy(floatingBot, new Vector2(44f, 0f), playerCharacter);
             //room1.AddStartingEnemy(floatingBot, new Vector2(46f, 0f), playerCharacter);
             //room1.AddStartingEnemy(floatingBot, new Vector2(48f, 0f), playerCharacter);
-           
 
 
-            // draw the door between them
-            ConnectRoomsWithDoor(room0, room1, rock1Door, 1f);
-            room0.DrawSelf();
-            room1.DrawSelf();
-        }
-        private void PopulateTileSets()
-        {
-            _tileSetRock1 = new TileSet();
-            _tileSetRock1.basePrefab = rock1Base;
-            _tileSetRock1.topPrefab = rock1Top;
-            _tileSetRock1.bottomPrefab = rock1Bottom;
-            _tileSetRock1.leftPrefab = rock1Left;
-            _tileSetRock1.rightPrefab = rock1Right;
-            _tileSetRock1.cornerUpLeftPrefab = rock1CornerUpLeft;
-            _tileSetRock1.cornerUpRightPrefab = rock1CornerUpRight;
-            _tileSetRock1.cornerDownLeftPrefab = rock1CornerBottomLeft;
-            _tileSetRock1.cornerDownRightPrefab = rock1CornerBottomRight;
-            _tileSetRock1.endCapUpPrefab = rock1EndCapUp;
-            _tileSetRock1.endCapDownPrefab = rock1EndCapDown;
-            _tileSetRock1.endCapLeftPrefab = rock1EndCapLeft;
-            _tileSetRock1.endCapRightPrefab = rock1EndCapRight;
-            _tileSetRock1.singleTallPrefab = rock1SingleTall;
-            _tileSetRock1.singleWidePrefab = rock1SingleWide;
+
         }
         private void ConnectRoomsWithDoor(Room roomLeft, Room roomRight, GameObject prefab, 
             float heightFromLeftFloorInTiles)
@@ -155,6 +173,8 @@ namespace Assets.Scripts.WorldBuilder
             Vector3 position = new Vector2(posX, posY);
             Quaternion rotation = new Quaternion(0, 0, 0, 0);
             Instantiate(prefab, position, rotation, roomsParent.transform);
+
+            _doors.Add(new Door() { roomLeft = roomLeft, roomRight = roomRight, positionInGlobalSpace = position });
         }
     }
 }
