@@ -51,9 +51,24 @@ namespace Assets.Scripts.WorldBuilder.RoomBuilder
             _hasGridBeenDrawn = false;
         }
 
-        public void AddDoor(int row, int column)
+        public void ReverseDoor(int row, int column)
         {
-            doors.Add(new Position() { row = row, column = column });
+            bool isDoorAlreadyThere = false;
+            List<Position> newDoors = new List<Position>();
+
+            foreach (var d in doors)
+            {
+                if (d.row == row && d.column == column)
+                {
+                    isDoorAlreadyThere = true;
+                }
+                else newDoors.Add(d);
+            }
+            if (!isDoorAlreadyThere)
+            {
+                newDoors.Add(new Position() { row = row, column = column });
+            }
+            doors = newDoors;
         }
         
         public void DrawRoom(EditMode editMode)

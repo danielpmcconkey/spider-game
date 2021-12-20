@@ -63,7 +63,6 @@ namespace Assets.Scripts.WorldBuilder.RoomBuilder
         private VisualElement _veHighlightDoorEditMode;
         #endregion
 
-        // Start is called before the first frame update
         void Start()
         {
 
@@ -76,8 +75,6 @@ namespace Assets.Scripts.WorldBuilder.RoomBuilder
             _hasUndrawnAssets = false;
             _hasUnsavedChanges = false;
         }
-
-        // Update is called once per frame
         void Update()
         {
             if (Input.GetButtonUp("Fire1")) OnBuilderSquareMouseUp();
@@ -167,7 +164,6 @@ namespace Assets.Scripts.WorldBuilder.RoomBuilder
             
             
         }
-
         private bool IsPanelOpen()
         {
             if(_veLoadDialog.visible) return true;
@@ -404,9 +400,20 @@ namespace Assets.Scripts.WorldBuilder.RoomBuilder
             _isMouseDown = true;
             if (!IsPanelOpen())
             {
-                int tileNum = _room.GetTileNumbFromMousePosition(position);
-                _room.ReverseTile(tileNum);
-                _lastTileFlipped = tileNum;
+                if (_editMode == EditMode.TILE)
+                {
+                    int tileNum = _room.GetTileNumbFromMousePosition(position);
+                    _room.ReverseTile(tileNum);
+                    _lastTileFlipped = tileNum;
+
+                }
+                else if (_editMode == EditMode.DOOR)
+                {
+                    int row = ((int)Mathf.Round(position.y) * -1) - 1;  // subtract 1 for border row
+                    int column = (int)Mathf.Round(position.x) - 1;  // subtract 1 for border col
+
+                    _room.ReverseDoor(row, column);
+                }
                 _hasUnsavedChanges = true;
                 _hasUndrawnAssets = true;
             }
