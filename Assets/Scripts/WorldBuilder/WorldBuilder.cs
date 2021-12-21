@@ -86,25 +86,27 @@ namespace Assets.Scripts.WorldBuilder
         private void BuildStarterRoom()
         {
             _roomSaves = RoomBuilderHelper.GetAllRoomSaves();
+            RoomSave starterRoomSave = _roomSaves.Where(x => x.roomName == "Cave Exit West").FirstOrDefault();
+            RoomSave secondRoomSave = _roomSaves.Where(x => x.roomName == "Psionics Chamber").FirstOrDefault();
 
             Vector2 startingPointForRooms = new Vector2(-5.0f, 5.0F);
 
             GameObject room000 = Instantiate(new GameObject("Room000"), roomsParent.transform, false);
-            Room room0 = new Room(rock1TileSet, _roomSaves[0], startingPointForRooms, room000);
+            Room room0 = new Room(rock1TileSet, starterRoomSave, startingPointForRooms, room000);
             _rooms[0] = room0;
 
             // room000 door right is in row 6
             // room001 door left is in row 14
             // so need to start room001 14 rows above room000's right door
-            int room000DoorRightRow = _roomSaves[0].doors.Where(x => x.column == _roomSaves[0].roomWidth - 1).First().row;
-            int room001DoorLeftRow = _roomSaves[1].doors.Where(x => x.column == - 1).First().row;
+            int room000DoorRightRow = starterRoomSave.doors.Where(x => x.column == starterRoomSave.roomWidth - 1).First().row;
+            int room001DoorLeftRow = secondRoomSave.doors.Where(x => x.column == - 1).First().row;
             float room001YPosition = startingPointForRooms.y - room000DoorRightRow + room001DoorLeftRow;
             Vector2 startingPointForRoom001 = new Vector2(
                 startingPointForRooms.x + room0.roomWidthInTiles,
                 room001YPosition
                 );
             GameObject room001 = Instantiate(new GameObject("Room001"), roomsParent.transform, false);
-            Room room1 = new Room(rock1TileSet, _roomSaves[1], startingPointForRoom001, room001);
+            Room room1 = new Room(rock1TileSet, secondRoomSave, startingPointForRoom001, room001);
             _rooms[1] = room1;
 
 
