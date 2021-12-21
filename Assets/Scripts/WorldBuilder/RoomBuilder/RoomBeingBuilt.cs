@@ -15,7 +15,7 @@ namespace Assets.Scripts.WorldBuilder.RoomBuilder
         public int roomWidth = -1;
         public int roomHeight = -1;
         public TilePlacement[] tiles;
-        public List<Position> doors;
+        public List<Door> doors;
 
         private List<int> _topRowTiles;
         private List<int> _bottomRowTiles;
@@ -26,7 +26,7 @@ namespace Assets.Scripts.WorldBuilder.RoomBuilder
         private GameObject _tileSet;
         private GameObject _tileParent;
         private GameObject _mouseTriggerSquare;
-        private bool _hasGridBeenDrawn;
+        //private bool _hasGridBeenDrawn;
 
         public RoomBeingBuilt(RoomSave restore, LineRenderer gridLinePrefab, GameObject gridParent, GameObject tileSet,
             GameObject tileParent, GameObject mouseTriggerSquare)
@@ -43,10 +43,10 @@ namespace Assets.Scripts.WorldBuilder.RoomBuilder
             roomWidth = restore.roomWidth;
             roomHeight = restore.roomHeight;
             tiles = restore.tiles;
-            if (restore.doors != null) doors = new List<Position>(restore.doors);
-            else doors = new List<Position>();
+            if (restore.doors != null) doors = new List<Door>(restore.doors);
+            else doors = new List<Door>();
             AddPerimeterTiles(true);
-            _hasGridBeenDrawn = false;
+            //_hasGridBeenDrawn = false;
         }
 
 
@@ -56,12 +56,9 @@ namespace Assets.Scripts.WorldBuilder.RoomBuilder
             if (roomWidth > 0 && roomHeight > 0)
             {
                 DrawTiles();
-                if (!_hasGridBeenDrawn) DrawGrid();
-                DrawDoors();
-                if (editMode == EditMode.DOOR)
-                {
-
-                }
+                DrawDoors(editMode);
+                DrawGrid(editMode);
+                // if (!_hasGridBeenDrawn) DrawGrid();
             }
         }
         public int GetTileNumbFromMousePosition(Vector2 mouseDownLocation)
@@ -92,19 +89,21 @@ namespace Assets.Scripts.WorldBuilder.RoomBuilder
         public void ReverseDoor(int row, int column)
         {
             bool isDoorAlreadyThere = false;
-            List<Position> newDoors = new List<Position>();
+            List<Door> newDoors = new List<Door>();
 
-            foreach (var d in doors)
+            foreach (Door d in doors)
             {
-                if (d.row == row && d.column == column)
+                if (d.position.row == row && d.position.column == column)
                 {
+                    // if already there, don't add it to the new list (reverse it by deleting)
                     isDoorAlreadyThere = true;
                 }
                 else newDoors.Add(d);
             }
             if (!isDoorAlreadyThere)
             {
-                newDoors.Add(new Position() { row = row, column = column });
+                // it was never there, so create it and add it
+                doors = AddNewDoor(row, column, newDoors);
             }
             doors = newDoors;
         }
@@ -126,12 +125,51 @@ namespace Assets.Scripts.WorldBuilder.RoomBuilder
             roomWidth = width;
             roomHeight = height;
             tiles = new TilePlacement[width * height];
-            doors = new List<Position>();
+            doors = new List<Door>();
             AddPerimeterTiles();
         }
         #endregion
 
         #region private methods
+        private List<Door> AddNewDoor(int row, int column, List<Door> newDoors)
+        {
+            Door d = new Door()
+            {
+                position = new Position() { row = row, column = column },
+                guid = Guid.NewGuid(),
+                doorConnections = new DoorConnection[doors.Count + 1],
+            };
+
+            // modify all the door connections
+            for (int i = 0; i < doors.Count; i++)
+            {
+                Door existingDoor = doors[i];
+                DoorConnection[] originalConnections = existingDoor.doorConnections;
+
+
+                // for each door, create a connections list, copying the existing ones
+                // add adding one for the new door.
+                existingDoor.doorConnections = new DoorConnection[originalConnections.Length + 1];
+                for (int k = 0; k < originalConnections.Length; k++)
+                {
+                    existingDoor.doorConnections[k] = originalConnections[k];
+                }
+
+                // now add the last connection for the new door
+                existingDoor.doorConnections[originalConnections.Length] = new DoorConnection()
+                {
+                    doorIn = existingDoor.guid,
+                    doorOut = existingDoor.guid,
+                };
+
+                // now add a connection for the added door to the existing door
+                d.doorConnections[i] = new DoorConnection() { doorIn = d.guid, doorOut = existingDoor.guid };
+            }
+
+            // now add it onto the list
+            newDoors.Add(d);
+            return newDoors;
+        }
         private void AddPerimeterTiles(bool fromFileLoad = false)
         {
             _topRowTiles = new List<int>();
@@ -165,28 +203,61 @@ namespace Assets.Scripts.WorldBuilder.RoomBuilder
         }
         private void DrawDoorConnectors()
         {
+            const int tileBorderBuffer = 1;
+
             if (doors == null) return;
 
-            foreach (Position d in doors)
+            foreach (Door doorIn in doors)
             {
-                float x = d.column * tileWidth;
-                float y = d.row * tileHeight;
-                throw new NotImplementedException();
+                foreach (Door doorOut in doors)
+                {
+                    if (doorIn.guid != doorOut.guid)
+                    {
+
+                        float x1 = 0f;
+                        float x2 = 0f;
+                        float y1 = 0f;
+                        float y2 = 0f;
+
+                        
+
+                        x1 = (doorIn.position.column + tileBorderBuffer) * Globals.tileWidthInUnityMeters;
+                        if (doorIn.position.column == -1)
+                        {
+                            // move it 2 to the right
+                            x1 += 2 * Globals.tileWidthInUnityMeters;
+                        }
+                        x2 = (doorOut.position.column + tileBorderBuffer) * Globals.tileWidthInUnityMeters;
+                        if (doorOut.position.column == -1)
+                        {
+                            // move it 2 to the right
+                            x2 += 2 * Globals.tileWidthInUnityMeters;
+                        }
+                        y1 = (doorIn.position.row + tileBorderBuffer) * Globals.tileHeightInUnityMeters;
+                        y2 = (doorOut.position.row + tileBorderBuffer + Globals.doorHeightInTiles) * Globals.tileHeightInUnityMeters;
+
+                        LineRenderer line = LineRenderer.Instantiate(_gridLinePrefab, _tileParent.transform, false);
+                        line.SetPosition(0, new Vector3(x1, -y1, 4));
+                        line.SetPosition(1, new Vector3(x2, -y2, -4));
+                        line.sortingLayerName = "UI";
+                    }
+                }
             }
         }
-        private void DrawDoors()
+        private void DrawDoors(EditMode editMode)
         {
-            if (doors == null) doors = new List<Position>();
-            foreach (Position d in doors)
+            if (doors == null) doors = new List<Door>();
+            foreach (Door d in doors)
             {
-                float x = (d.column + 1) * tileWidth / Globals.pixelsInAUnityMeter;
-                float y = (d.row + 1) * tileHeight / Globals.pixelsInAUnityMeter * -1;
+                float x = (d.position.column + 1) * tileWidth / Globals.pixelsInAUnityMeter;
+                float y = (d.position.row + 1) * tileHeight / Globals.pixelsInAUnityMeter * -1;
 
                 Transform prefabTransform = _tileSet.transform.Find("Door_origin");
                 DrawPrefab(prefabTransform.gameObject, new Vector3(x, y, 20), _tileParent);
             }
+            if (editMode == EditMode.DOOR) DrawDoorConnectors();
         }
-        private void DrawGrid()
+        private void DrawGrid(EditMode editMode)
         {
             const int startX = 0;
             const int startY = 0;
@@ -196,24 +267,29 @@ namespace Assets.Scripts.WorldBuilder.RoomBuilder
             float lineWidth = (roomWidth + 2) * tileWidth / Globals.pixelsInAUnityMeter;
             float lineHeight = (roomHeight + 2) * tileHeight / Globals.pixelsInAUnityMeter;
 
-            float horizontalLineLeft = startX;
-            float horizontalLineRight = startX + lineWidth;
-            float verticalLineTop = startY;
-            float verticalLineBottom = startY - lineHeight;
+            if (editMode == EditMode.TILE)
+            {
+                float horizontalLineLeft = startX;
+                float horizontalLineRight = startX + lineWidth;
+                float verticalLineTop = startY;
+                float verticalLineBottom = startY - lineHeight;
 
-            // vertical lines
-            for (float x = startX; x <= lineWidth + startX; x += tileWidth / Globals.pixelsInAUnityMeter)
-            {
-                LineRenderer line = LineRenderer.Instantiate(_gridLinePrefab, _gridParent.transform, false);
-                line.SetPosition(0, new Vector2(x, verticalLineTop));
-                line.SetPosition(1, new Vector2(x, verticalLineBottom));
-            }
-            // horizontal lines
-            for (float y = startY; y >= startY - lineHeight; y -= tileHeight / Globals.pixelsInAUnityMeter)
-            {
-                LineRenderer line = LineRenderer.Instantiate(_gridLinePrefab, _gridParent.transform, false);
-                line.SetPosition(0, new Vector2(horizontalLineLeft, y));
-                line.SetPosition(1, new Vector2(horizontalLineRight, y));
+                // vertical lines
+                for (float x = startX; x <= lineWidth + startX; x += tileWidth / Globals.pixelsInAUnityMeter)
+                {
+                    LineRenderer line = LineRenderer.Instantiate(_gridLinePrefab, _gridParent.transform, false);
+                    line.SetPosition(0, new Vector2(x, verticalLineTop));
+                    line.SetPosition(1, new Vector2(x, verticalLineBottom));
+                    line.sortingLayerName = "UI";
+                }
+                // horizontal lines
+                for (float y = startY; y >= startY - lineHeight; y -= tileHeight / Globals.pixelsInAUnityMeter)
+                {
+                    LineRenderer line = LineRenderer.Instantiate(_gridLinePrefab, _gridParent.transform, false);
+                    line.SetPosition(0, new Vector2(horizontalLineLeft, y));
+                    line.SetPosition(1, new Vector2(horizontalLineRight, y));
+                    line.sortingLayerName = "UI";
+                }
             }
 
             // draw the trigger squares
@@ -226,7 +302,7 @@ namespace Assets.Scripts.WorldBuilder.RoomBuilder
             }
 
             // finally set the bool to true so we don't do this every frame
-            _hasGridBeenDrawn = true;
+            //_hasGridBeenDrawn = true;
         }
         private GameObject DrawPrefab(GameObject prefab, Vector3 positionInGlobalSpace, GameObject parent)
         {
@@ -980,12 +1056,12 @@ namespace Assets.Scripts.WorldBuilder.RoomBuilder
             foreach (var door in doors)
             {
                 // get the index of the left brick in each of the door's rows
-                int indexAtDoorUL = (door.row * roomWidth) + door.column;
+                int indexAtDoorUL = (door.position.row * roomWidth) + door.position.column;
                 int indexAtDoorML = indexAtDoorUL + roomWidth;
                 int indexAtDoorBL = indexAtDoorML + roomWidth;
 
                 // if door is on the left wall, check the right side of it
-                if (door.column == -1)
+                if (door.position.column == -1)
                 {
                     // upper row
                     if (indexAtDoorUL + 1 == tileIndex) return true;
@@ -995,7 +1071,7 @@ namespace Assets.Scripts.WorldBuilder.RoomBuilder
                     if (indexAtDoorBL + 1 == tileIndex) return true;
                 }
                 // if door is on the right wall, check the left side of it
-                else if (door.column == roomWidth - 1)
+                else if (door.position.column == roomWidth - 1)
                 {
                     // upper row
                     if (indexAtDoorUL == tileIndex) return true;

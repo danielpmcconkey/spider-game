@@ -12,6 +12,11 @@ namespace Assets.Scripts.WorldBuilder.RoomBuilder
         public static RoomSave DeserializeFromJson(string json)
         {
             RoomSave save = JsonUtility.FromJson<RoomSave>(json);
+            for(int i = 0;  i < save.doors.Length; i++)
+            {
+                var door = save.doors[i];
+                if (door.guid == null) door.guid = Guid.NewGuid();
+            }
             return save;
         }
         public static RoomSave[] GetAllRoomSaves()

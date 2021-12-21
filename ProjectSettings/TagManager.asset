@@ -57,3 +57,6 @@ TagManager:
   - name: Reticule
     uniqueID: 485262379
     locked: 0
+  - name: UI
+    uniqueID: 597548017
+    locked: 0

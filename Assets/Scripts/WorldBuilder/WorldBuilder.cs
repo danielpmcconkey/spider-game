@@ -98,8 +98,10 @@ namespace Assets.Scripts.WorldBuilder
             // room000 door right is in row 6
             // room001 door left is in row 14
             // so need to start room001 14 rows above room000's right door
-            int room000DoorRightRow = starterRoomSave.doors.Where(x => x.column == starterRoomSave.roomWidth - 1).First().row;
-            int room001DoorLeftRow = secondRoomSave.doors.Where(x => x.column == - 1).First().row;
+            int room000DoorRightRow = starterRoomSave.doors.
+                Where(x => x.position.column == starterRoomSave.roomWidth - 1).First().position.row;
+            int room001DoorLeftRow = secondRoomSave.doors.
+                Where(x => x.position.column == - 1).First().position.row;
             float room001YPosition = startingPointForRooms.y - room000DoorRightRow + room001DoorLeftRow;
             Vector2 startingPointForRoom001 = new Vector2(
                 startingPointForRooms.x + room0.roomWidthInTiles,

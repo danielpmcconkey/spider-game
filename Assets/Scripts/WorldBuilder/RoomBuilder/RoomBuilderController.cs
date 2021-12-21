@@ -290,6 +290,7 @@ namespace Assets.Scripts.WorldBuilder.RoomBuilder
             _editMode = EditMode.DOOR;
             _veHighlightTileEditMode.visible = false;
             _veHighlightDoorEditMode.visible = true;
+            _hasUndrawnAssets = true;
         }
         private void btnLoadRoom_Click()
         {
@@ -394,6 +395,7 @@ namespace Assets.Scripts.WorldBuilder.RoomBuilder
             _editMode = EditMode.TILE;
             _veHighlightTileEditMode.visible = true;
             _veHighlightDoorEditMode.visible = false;
+            _hasUndrawnAssets = true;
         }
         private void OnBuilderSquareMouseDown(Vector2 position)
         {
@@ -420,7 +422,7 @@ namespace Assets.Scripts.WorldBuilder.RoomBuilder
         }
         private void OnBuilderSquareMouseEnter(Vector2 position)
         {            
-            if (!IsPanelOpen())
+            if (!IsPanelOpen() && _editMode == EditMode.TILE)
             {
                 if (_isMouseDown)
                 {
