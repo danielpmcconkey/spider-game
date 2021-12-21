@@ -26,8 +26,6 @@ namespace Assets.Scripts.WorldBuilder.RoomBuilder
         private GameObject _tileSet;
         private GameObject _tileParent;
         private GameObject _mouseTriggerSquare;
-
-
         private bool _hasGridBeenDrawn;
 
         public RoomBeingBuilt(RoomSave restore, LineRenderer gridLinePrefab, GameObject gridParent, GameObject tileSet,
@@ -51,32 +49,14 @@ namespace Assets.Scripts.WorldBuilder.RoomBuilder
             _hasGridBeenDrawn = false;
         }
 
-        public void ReverseDoor(int row, int column)
-        {
-            bool isDoorAlreadyThere = false;
-            List<Position> newDoors = new List<Position>();
 
-            foreach (var d in doors)
-            {
-                if (d.row == row && d.column == column)
-                {
-                    isDoorAlreadyThere = true;
-                }
-                else newDoors.Add(d);
-            }
-            if (!isDoorAlreadyThere)
-            {
-                newDoors.Add(new Position() { row = row, column = column });
-            }
-            doors = newDoors;
-        }
-        
+        #region public methods
         public void DrawRoom(EditMode editMode)
         {
             if (roomWidth > 0 && roomHeight > 0)
             {
                 DrawTiles();
-                if(!_hasGridBeenDrawn) DrawGrid();
+                if (!_hasGridBeenDrawn) DrawGrid();
                 DrawDoors();
                 if (editMode == EditMode.DOOR)
                 {
@@ -84,8 +64,6 @@ namespace Assets.Scripts.WorldBuilder.RoomBuilder
                 }
             }
         }
-        
-
         public int GetTileNumbFromMousePosition(Vector2 mouseDownLocation)
         {
             float mouseXToUse = mouseDownLocation.x;
@@ -111,6 +89,25 @@ namespace Assets.Scripts.WorldBuilder.RoomBuilder
             int tileNum = (row * roomWidth) + column;
             return tileNum;
         }
+        public void ReverseDoor(int row, int column)
+        {
+            bool isDoorAlreadyThere = false;
+            List<Position> newDoors = new List<Position>();
+
+            foreach (var d in doors)
+            {
+                if (d.row == row && d.column == column)
+                {
+                    isDoorAlreadyThere = true;
+                }
+                else newDoors.Add(d);
+            }
+            if (!isDoorAlreadyThere)
+            {
+                newDoors.Add(new Position() { row = row, column = column });
+            }
+            doors = newDoors;
+        }
         public void ReverseTile(int tileNum)
         {
             if (tileNum < 0) return;
@@ -124,7 +121,6 @@ namespace Assets.Scripts.WorldBuilder.RoomBuilder
                 tiles[tileNum] = new TilePlacement() { isSolid = true, tileNum = 2 };
             }
         }
-        
         public void SetRoomDimensions(int width, int height)
         {
             roomWidth = width;
@@ -133,7 +129,9 @@ namespace Assets.Scripts.WorldBuilder.RoomBuilder
             doors = new List<Position>();
             AddPerimeterTiles();
         }
+        #endregion
 
+        #region private methods
         private void AddPerimeterTiles(bool fromFileLoad = false)
         {
             _topRowTiles = new List<int>();
@@ -591,9 +589,14 @@ namespace Assets.Scripts.WorldBuilder.RoomBuilder
                 }
                 if (shouldDrawATile)
                 {
+                    if (tileNumToDraw == -1)
+                    {
+                        // failsafe in case my planning sucks
+                        tileNumToDraw = 1;
+                    }
                     DrawSprite(
-                        tileNumToDraw, 
-                        (column + 1) * tileWidth / Globals.pixelsInAUnityMeter, 
+                        tileNumToDraw,
+                        (column + 1) * tileWidth / Globals.pixelsInAUnityMeter,
                         (row + 1) * tileHeight / Globals.pixelsInAUnityMeter * -1);
                 }
             }
@@ -1003,6 +1006,7 @@ namespace Assets.Scripts.WorldBuilder.RoomBuilder
                 }
             }
             return false;
-        }
+        } 
+        #endregion
     }
 }
