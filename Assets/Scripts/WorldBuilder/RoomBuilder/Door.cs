@@ -9,7 +9,7 @@ namespace Assets.Scripts.WorldBuilder.RoomBuilder
     [Serializable]
     public class Door
     {
-        public string guid;
+        public string guid; // it's stupid to stoor guids as strings, but the unity serializer won't serialize a guid
         public Position position;
         public List<DoorConnection> doorConnections; // used to determine what movement capabilities are required to go from one room to the next
 
