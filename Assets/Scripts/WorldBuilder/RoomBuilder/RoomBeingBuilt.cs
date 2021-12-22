@@ -558,6 +558,16 @@ namespace Assets.Scripts.WorldBuilder.RoomBuilder
                     {
                         tileNumToDraw = 58;
                     }
+                    if (!neighbors.isUpLeft && !neighbors.isDownRight && neighbors.isUp && neighbors.isUpRight
+                        && neighbors.isLeft && neighbors.isRight && neighbors.isDownLeft && neighbors.isDown)
+                    {
+                        tileNumToDraw = 61;
+                    }
+                    if (neighbors.isUpLeft && neighbors.isDownRight && neighbors.isUp && !neighbors.isUpRight
+                        && neighbors.isLeft && neighbors.isRight && !neighbors.isDownLeft && neighbors.isDown)
+                    {
+                        tileNumToDraw = 62;
+                    }
                     tiles[i].tileNum = tileNumToDraw;
                 }
                 else

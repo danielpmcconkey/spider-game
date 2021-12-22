@@ -1396,6 +1396,48 @@ TextureImporter:
       indices: 
       edges: []
       weights: []
+    - serializedVersion: 2
+      name: WorldBuilderTilemap48x48_61
+      rect:
+        serializedVersion: 2
+        x: 240
+        y: 0
+        width: 48
+        height: 48
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 6c0a1718ed0f9cb459bd58fc348cddd7
+      internalID: -2123073150
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: WorldBuilderTilemap48x48_62
+      rect:
+        serializedVersion: 2
+        x: 288
+        y: 0
+        width: 48
+        height: 48
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 8033b64d1ec950d48a0379e73b1481ab
+      internalID: -854466550
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
     outline: []
     physicsShape: []
     bones: []
@@ -1408,6 +1450,7 @@ TextureImporter:
     secondaryTextures: []
     nameFileIdTable:
       WorldBuilderTilemap48x48_25: 117990199
+      WorldBuilderTilemap48x48_61: -2123073150
       WorldBuilderTilemap48x48_47: 1027991463
       WorldBuilderTilemap48x48_17: 351096758
       WorldBuilderTilemap48x48_34: -1949202653
@@ -1431,6 +1474,7 @@ TextureImporter:
       WorldBuilderTilemap48x48_18: -1728544669
       WorldBuilderTilemap48x48_21: -1161930053
       WorldBuilderTilemap48x48_35: -323327376
+      WorldBuilderTilemap48x48_62: -854466550
       WorldBuilderTilemap48x48_26: -1616907893
       WorldBuilderTilemap48x48_23: 806947217
       WorldBuilderTilemap48x48_14: -1855316672
