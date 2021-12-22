@@ -15,6 +15,7 @@ namespace Assets.Scripts.WorldBuilder.RoomBuilder
         [SerializeField] public GameObject buildingZone;
         [SerializeField] public GameObject tileSet;
         [SerializeField] public LineRenderer gridLinePrefab;
+        [SerializeField] public LineRenderer doorLinePrefab;
         [SerializeField] public GameObject gridParent;
         [SerializeField] public GameObject tileParent;
         [SerializeField] public GameObject mouseTriggerSquare;
@@ -299,7 +300,8 @@ namespace Assets.Scripts.WorldBuilder.RoomBuilder
             if(nameSelected != string.Empty)
             {
                 RoomSave save = _roomSaves.Where(x => x.roomName == nameSelected).FirstOrDefault();
-                _room = new RoomBeingBuilt(save, gridLinePrefab, gridParent, tileSet, tileParent, mouseTriggerSquare);
+                _room = new RoomBeingBuilt(save, gridLinePrefab, gridParent, tileSet, tileParent, 
+                    mouseTriggerSquare, doorLinePrefab);
                 _room.DrawRoom(_editMode);
                 _hasUnsavedChanges = false;
                 StartCoroutine(MoveCameraToRoomCenter());
@@ -324,7 +326,8 @@ namespace Assets.Scripts.WorldBuilder.RoomBuilder
                 roomHeight = height,
             };
 
-            _room = new RoomBeingBuilt(emptySave, gridLinePrefab, gridParent, tileSet, tileParent, mouseTriggerSquare);
+            _room = new RoomBeingBuilt(emptySave, gridLinePrefab, gridParent, tileSet, tileParent, 
+                mouseTriggerSquare, doorLinePrefab);
             _room.SetRoomDimensions(width, height);
             _room.DrawRoom(_editMode);
             _hasUnsavedChanges = true;

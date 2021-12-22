@@ -22,6 +22,7 @@ namespace Assets.Scripts.WorldBuilder.RoomBuilder
         private List<int> _leftColumnTiles;
         private List<int> _rightColumnTiles;
         private LineRenderer _gridLinePrefab;
+        private LineRenderer _doorLinePrefab;
         private GameObject _gridParent;
         private GameObject _tileSet;
         private GameObject _tileParent;
@@ -29,9 +30,10 @@ namespace Assets.Scripts.WorldBuilder.RoomBuilder
         //private bool _hasGridBeenDrawn;
 
         public RoomBeingBuilt(RoomSave restore, LineRenderer gridLinePrefab, GameObject gridParent, GameObject tileSet,
-            GameObject tileParent, GameObject mouseTriggerSquare)
+            GameObject tileParent, GameObject mouseTriggerSquare, LineRenderer doorLinePrefab)
         {
             _gridLinePrefab = gridLinePrefab;
+            _doorLinePrefab = doorLinePrefab;
             _gridParent = gridParent;
             _tileSet = tileSet;
             _tileParent = tileParent;
@@ -218,6 +220,8 @@ namespace Assets.Scripts.WorldBuilder.RoomBuilder
                         float x2 = 0f;
                         float y1 = 0f;
                         float y2 = 0f;
+                        float x3 = 0f;
+                        float y3 = 0f;
 
                         
 
@@ -227,18 +231,30 @@ namespace Assets.Scripts.WorldBuilder.RoomBuilder
                             // move it 2 to the right
                             x1 += 2 * Globals.tileWidthInUnityMeters;
                         }
-                        x2 = (doorOut.position.column + tileBorderBuffer) * Globals.tileWidthInUnityMeters;
+                        x3 = (doorOut.position.column + tileBorderBuffer) * Globals.tileWidthInUnityMeters;
                         if (doorOut.position.column == -1)
                         {
                             // move it 2 to the right
-                            x2 += 2 * Globals.tileWidthInUnityMeters;
+                            x3 += 2 * Globals.tileWidthInUnityMeters;
                         }
                         y1 = (doorIn.position.row + tileBorderBuffer) * Globals.tileHeightInUnityMeters;
-                        y2 = (doorOut.position.row + tileBorderBuffer + Globals.doorHeightInTiles) * Globals.tileHeightInUnityMeters;
+                        y3 = (doorOut.position.row + tileBorderBuffer + Globals.doorHeightInTiles) * Globals.tileHeightInUnityMeters;
 
-                        LineRenderer line = LineRenderer.Instantiate(_gridLinePrefab, _tileParent.transform, false);
+                        // set x2 and y2 to be in the middle of 1 and 3
+                        x2 = x1 + ((x3 - x1) / 2);
+                        y2 = y1 + ((y3 - y1) / 2);
+                        
+                        // if x1 and x3 are are the same, move x2 over
+                        if(x1 == x3)
+                        {
+                            if (y1 > y3) x2 += 3;
+                            else x2 -= 3;
+                        }
+
+                        LineRenderer line = LineRenderer.Instantiate(_doorLinePrefab, _tileParent.transform, false);
                         line.SetPosition(0, new Vector3(x1, -y1, 4));
                         line.SetPosition(1, new Vector3(x2, -y2, -4));
+                        line.SetPosition(2, new Vector3(x3, -y3, -4));
                         line.sortingLayerName = "UI";
                     }
                 }
