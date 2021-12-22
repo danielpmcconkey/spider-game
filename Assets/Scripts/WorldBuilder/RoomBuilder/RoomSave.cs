@@ -17,6 +17,6 @@ namespace Assets.Scripts.WorldBuilder.RoomBuilder
         public int roomWidth;
         public int roomHeight;
         public TilePlacement[] tiles;
-        public Door[] doors;
+        public List<Door> doors;
     }
 }

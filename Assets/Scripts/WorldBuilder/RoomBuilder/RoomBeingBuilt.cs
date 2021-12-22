@@ -21,23 +21,14 @@ namespace Assets.Scripts.WorldBuilder.RoomBuilder
         private List<int> _bottomRowTiles;
         private List<int> _leftColumnTiles;
         private List<int> _rightColumnTiles;
-        private LineRenderer _gridLinePrefab;
-        private LineRenderer _doorLinePrefab;
-        private GameObject _gridParent;
-        private GameObject _tileSet;
-        private GameObject _tileParent;
-        private GameObject _mouseTriggerSquare;
-        //private bool _hasGridBeenDrawn;
+        RoomBuilderReferences _references;
 
-        public RoomBeingBuilt(RoomSave restore, LineRenderer gridLinePrefab, GameObject gridParent, GameObject tileSet,
-            GameObject tileParent, GameObject mouseTriggerSquare, LineRenderer doorLinePrefab)
+        public RoomBeingBuilt(RoomSave restore, RoomBuilderReferences references)
+            
+            //LineRenderer gridLinePrefab, GameObject gridParent, GameObject tileSet,
+            //GameObject tileParent, GameObject mouseTriggerSquare, LineRenderer doorLinePrefab)
         {
-            _gridLinePrefab = gridLinePrefab;
-            _doorLinePrefab = doorLinePrefab;
-            _gridParent = gridParent;
-            _tileSet = tileSet;
-            _tileParent = tileParent;
-            _mouseTriggerSquare = mouseTriggerSquare;
+            _references = references;
 
             roomName = restore.roomName;
             tileWidth = restore.tileWidth;
@@ -105,7 +96,7 @@ namespace Assets.Scripts.WorldBuilder.RoomBuilder
             if (!isDoorAlreadyThere)
             {
                 // it was never there, so create it and add it
-                doors = AddNewDoor(row, column, newDoors);
+                newDoors.Add(new Door(row, column));
             }
             doors = newDoors;
         }
@@ -133,45 +124,41 @@ namespace Assets.Scripts.WorldBuilder.RoomBuilder
         #endregion
 
         #region private methods
-        private List<Door> AddNewDoor(int row, int column, List<Door> newDoors)
-        {
-            Door d = new Door()
-            {
-                position = new Position() { row = row, column = column },
-                guid = Guid.NewGuid(),
-                doorConnections = new DoorConnection[doors.Count + 1],
-            };
+        //private List<Door> AddNewDoor(int row, int column, List<Door> newDoors)
+        //{
+        //    Door newDoor = new Door()
+        //    {
+        //        position = new Position() { row = row, column = column },
+        //        guid = Guid.NewGuid(),
+        //        doorConnections = new List<DoorConnection>(),
+        //    };
 
-            // modify all the door connections
-            for (int i = 0; i < doors.Count; i++)
-            {
-                Door existingDoor = doors[i];
-                DoorConnection[] originalConnections = existingDoor.doorConnections;
+        //    // modify all the door connections
+        //    for (int i = 0; i < doors.Count; i++)
+        //    {
+        //        Door existingDoor = doors[i];
+        //        List<DoorConnection> originalConnections = existingDoor.doorConnections;
 
 
-                // for each door, create a connections list, copying the existing ones
-                // add adding one for the new door.
-                existingDoor.doorConnections = new DoorConnection[originalConnections.Length + 1];
-                for (int k = 0; k < originalConnections.Length; k++)
-                {
-                    existingDoor.doorConnections[k] = originalConnections[k];
-                }
+        //        // for each door, create a connections list, copying the existing ones
+        //        // add adding one for the new door.
+        //        existingDoor.doorConnections = new DoorConnection[originalConnections.Count + 1];
+        //        for (int k = 0; k < originalConnections.Length; k++)
+        //        {
+        //            existingDoor.doorConnections[k] = originalConnections[k];
+        //        }
 
-                // now add the last connection for the new door
-                existingDoor.doorConnections[originalConnections.Length] = new DoorConnection()
-                {
-                    doorIn = existingDoor.guid,
-                    doorOut = existingDoor.guid,
-                };
+        //        // now add the last connection for the new door
+        //        existingDoor.doorConnections[originalConnections.Length] = new DoorConnection(existingDoor.guid, newDoor.guid);
 
-                // now add a connection for the added door to the existing door
-                d.doorConnections[i] = new DoorConnection() { doorIn = d.guid, doorOut = existingDoor.guid };
-            }
+        //        // now add a connection for the added door to the existing door
+        //        newDoor.doorConnections[i] = new DoorConnection(newDoor.guid, existingDoor.guid);
+        //    }
 
-            // now add it onto the list
-            newDoors.Add(d);
-            return newDoors;
-        }
+        //    // now add it onto the list
+        //    newDoors.Add(newDoor);
+        //    return newDoors;
+        //}
         private void AddPerimeterTiles(bool fromFileLoad = false)
         {
             _topRowTiles = new List<int>();
@@ -209,13 +196,32 @@ namespace Assets.Scripts.WorldBuilder.RoomBuilder
 
             if (doors == null) return;
 
-            foreach (Door doorIn in doors)
+            for(int i = 0; i < doors.Count; i++) 
             {
-                foreach (Door doorOut in doors)
+                Door doorIn = doors[i];
+
+                if (doorIn.doorConnections == null) doorIn.doorConnections = new List<DoorConnection>();
+
+                for (int i2 = 0; i2 < doors.Count; i2++) 
                 {
+                    Door doorOut = doors[i2];
+                    
+                    
+
                     if (doorIn.guid != doorOut.guid)
                     {
+                        // make sure we have teh right door connection object
+                        DoorConnection doorConnection = new DoorConnection(doorIn.guid, doorOut.guid);
 
+                        var existingMatches = doorIn.doorConnections.Where(
+                            x => x.doorInId == doorIn.guid
+                            && x.doorOutId == doorOut.guid);
+
+                        if (existingMatches.Count() > 0) doorConnection = existingMatches.First();
+                        else doorIn.doorConnections.Add(doorConnection);
+
+
+                        // now draft our line points
                         float x1 = 0f;
                         float x2 = 0f;
                         float y1 = 0f;
@@ -251,11 +257,24 @@ namespace Assets.Scripts.WorldBuilder.RoomBuilder
                             else x2 -= 3;
                         }
 
-                        LineRenderer line = LineRenderer.Instantiate(_doorLinePrefab, _tileParent.transform, false);
+                        // move y2 up if doorIn is on the left and down if on the right
+                        if (x1 < x3) y2 += 2;
+                        else y2 -= 2;
+
+                        // now draw the line
+                        LineRenderer line = LineRenderer.Instantiate(_references.doorLinePrefab,
+                            _references.tileParent.transform, false);
                         line.SetPosition(0, new Vector3(x1, -y1, 4));
                         line.SetPosition(1, new Vector3(x2, -y2, -4));
                         line.SetPosition(2, new Vector3(x3, -y3, -4));
                         line.sortingLayerName = "UI";
+
+                        // now draw the dependencyButton
+                        GameObject dependencyButton = DrawPrefab(_references.dependencyButton,
+                            new Vector3(x2, -y2, -5), _references.tileParent);
+
+                        BuilderDependencyMouseTrigger script = dependencyButton.GetComponent<BuilderDependencyMouseTrigger>();
+                        script.doorConnectionId = doorConnection.doorConnectionId;
                     }
                 }
             }
@@ -268,8 +287,8 @@ namespace Assets.Scripts.WorldBuilder.RoomBuilder
                 float x = (d.position.column + 1) * tileWidth / Globals.pixelsInAUnityMeter;
                 float y = (d.position.row + 1) * tileHeight / Globals.pixelsInAUnityMeter * -1;
 
-                Transform prefabTransform = _tileSet.transform.Find("Door_origin");
-                DrawPrefab(prefabTransform.gameObject, new Vector3(x, y, 20), _tileParent);
+                Transform prefabTransform = _references.tileSet.transform.Find("Door_origin");
+                DrawPrefab(prefabTransform.gameObject, new Vector3(x, y, 20), _references.tileParent);
             }
             if (editMode == EditMode.DOOR) DrawDoorConnectors();
         }
@@ -293,7 +312,8 @@ namespace Assets.Scripts.WorldBuilder.RoomBuilder
                 // vertical lines
                 for (float x = startX; x <= lineWidth + startX; x += tileWidth / Globals.pixelsInAUnityMeter)
                 {
-                    LineRenderer line = LineRenderer.Instantiate(_gridLinePrefab, _gridParent.transform, false);
+                    LineRenderer line = LineRenderer.Instantiate(_references.gridLinePrefab,
+                        _references.gridParent.transform, false);
                     line.SetPosition(0, new Vector2(x, verticalLineTop));
                     line.SetPosition(1, new Vector2(x, verticalLineBottom));
                     line.sortingLayerName = "UI";
@@ -301,7 +321,8 @@ namespace Assets.Scripts.WorldBuilder.RoomBuilder
                 // horizontal lines
                 for (float y = startY; y >= startY - lineHeight; y -= tileHeight / Globals.pixelsInAUnityMeter)
                 {
-                    LineRenderer line = LineRenderer.Instantiate(_gridLinePrefab, _gridParent.transform, false);
+                    LineRenderer line = LineRenderer.Instantiate(_references.gridLinePrefab,
+                        _references.gridParent.transform, false);
                     line.SetPosition(0, new Vector2(horizontalLineLeft, y));
                     line.SetPosition(1, new Vector2(horizontalLineRight, y));
                     line.sortingLayerName = "UI";
@@ -313,7 +334,7 @@ namespace Assets.Scripts.WorldBuilder.RoomBuilder
             {
                 for (float x = startX; x <= lineWidth + startX; x += tileWidth / Globals.pixelsInAUnityMeter)
                 {
-                    DrawPrefab(_mouseTriggerSquare, new Vector3(x, y, 0), _gridParent);
+                    DrawPrefab(_references.mouseTriggerSquare, new Vector3(x, y, 0), _references.gridParent);
                 }
             }
 
@@ -327,8 +348,8 @@ namespace Assets.Scripts.WorldBuilder.RoomBuilder
         }
         private void DrawSprite(int spriteNum, float x, float y)
         {
-            Transform prefabTransform = _tileSet.transform.Find(string.Format("{0}_origin", spriteNum));
-            DrawPrefab(prefabTransform.gameObject, new Vector3(x, y, 20), _tileParent);
+            Transform prefabTransform = _references.tileSet.transform.Find(string.Format("{0}_origin", spriteNum));
+            DrawPrefab(prefabTransform.gameObject, new Vector3(x, y, 20), _references.tileParent);
         }
         private void DrawTiles()
         {
@@ -712,11 +733,11 @@ namespace Assets.Scripts.WorldBuilder.RoomBuilder
         }
         private void EraseGrid()
         {
-            EraseAllFromParent(_gridParent);
+            EraseAllFromParent(_references.gridParent);
         }
         private void EraseTiles()
         {
-            EraseAllFromParent(_tileParent);
+            EraseAllFromParent(_references.tileParent);
         }
         private Position GetSpriteSheetPositionOfSpriteNum(int spriteNum)
         {

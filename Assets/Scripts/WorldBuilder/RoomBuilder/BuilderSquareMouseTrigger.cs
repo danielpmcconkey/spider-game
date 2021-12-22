@@ -13,12 +13,12 @@ namespace Assets.Scripts.WorldBuilder.RoomBuilder
         private void OnMouseDown()
         {
             // use teh parent's position because the colider is always x=.5 y=-.5
-            GameEvents.current.BuilderSquareMouseDown(transform.parent.position);
+            RoomBuilderEvents.current.BuilderSquareMouseDown(transform.parent.position);
         }
         private void OnMouseEnter()
         {
             // use teh parent's position because the colider is always x=.5 y=-.5
-            GameEvents.current.BuilderSquareMouseEnter(transform.parent.position);
+            RoomBuilderEvents.current.BuilderSquareMouseEnter(transform.parent.position);
         }
     }
 }

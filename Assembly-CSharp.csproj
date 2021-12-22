@@ -84,11 +84,13 @@
     <Compile Include="Assets\Scripts\Combat\HealthBar.cs" />
     <Compile Include="Assets\Scripts\WorldBuilder\RoomBuilder\EditMode.cs" />
     <Compile Include="Assets\Scripts\Animation\CharacterAnimationController.cs" />
+    <Compile Include="Assets\Scripts\WorldBuilder\RoomBuilder\BuilderDependencyMouseTrigger.cs" />
     <Compile Include="Assets\Scripts\WorldBuilder\RoomBuilder\RoomBeingBuilt.cs" />
     <Compile Include="Assets\Scripts\Utility\Raycaster.cs" />
     <Compile Include="Assets\Scripts\CharacterControl\FloatingAiCharacter.cs" />
     <Compile Include="Assets\Scripts\CharacterControl\CharacterOrienter.cs" />
     <Compile Include="Assets\Scripts\CharacterControl\MovementTrigger.cs" />
+    <Compile Include="Assets\Scripts\Events\RoomBuilderEvents.cs" />
     <Compile Include="Assets\Scripts\WorldBuilder\TileSet.cs" />
     <Compile Include="Assets\Scripts\WorldBuilder\DoorTrigger.cs" />
     <Compile Include="Assets\Scripts\CharacterControl\ControllableCharacter.cs" />
@@ -97,6 +99,7 @@
     <Compile Include="Assets\Scripts\Utility\Replay.cs" />
     <Compile Include="Assets\Scripts\WorldBuilder\RoomBuilder\Door.cs" />
     <Compile Include="Assets\Scripts\WorldBuilder\RoomBuilder\RoomSave.cs" />
+    <Compile Include="Assets\Scripts\WorldBuilder\RoomBuilder\RoomBuilderReferences.cs" />
     <Compile Include="Assets\Scripts\CharacterControl\AiControlledCharacter.cs" />
     <Compile Include="Assets\Scripts\CharacterControl\MovementState.cs" />
     <Compile Include="Assets\Scripts\CharacterControl\CharacterMovementCapabilities.cs" />
@@ -126,6 +129,7 @@
     <None Include="Assets\TextMesh Pro\Shaders\TMPro_Surface.cginc" />
     <None Include="Assets\UI Toolkit\RoomBuilderTemplate.uxml" />
     <None Include="Assets\TextMesh Pro\Resources\LineBreaking Following Characters.txt" />
+    <None Include="Assets\Resources\RoomTemplates\Fluffernutter.txt" />
     <None Include="Assets\Resources\RoomTemplates\Psionics Chamber.txt" />
     <None Include="Assets\Resources\RoomTemplates\Burp2.txt" />
     <None Include="Assets\TextMesh Pro\Shaders\TMP_SDF-Mobile Masking.shader" />

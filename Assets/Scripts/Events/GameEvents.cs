@@ -10,35 +10,29 @@ namespace Assets.Scripts.Events
     public class GameEvents : MonoBehaviour
     {
         public static GameEvents current;
-        public event Action<Vector2> onBuilderSquareMouseDown;
-        public event Action<Vector2> onBuilderSquareMouseEnter;
+        
+
+        private void Awake()
+        {
+            // singleton pattern allows us to have a "static" class inherit from MonoBehaviour
+            current = this;
+        }
+
+        #region Game events
         public event Action<float> onContactDamageForPlayer;
         public event Action<Vector2> onDoorwayTriggerEnter;
         public event Action<Vector2> onDoorwayTriggerExit;
 
-        private void Awake()
-        {
-            current = this;
-
-        }
-        public void BuilderSquareMouseDown(Vector2 position)
-        {
-            onBuilderSquareMouseDown?.Invoke(position);
-        }
-        public void BuilderSquareMouseEnter(Vector2 position)
-        {
-            onBuilderSquareMouseEnter?.Invoke(position);
-        }
         public void ContactDamageForPlayerTriggerEnter(float damageAmount)
         {
-            if(onContactDamageForPlayer != null)
+            if (onContactDamageForPlayer != null)
             {
                 onContactDamageForPlayer(damageAmount);
             }
         }
         public void DoorwayTriggerEnter(Vector2 doorPosition)
         {
-            if(onDoorwayTriggerEnter != null)
+            if (onDoorwayTriggerEnter != null)
             {
                 onDoorwayTriggerEnter(doorPosition);
             }
@@ -49,6 +43,10 @@ namespace Assets.Scripts.Events
             {
                 onDoorwayTriggerExit(doorPosition);
             }
-        }        
+        }
+        #endregion
+
+        
+
     }
 }

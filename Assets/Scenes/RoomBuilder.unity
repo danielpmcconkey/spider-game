@@ -338,10 +338,14 @@ MonoBehaviour:
   tileSet: {fileID: 3126088930031911795, guid: 459f4c46602822c4ea8f5ad4e3b14878, type: 3}
   gridLinePrefab: {fileID: 7148285192758486830, guid: a9eedad684a92dc4d800e23e2ca0e035,
     type: 3}
-  gridParent: {fileID: 1661009073}
-  tileParent: {fileID: 469640295}
+  doorLinePrefab: {fileID: 7281146930171491028, guid: ecbaf8d38aca06a4cbd08b8475f2a835,
+    type: 3}
   mouseTriggerSquare: {fileID: 5819994706651777386, guid: 1efc29912baa5464da6aaf7f753c37cc,
     type: 3}
+  dependencyButton: {fileID: 3683885156441325090, guid: 049d8d9081c063443a62322a67551225,
+    type: 3}
+  gridParent: {fileID: 1661009073}
+  tileParent: {fileID: 469640295}
   mainCamera: {fileID: 94486833}
   cameraSpeed: 10
 --- !u!1 &1661009073
@@ -416,6 +420,6 @@ MonoBehaviour:
   m_GameObject: {fileID: 1771347641}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 1fb951f0bd253a04a819abe0adefd53c, type: 3}
+  m_Script: {fileID: 11500000, guid: 590bfb3c28d75f34cb08114ed8463feb, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 

@@ -25,14 +25,6 @@
             <ui:TextField name="textFileName" picking-mode="Ignore" label="File name" text="filler text" class="formField" />
             <ui:Button text="Save room" display-tooltip-when-elided="true" name="btnSaveRoom" class="button-style" />
         </ui:VisualElement>
-        <ui:VisualElement name="veNewRoomDialog" class="builderDialog">
-            <ui:VisualElement class="closeButtonRow">
-                <ui:Button text="X" display-tooltip-when-elided="true" name="btnCloseNewRoomDialog" class="closeButton" style="flex-direction: row-reverse; align-items: stretch;" />
-            </ui:VisualElement>
-            <ui:TextField name="textRoomWidth" picking-mode="Ignore" label="Room width" text="filler text" class="formField" />
-            <ui:TextField name="textRoomHeight" picking-mode="Ignore" label="Room height" text="filler text" class="formField" />
-            <ui:Button text="New room" display-tooltip-when-elided="true" name="btnNewRoom" class="button-style" />
-        </ui:VisualElement>
         <ui:VisualElement name="veConfirmDialog" class="builderDialog">
             <ui:VisualElement class="closeButtonRow">
                 <ui:Button text="X" display-tooltip-when-elided="true" name="btnCloseConfirmDialog" class="closeButton" style="flex-direction: row-reverse; align-items: stretch;" />
@@ -45,6 +37,35 @@
                 <ui:Button text="X" display-tooltip-when-elided="true" name="btnCloseSaveSuccessDialog" class="closeButton" style="flex-direction: row-reverse; align-items: stretch;" />
             </ui:VisualElement>
             <ui:Label text="Success! The room file has been saved." display-tooltip-when-elided="true" />
+        </ui:VisualElement>
+        <ui:VisualElement name="veNewRoomDialog" class="builderDialog">
+            <ui:VisualElement class="closeButtonRow">
+                <ui:Button text="X" display-tooltip-when-elided="true" name="btnCloseNewRoomDialog" class="closeButton" style="flex-direction: row-reverse; align-items: stretch;" />
+            </ui:VisualElement>
+            <ui:TextField name="textRoomWidth" picking-mode="Ignore" label="Room width" text="filler text" class="formField" />
+            <ui:SliderInt picking-mode="Ignore" label="Room width" value="15" high-value="100" low-value="5" name="sliderWidth" />
+            <ui:TextField name="textRoomHeight" picking-mode="Ignore" label="Room height" text="filler text" class="formField" />
+            <ui:SliderInt picking-mode="Ignore" label="Room height" value="15" high-value="100" low-value="5" name="sliderHeight" />
+            <ui:Button text="New room" display-tooltip-when-elided="true" name="btnNewRoom" class="button-style" />
+        </ui:VisualElement>
+        <ui:VisualElement name="veRoomDependencyDialog" class="builderDialog">
+            <ui:VisualElement class="closeButtonRow">
+                <ui:Button text="X" display-tooltip-when-elided="true" name="btnCloseRoomDependencyDialog" class="closeButton" style="flex-direction: row-reverse; align-items: stretch;" />
+            </ui:VisualElement>
+            <ui:Toggle label="Is impossible" name="toggleDependency_isImpossible" />
+			<ui:Toggle label="Requires high jump" name="toggleDependency_requiresHighJump" />
+			<ui:Toggle label="Requires wall walk" name="toggleDependency_requiresWallWalk" />
+			<ui:Toggle label="Requires ceiling walk" name="toggleDependency_requiresCeilingWalk" />
+			<ui:Toggle label="Requires grapple" name="toggleDependency_requiresGrapple" />
+			<ui:Toggle label="Requires user defined capability 01" name="toggleDependency_requiresUserCapability01" />
+			<ui:Toggle label="Requires user defined capability 02" name="toggleDependency_requiresUserCapability02" />
+			<ui:Toggle label="Requires user defined capability 03" name="toggleDependency_requiresUserCapability03" />
+			<ui:Toggle label="Requires user defined capability 04" name="toggleDependency_requiresUserCapability04" />
+			<ui:Toggle label="Requires user defined capability 05" name="toggleDependency_requiresUserCapability05" />
+			<ui:Toggle label="Requires user defined capability 06" name="toggleDependency_requiresUserCapability06" />
+			<ui:Toggle label="Requires user defined capability 07" name="toggleDependency_requiresUserCapability07" />
+			<ui:Toggle label="Requires user defined capability 08" name="toggleDependency_requiresUserCapability08" />
+			<ui:Button text="Save room dependency" name="btnSaveRoomDependency" class="button-style" style="width: 180px;" />
         </ui:VisualElement>
     </ui:VisualElement>
 </ui:UXML>

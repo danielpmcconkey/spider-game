@@ -16,9 +16,10 @@ namespace Assets.Scripts.WorldBuilder.RoomBuilder
         [SerializeField] public GameObject tileSet;
         [SerializeField] public LineRenderer gridLinePrefab;
         [SerializeField] public LineRenderer doorLinePrefab;
-        [SerializeField] public GameObject gridParent;
-        [SerializeField] public GameObject tileParent;
         [SerializeField] public GameObject mouseTriggerSquare;
+        [SerializeField] public GameObject dependencyButton;
+        [SerializeField] public GameObject gridParent;
+        [SerializeField] public GameObject tileParent;        
         [SerializeField] public UnityEngine.Camera mainCamera;
         [SerializeField] public float cameraSpeed = 10;
 
@@ -31,6 +32,8 @@ namespace Assets.Scripts.WorldBuilder.RoomBuilder
         private bool _hasUndrawnAssets;
         private ConfirmAction _confirmAction = ConfirmAction.NONE;
         private string _confirmWarning = string.Empty;
+        private RoomBuilderReferences _references;
+        private string _roomDependencyBeingEdited;
 
 
         #region UI elements
@@ -50,6 +53,8 @@ namespace Assets.Scripts.WorldBuilder.RoomBuilder
         private Button _btnDoorEditMode;
         private DropdownField _dropDownSelectRoomSave;
         private Label _lblConfirmWarning;
+        private SliderInt _sliderWidth;
+        private SliderInt _sliderHeight;
         private TextField _textFileName;
         private TextField _textRoomName;
         private TextField _textRoomWidth;
@@ -62,13 +67,42 @@ namespace Assets.Scripts.WorldBuilder.RoomBuilder
         private VisualElement _veSaveSuccessDialog;
         private VisualElement _veHighlightTileEditMode;
         private VisualElement _veHighlightDoorEditMode;
+        private VisualElement _veRoomDependencyDialog;
+
+
+        private Toggle _toggleDependency_isImpossible;
+        private Toggle _toggleDependency_requiresHighJump;
+        private Toggle _toggleDependency_requiresWallWalk;
+        private Toggle _toggleDependency_requiresCeilingWalk;
+        private Toggle _toggleDependency_requiresGrapple;
+        private Toggle _toggleDependency_requiresUserCapability01;
+        private Toggle _toggleDependency_requiresUserCapability02;
+        private Toggle _toggleDependency_requiresUserCapability03;
+        private Toggle _toggleDependency_requiresUserCapability04;
+        private Toggle _toggleDependency_requiresUserCapability05;
+        private Toggle _toggleDependency_requiresUserCapability06;
+        private Toggle _toggleDependency_requiresUserCapability07;
+        private Toggle _toggleDependency_requiresUserCapability08;
+        private Button _btnSaveRoomDependency;
+        private Button _btnCloseRoomDependencyDialog;
         #endregion
 
         void Start()
         {
+            RoomBuilderEvents.current.onBuilderSquareMouseDown += OnBuilderSquareMouseDown;
+            RoomBuilderEvents.current.onBuilderSquareMouseEnter += OnBuilderSquareMouseEnter;
+            RoomBuilderEvents.current.onBuilderDependencyMouseDown += onBuilderDependencyMouseDown;
 
-            GameEvents.current.onBuilderSquareMouseDown += OnBuilderSquareMouseDown;
-            GameEvents.current.onBuilderSquareMouseEnter += OnBuilderSquareMouseEnter;
+            _references = new RoomBuilderReferences()
+            {
+                gridLinePrefab = gridLinePrefab,
+                gridParent = gridParent,
+                tileSet = tileSet,
+                tileParent = tileParent,
+                mouseTriggerSquare = mouseTriggerSquare,
+                doorLinePrefab = doorLinePrefab,
+                dependencyButton = dependencyButton,
+            };
 
             _roomSaves = RoomBuilderHelper.GetAllRoomSaves();
 
@@ -85,6 +119,14 @@ namespace Assets.Scripts.WorldBuilder.RoomBuilder
                 _room.DrawRoom(_editMode);
                 _hasUndrawnAssets = false;
             }
+            if (_textRoomHeight.text != _sliderHeight.value.ToString())
+            {
+                _textRoomHeight.value = _sliderHeight.value.ToString();
+            }
+            if (_textRoomWidth.text != _sliderWidth.value.ToString())
+            {
+                _textRoomWidth.value = _sliderWidth.value.ToString();
+            }
             MoveCamera();            
         }
 
@@ -95,6 +137,7 @@ namespace Assets.Scripts.WorldBuilder.RoomBuilder
             _veConfirmDialog.visible = false;
             _veSaveSuccessDialog.visible = false;
             _veNewRoomDialog.visible = false;
+            _veRoomDependencyDialog.visible = false;
         }
         private void InitializeUIComponents()
         {
@@ -129,6 +172,8 @@ namespace Assets.Scripts.WorldBuilder.RoomBuilder
             _btnOpenNewDialog = root.Q<Button>("btnOpenNewDialog");
             _btnCloseNewRoomDialog = root.Q<Button>("btnCloseNewRoomDialog");
             _btnNewRoom = root.Q<Button>("btnNewRoom");
+            _sliderHeight = root.Q<SliderInt>("sliderHeight");
+            _sliderWidth = root.Q<SliderInt>("sliderWidth");
             _textRoomWidth = root.Q<TextField>("textRoomWidth");
             _textRoomHeight = root.Q<TextField>("textRoomHeight");
             _veNewRoomDialog = root.Q<VisualElement>("veNewRoomDialog");
@@ -138,6 +183,26 @@ namespace Assets.Scripts.WorldBuilder.RoomBuilder
             _btnConfirm = root.Q<Button>("btnConfirm");
             _lblConfirmWarning = root.Q<Label>("lblConfirmWarning");
             _veConfirmDialog = root.Q<VisualElement>("veConfirmDialog");
+
+            // room dependencies
+            _toggleDependency_isImpossible = root.Q<Toggle>("toggleDependency_isImpossible");
+            _toggleDependency_requiresHighJump = root.Q<Toggle>("toggleDependency_requiresHighJump");
+            _toggleDependency_requiresWallWalk = root.Q<Toggle>("toggleDependency_requiresWallWalk");
+            _toggleDependency_requiresCeilingWalk = root.Q<Toggle>("toggleDependency_requiresCeilingWalk");
+            _toggleDependency_requiresGrapple = root.Q<Toggle>("toggleDependency_requiresGrapple");
+            _toggleDependency_requiresUserCapability01 = root.Q<Toggle>("toggleDependency_requiresUserCapability01");
+            _toggleDependency_requiresUserCapability02 = root.Q<Toggle>("toggleDependency_requiresUserCapability02");
+            _toggleDependency_requiresUserCapability03 = root.Q<Toggle>("toggleDependency_requiresUserCapability03");
+            _toggleDependency_requiresUserCapability04 = root.Q<Toggle>("toggleDependency_requiresUserCapability04");
+            _toggleDependency_requiresUserCapability05 = root.Q<Toggle>("toggleDependency_requiresUserCapability05");
+            _toggleDependency_requiresUserCapability06 = root.Q<Toggle>("toggleDependency_requiresUserCapability06");
+            _toggleDependency_requiresUserCapability07 = root.Q<Toggle>("toggleDependency_requiresUserCapability07");
+            _toggleDependency_requiresUserCapability08 = root.Q<Toggle>("toggleDependency_requiresUserCapability08");
+            _btnSaveRoomDependency = root.Q<Button>("btnSaveRoomDependency");
+            _btnCloseRoomDependencyDialog = root.Q<Button>("btnCloseRoomDependencyDialog");
+            _veRoomDependencyDialog = root.Q<VisualElement>("veRoomDependencyDialog");
+
+
 
             // set initial visual state for things
             HideUIDialogs();
@@ -162,9 +227,13 @@ namespace Assets.Scripts.WorldBuilder.RoomBuilder
             _btnTileEditMode.clicked += btnTileEditMode_Click;
             _btnDoorEditMode.clicked += btnDoorEditMode_Click;
             _btnNewRoom.clicked += btnNewRoom_Click;
-            
-            
+            _btnSaveRoomDependency.clicked += btnSaveRoomDependency_Click;
+            _btnCloseRoomDependencyDialog.clicked += btnCloseRoomDependencyDialog_Click;
+
         }
+
+        
+
         private bool IsPanelOpen()
         {
             if(_veLoadDialog.visible) return true;
@@ -172,6 +241,7 @@ namespace Assets.Scripts.WorldBuilder.RoomBuilder
             if (_veConfirmDialog.visible) return true;
             if (_veSaveSuccessDialog.visible) return true;
             if (_veNewRoomDialog.visible) return true;
+            if (_veRoomDependencyDialog.visible) return true;
             return false;
         }
         private void MoveCamera()
@@ -213,6 +283,25 @@ namespace Assets.Scripts.WorldBuilder.RoomBuilder
                 yield return 0;
             }
         }
+        private void PopulateRoomDependencyDialog()
+        {
+            DoorConnection doorConnection = _room.doors.SelectMany(s => s.doorConnections).
+                FirstOrDefault(s => s.doorConnectionId == _roomDependencyBeingEdited);
+
+            _toggleDependency_isImpossible.value = doorConnection.isImpossible;
+            _toggleDependency_requiresHighJump.value = doorConnection.requiresHighJump;
+            _toggleDependency_requiresWallWalk.value = doorConnection.requiresWallWalk;
+            _toggleDependency_requiresCeilingWalk.value = doorConnection.requiresCeilingWalk;
+            _toggleDependency_requiresGrapple.value = doorConnection.requiresGrapple;
+            _toggleDependency_requiresUserCapability01.value = doorConnection.requiresUserCapability01;
+            _toggleDependency_requiresUserCapability02.value = doorConnection.requiresUserCapability02;
+            _toggleDependency_requiresUserCapability03.value = doorConnection.requiresUserCapability03;
+            _toggleDependency_requiresUserCapability04.value = doorConnection.requiresUserCapability04;
+            _toggleDependency_requiresUserCapability05.value = doorConnection.requiresUserCapability05;
+            _toggleDependency_requiresUserCapability06.value = doorConnection.requiresUserCapability06;
+            _toggleDependency_requiresUserCapability07.value = doorConnection.requiresUserCapability07;
+            _toggleDependency_requiresUserCapability08.value = doorConnection.requiresUserCapability08;
+    }
         private void PopulateRoomSaveDropdownChoices()
         {
             _dropDownSelectRoomSave.choices = _roomSaves.OrderBy(x => x.roomName).Select(y => y.roomName).ToList();
@@ -252,6 +341,10 @@ namespace Assets.Scripts.WorldBuilder.RoomBuilder
             HideUIDialogs();
         }
         private void btnCloseNewRoomDialog_Click()
+        {
+            HideUIDialogs();
+        }
+        private void btnCloseRoomDependencyDialog_Click()
         {
             HideUIDialogs();
         }
@@ -300,8 +393,8 @@ namespace Assets.Scripts.WorldBuilder.RoomBuilder
             if(nameSelected != string.Empty)
             {
                 RoomSave save = _roomSaves.Where(x => x.roomName == nameSelected).FirstOrDefault();
-                _room = new RoomBeingBuilt(save, gridLinePrefab, gridParent, tileSet, tileParent, 
-                    mouseTriggerSquare, doorLinePrefab);
+
+                _room = new RoomBeingBuilt(save, _references);
                 _room.DrawRoom(_editMode);
                 _hasUnsavedChanges = false;
                 StartCoroutine(MoveCameraToRoomCenter());
@@ -326,8 +419,7 @@ namespace Assets.Scripts.WorldBuilder.RoomBuilder
                 roomHeight = height,
             };
 
-            _room = new RoomBeingBuilt(emptySave, gridLinePrefab, gridParent, tileSet, tileParent, 
-                mouseTriggerSquare, doorLinePrefab);
+            _room = new RoomBeingBuilt(emptySave, _references);
             _room.SetRoomDimensions(width, height);
             _room.DrawRoom(_editMode);
             _hasUnsavedChanges = true;
@@ -393,12 +485,40 @@ namespace Assets.Scripts.WorldBuilder.RoomBuilder
 
             }
         }
+        private void btnSaveRoomDependency_Click()
+        {
+            DoorConnection doorConnection = _room.doors.SelectMany(s => s.doorConnections).
+                FirstOrDefault(s => s.doorConnectionId == _roomDependencyBeingEdited);
+
+            doorConnection.isImpossible = _toggleDependency_isImpossible.value;
+            doorConnection.requiresHighJump = _toggleDependency_requiresHighJump.value;
+            doorConnection.requiresWallWalk = _toggleDependency_requiresWallWalk.value;
+            doorConnection.requiresCeilingWalk = _toggleDependency_requiresCeilingWalk.value;
+            doorConnection.requiresGrapple = _toggleDependency_requiresGrapple.value;
+            doorConnection.requiresUserCapability01 = _toggleDependency_requiresUserCapability01.value;
+            doorConnection.requiresUserCapability02 = _toggleDependency_requiresUserCapability02.value;
+            doorConnection.requiresUserCapability03 = _toggleDependency_requiresUserCapability03.value;
+            doorConnection.requiresUserCapability04 = _toggleDependency_requiresUserCapability04.value;
+            doorConnection.requiresUserCapability05 = _toggleDependency_requiresUserCapability05.value;
+            doorConnection.requiresUserCapability06 = _toggleDependency_requiresUserCapability06.value;
+            doorConnection.requiresUserCapability07 = _toggleDependency_requiresUserCapability07.value;
+            doorConnection.requiresUserCapability08 = _toggleDependency_requiresUserCapability08.value;
+
+            HideUIDialogs();
+            _veSaveRoomDialog.visible = true;
+        }
         private void btnTileEditMode_Click()
         {
             _editMode = EditMode.TILE;
             _veHighlightTileEditMode.visible = true;
             _veHighlightDoorEditMode.visible = false;
             _hasUndrawnAssets = true;
+        }
+        private void onBuilderDependencyMouseDown(string doorConnectionId)
+        {
+            _roomDependencyBeingEdited = doorConnectionId;
+            _veRoomDependencyDialog.visible = true;
+            PopulateRoomDependencyDialog();
         }
         private void OnBuilderSquareMouseDown(Vector2 position)
         {

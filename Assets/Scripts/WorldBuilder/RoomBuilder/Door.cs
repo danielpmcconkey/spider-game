@@ -7,10 +7,22 @@ using System.Threading.Tasks;
 namespace Assets.Scripts.WorldBuilder.RoomBuilder
 {
     [Serializable]
-    public struct Door
+    public class Door
     {
-        public Guid guid;
+        public string guid;
         public Position position;
-        public DoorConnection[] doorConnections;   // used to determine what movement capabilities are required to go from one room to the next
+        public List<DoorConnection> doorConnections; // used to determine what movement capabilities are required to go from one room to the next
+
+        public Door()
+        {
+            guid = Guid.NewGuid().ToString();
+            doorConnections = new List<DoorConnection>();
+        }
+        public Door(int row, int column)
+        {
+            guid = Guid.NewGuid().ToString();
+            doorConnections = new List<DoorConnection>();
+            position = new Position() { row = row, column = column };
+        }
     }
 }

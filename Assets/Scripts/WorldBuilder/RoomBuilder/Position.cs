@@ -11,5 +11,5 @@ namespace Assets.Scripts.WorldBuilder.RoomBuilder
     {
         public int column;
         public int row;
-    }
+    }    
 }

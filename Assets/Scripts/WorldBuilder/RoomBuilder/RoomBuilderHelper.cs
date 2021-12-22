@@ -12,10 +12,10 @@ namespace Assets.Scripts.WorldBuilder.RoomBuilder
         public static RoomSave DeserializeFromJson(string json)
         {
             RoomSave save = JsonUtility.FromJson<RoomSave>(json);
-            for(int i = 0;  i < save.doors.Length; i++)
+            for(int i = 0;  i < save.doors.Count; i++)
             {
                 var door = save.doors[i];
-                if (door.guid == null) door.guid = Guid.NewGuid();
+                if (door.guid == null) door.guid = Guid.NewGuid().ToString();
             }
             return save;
         }
@@ -41,7 +41,7 @@ namespace Assets.Scripts.WorldBuilder.RoomBuilder
             save.roomWidth = room.roomWidth;
             save.roomHeight = room.roomHeight;
             save.tiles = room.tiles;
-            save.doors = room.doors.ToArray();
+            save.doors = room.doors;
             string json = JsonUtility.ToJson(save);
             return json;
         }

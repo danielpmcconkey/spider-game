@@ -7,10 +7,11 @@ using System.Threading.Tasks;
 namespace Assets.Scripts.WorldBuilder.RoomBuilder
 {
     [Serializable]
-    public struct DoorConnection
+    public class DoorConnection
     {
-        public Guid doorIn;
-        public Guid doorOut;
+        public string doorConnectionId;
+        public string doorInId;
+        public string doorOutId;
         public bool isImpossible;
         public bool requiresHighJump;
         public bool requiresWallWalk;
@@ -24,5 +25,12 @@ namespace Assets.Scripts.WorldBuilder.RoomBuilder
         public bool requiresUserCapability06;
         public bool requiresUserCapability07;
         public bool requiresUserCapability08;
+
+        public DoorConnection(string doorInId, string doorOutId)
+        {
+            doorConnectionId = Guid.NewGuid().ToString();
+            this.doorInId = doorInId;
+            this.doorOutId = doorOutId;
+        }
     }
 }
