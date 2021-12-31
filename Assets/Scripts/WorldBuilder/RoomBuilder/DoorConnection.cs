@@ -9,9 +9,9 @@ namespace Assets.Scripts.WorldBuilder.RoomBuilder
     [Serializable]
     public class DoorConnection
     {
-        public string doorConnectionId; // it's stupid to stoor guids as strings, but the unity serializer won't serialize a guid
-        public string doorInId; // it's stupid to stoor guids as strings, but the unity serializer won't serialize a guid
-        public string doorOutId; // it's stupid to stoor guids as strings, but the unity serializer won't serialize a guid
+        public string doorConnectionId; // it's stupid to store guids as strings, but the unity serializer won't serialize a guid
+        public string doorInId; // it's stupid to store guids as strings, but the unity serializer won't serialize a guid
+        public string doorOutId; // it's stupid to store guids as strings, but the unity serializer won't serialize a guid
         public bool isImpossible;
         public bool requiresHighJump;
         public bool requiresWallWalk;
