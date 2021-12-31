@@ -1,7 +1,7 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
 <Project ToolsVersion="4.0" DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <PropertyGroup>
-    <LangVersion>latest</LangVersion>
+    <LangVersion>7.3</LangVersion>
   </PropertyGroup>
   <PropertyGroup>
     <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
@@ -54,55 +54,55 @@
   </PropertyGroup>
   <ItemGroup>
     <Compile Include="Assets\Scripts\WorldBuilder\RoomBuilder\RoomBuilderController.cs" />
-    <Compile Include="Assets\Scripts\WorldBuilder\RoomBuilder\TileNeighbors.cs" />
-    <Compile Include="Assets\Scripts\WorldBuilder\Globals.cs" />
-    <Compile Include="Assets\Scripts\WorldBuilder\Room.cs" />
-    <Compile Include="Assets\Scripts\Animation\AnimationState.cs" />
     <Compile Include="Assets\Scripts\Utility\RotationHelper.cs" />
-    <Compile Include="Assets\Scripts\CharacterControl\AutoSuicide.cs" />
-    <Compile Include="Assets\Scripts\WorldBuilder\Enemy.cs" />
-    <Compile Include="Assets\Scripts\WorldBuilder\RoomBuilder\BuilderSquareMouseTrigger.cs" />
     <Compile Include="Assets\Scripts\CharacterControl\Enemies\FloatingBot.cs" />
     <Compile Include="Assets\Scripts\Events\GameEvents.cs" />
     <Compile Include="Assets\Scripts\Utility\LoggerCustom.cs" />
     <Compile Include="Assets\Scripts\CharacterControl\SpiderController.cs" />
-    <Compile Include="Assets\Scripts\WorldBuilder\WorldBuilder.cs" />
     <Compile Include="Assets\Scripts\WorldBuilder\Door.cs" />
+    <Compile Include="Assets\Scripts\WorldBuilder\RoomBuilder\DoorConnection.cs" />
+    <Compile Include="Assets\Scripts\WorldBuilder\RoomBuilder\Position.cs" />
+    <Compile Include="Assets\Scripts\CharacterControl\ShootingCharacter.cs" />
+    <Compile Include="Assets\Scripts\CharacterControl\PlatformCollisionTransforms.cs" />
+    <Compile Include="Assets\Scripts\CharacterControl\CharacterMovementStateController.cs" />
+    <Compile Include="Assets\Scripts\CharacterControl\GrapplingCharacter.cs" />
+    <Compile Include="Assets\Scripts\Utility\RNG.cs" />
+    <Compile Include="Assets\Scripts\CharacterControl\FloatingAiCharacter.cs" />
+    <Compile Include="Assets\Scripts\CharacterControl\CharacterOrienter.cs" />
+    <Compile Include="Assets\Scripts\Events\RoomBuilderEvents.cs" />
+    <Compile Include="Assets\Scripts\WorldBuilder\TileSet.cs" />
+    <Compile Include="Assets\Scripts\WorldBuilder\RoomBuilder\RoomSave.cs" />
+    <Compile Include="Assets\Scripts\CharacterControl\AiControlledCharacter.cs" />
+    <Compile Include="Assets\Scripts\CharacterControl\CharacterMovementCapabilities.cs" />
+    <Compile Include="Assets\Scripts\WorldBuilder\RoomBuilder\TileNeighbors.cs" />
+    <Compile Include="Assets\Scripts\WorldBuilder\Globals.cs" />
+    <Compile Include="Assets\Scripts\WorldBuilder\Room.cs" />
+    <Compile Include="Assets\Scripts\Animation\AnimationState.cs" />
+    <Compile Include="Assets\Scripts\CharacterControl\AutoSuicide.cs" />
+    <Compile Include="Assets\Scripts\WorldBuilder\Enemy.cs" />
+    <Compile Include="Assets\Scripts\WorldBuilder\RoomBuilder\BuilderSquareMouseTrigger.cs" />
+    <Compile Include="Assets\Scripts\WorldBuilder\WorldBuilder.cs" />
     <Compile Include="Assets\Scripts\CharacterControl\CharacterContacts.cs" />
     <Compile Include="Assets\Scripts\WorldBuilder\RoomBuilder\RoomBuilderHelper.cs" />
     <Compile Include="Assets\Scripts\WorldBuilder\TestAddWallsAndFloor.cs" />
     <Compile Include="Assets\Scripts\Camera\CameraControl.cs" />
-    <Compile Include="Assets\Scripts\WorldBuilder\RoomBuilder\DoorConnection.cs" />
-    <Compile Include="Assets\Scripts\WorldBuilder\RoomBuilder\Position.cs" />
-    <Compile Include="Assets\Scripts\CharacterControl\ShootingCharacter.cs" />
     <Compile Include="Assets\Scripts\CharacterControl\UserInputCollection.cs" />
-    <Compile Include="Assets\Scripts\CharacterControl\PlatformCollisionTransforms.cs" />
     <Compile Include="Assets\Scripts\Events\UIController.cs" />
-    <Compile Include="Assets\Scripts\CharacterControl\CharacterMovementStateController.cs" />
-    <Compile Include="Assets\Scripts\CharacterControl\GrapplingCharacter.cs" />
-    <Compile Include="Assets\Scripts\Utility\RNG.cs" />
     <Compile Include="Assets\Scripts\Combat\HealthBar.cs" />
     <Compile Include="Assets\Scripts\WorldBuilder\RoomBuilder\EditMode.cs" />
     <Compile Include="Assets\Scripts\Animation\CharacterAnimationController.cs" />
     <Compile Include="Assets\Scripts\WorldBuilder\RoomBuilder\BuilderDependencyMouseTrigger.cs" />
     <Compile Include="Assets\Scripts\WorldBuilder\RoomBuilder\RoomBeingBuilt.cs" />
     <Compile Include="Assets\Scripts\Utility\Raycaster.cs" />
-    <Compile Include="Assets\Scripts\CharacterControl\FloatingAiCharacter.cs" />
-    <Compile Include="Assets\Scripts\CharacterControl\CharacterOrienter.cs" />
     <Compile Include="Assets\Scripts\CharacterControl\MovementTrigger.cs" />
-    <Compile Include="Assets\Scripts\Events\RoomBuilderEvents.cs" />
-    <Compile Include="Assets\Scripts\WorldBuilder\TileSet.cs" />
     <Compile Include="Assets\Scripts\WorldBuilder\DoorTrigger.cs" />
     <Compile Include="Assets\Scripts\CharacterControl\ControllableCharacter.cs" />
     <Compile Include="Assets\Scripts\WorldBuilder\RoomBuilder\TilePlacement.cs" />
     <Compile Include="Assets\Scripts\WorldBuilder\Tile.cs" />
     <Compile Include="Assets\Scripts\Utility\Replay.cs" />
     <Compile Include="Assets\Scripts\WorldBuilder\RoomBuilder\Door.cs" />
-    <Compile Include="Assets\Scripts\WorldBuilder\RoomBuilder\RoomSave.cs" />
     <Compile Include="Assets\Scripts\WorldBuilder\RoomBuilder\RoomBuilderReferences.cs" />
-    <Compile Include="Assets\Scripts\CharacterControl\AiControlledCharacter.cs" />
     <Compile Include="Assets\Scripts\CharacterControl\MovementState.cs" />
-    <Compile Include="Assets\Scripts\CharacterControl\CharacterMovementCapabilities.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="Assets\TextMesh Pro\Shaders\TMPro.cginc" />
@@ -382,12 +382,6 @@
     <Reference Include="UnityEditor.UnityConnectModule">
       <HintPath>E:\Unity\2021.2.7f1\Editor\Data\Managed\UnityEngine\UnityEditor.UnityConnectModule.dll</HintPath>
     </Reference>
-    <Reference Include="clipper_library">
-      <HintPath>Library\PackageCache\com.unity.cinemachine@2.8.2\Runtime\ThirdParty\clipper_library.dll</HintPath>
-    </Reference>
-    <Reference Include="Newtonsoft.Json">
-      <HintPath>Library\PackageCache\com.unity.nuget.newtonsoft-json@2.0.0\Runtime\Newtonsoft.Json.dll</HintPath>
-    </Reference>
     <Reference Include="Unity.Burst.Unsafe">
       <HintPath>Library\PackageCache\com.unity.burst@1.6.0\Unity.Burst.Unsafe.dll</HintPath>
     </Reference>
@@ -402,6 +396,12 @@
     </Reference>
     <Reference Include="Unity.Burst.Cecil.Rocks">
       <HintPath>Library\PackageCache\com.unity.burst@1.6.0\Unity.Burst.CodeGen\Unity.Burst.Cecil.Rocks.dll</HintPath>
+    </Reference>
+    <Reference Include="clipper_library">
+      <HintPath>Library\PackageCache\com.unity.cinemachine@2.8.2\Runtime\ThirdParty\clipper_library.dll</HintPath>
+    </Reference>
+    <Reference Include="Newtonsoft.Json">
+      <HintPath>Library\PackageCache\com.unity.nuget.newtonsoft-json@2.0.0\Runtime\Newtonsoft.Json.dll</HintPath>
     </Reference>
     <Reference Include="netstandard">
       <HintPath>E:\Unity\2021.2.7f1\Editor\Data\NetStandard\ref\2.1.0\netstandard.dll</HintPath>
@@ -769,14 +769,17 @@
     <Reference Include="System.Xml.Serialization">
       <HintPath>E:\Unity\2021.2.7f1\Editor\Data\NetStandard\compat\2.1.0\shims\netfx\System.Xml.Serialization.dll</HintPath>
     </Reference>
-    <Reference Include="Cinemachine">
-      <HintPath>Library\ScriptAssemblies\Cinemachine.dll</HintPath>
-    </Reference>
-    <Reference Include="com.unity.cinemachine.editor">
-      <HintPath>Library\ScriptAssemblies\com.unity.cinemachine.editor.dll</HintPath>
-    </Reference>
     <Reference Include="Unity.VSCode.Editor">
       <HintPath>Library\ScriptAssemblies\Unity.VSCode.Editor.dll</HintPath>
+    </Reference>
+    <Reference Include="Unity.RenderPipelines.Universal.Shaders">
+      <HintPath>Library\ScriptAssemblies\Unity.RenderPipelines.Universal.Shaders.dll</HintPath>
+    </Reference>
+    <Reference Include="Unity.RenderPipelines.Universal.Runtime">
+      <HintPath>Library\ScriptAssemblies\Unity.RenderPipelines.Universal.Runtime.dll</HintPath>
+    </Reference>
+    <Reference Include="PPv2URPConverters">
+      <HintPath>Library\ScriptAssemblies\PPv2URPConverters.dll</HintPath>
     </Reference>
     <Reference Include="Unity.TextMeshPro.Editor">
       <HintPath>Library\ScriptAssemblies\Unity.TextMeshPro.Editor.dll</HintPath>
@@ -787,20 +790,23 @@
     <Reference Include="Unity.Sysroot.Linux_x86_64">
       <HintPath>Library\ScriptAssemblies\Unity.Sysroot.Linux_x86_64.dll</HintPath>
     </Reference>
-    <Reference Include="Unity.Toolchain.Win-x86_64-Linux-x86_64">
-      <HintPath>Library\ScriptAssemblies\Unity.Toolchain.Win-x86_64-Linux-x86_64.dll</HintPath>
-    </Reference>
-    <Reference Include="Unity.Timeline.Editor">
-      <HintPath>Library\ScriptAssemblies\Unity.Timeline.Editor.dll</HintPath>
-    </Reference>
     <Reference Include="Unity.Timeline">
       <HintPath>Library\ScriptAssemblies\Unity.Timeline.dll</HintPath>
     </Reference>
     <Reference Include="Unity.TextMeshPro">
       <HintPath>Library\ScriptAssemblies\Unity.TextMeshPro.dll</HintPath>
     </Reference>
+    <Reference Include="Unity.Burst.Editor">
+      <HintPath>Library\ScriptAssemblies\Unity.Burst.Editor.dll</HintPath>
+    </Reference>
+    <Reference Include="Unity.Searcher.Editor">
+      <HintPath>Library\ScriptAssemblies\Unity.Searcher.Editor.dll</HintPath>
+    </Reference>
     <Reference Include="Unity.2D.Sprite.Editor">
       <HintPath>Library\ScriptAssemblies\Unity.2D.Sprite.Editor.dll</HintPath>
+    </Reference>
+    <Reference Include="Unity.RenderPipelines.Core.Runtime">
+      <HintPath>Library\ScriptAssemblies\Unity.RenderPipelines.Core.Runtime.dll</HintPath>
     </Reference>
     <Reference Include="UnityEditor.UI">
       <HintPath>Library\ScriptAssemblies\UnityEditor.UI.dll</HintPath>
@@ -811,56 +817,50 @@
     <Reference Include="Unity.Rider.Editor">
       <HintPath>Library\ScriptAssemblies\Unity.Rider.Editor.dll</HintPath>
     </Reference>
-    <Reference Include="UnityEngine.UI">
-      <HintPath>Library\ScriptAssemblies\UnityEngine.UI.dll</HintPath>
-    </Reference>
-    <Reference Include="Unity.SysrootPackage.Editor">
-      <HintPath>Library\ScriptAssemblies\Unity.SysrootPackage.Editor.dll</HintPath>
-    </Reference>
-    <Reference Include="Unity.RenderPipelines.Universal.Shaders">
-      <HintPath>Library\ScriptAssemblies\Unity.RenderPipelines.Universal.Shaders.dll</HintPath>
-    </Reference>
-    <Reference Include="Unity.RenderPipelines.Core.Runtime">
-      <HintPath>Library\ScriptAssemblies\Unity.RenderPipelines.Core.Runtime.dll</HintPath>
-    </Reference>
-    <Reference Include="Unity.Searcher.Editor">
-      <HintPath>Library\ScriptAssemblies\Unity.Searcher.Editor.dll</HintPath>
-    </Reference>
-    <Reference Include="PPv2URPConverters">
-      <HintPath>Library\ScriptAssemblies\PPv2URPConverters.dll</HintPath>
-    </Reference>
-    <Reference Include="Unity.RenderPipelines.Universal.Editor">
-      <HintPath>Library\ScriptAssemblies\Unity.RenderPipelines.Universal.Editor.dll</HintPath>
-    </Reference>
-    <Reference Include="Unity.Mathematics.Editor">
-      <HintPath>Library\ScriptAssemblies\Unity.Mathematics.Editor.dll</HintPath>
-    </Reference>
-    <Reference Include="Unity.RenderPipeline.Universal.ShaderLibrary">
-      <HintPath>Library\ScriptAssemblies\Unity.RenderPipeline.Universal.ShaderLibrary.dll</HintPath>
-    </Reference>
-    <Reference Include="Unity.RenderPipelines.Core.Editor">
-      <HintPath>Library\ScriptAssemblies\Unity.RenderPipelines.Core.Editor.dll</HintPath>
-    </Reference>
     <Reference Include="Unity.RenderPipelines.Core.ShaderLibrary">
       <HintPath>Library\ScriptAssemblies\Unity.RenderPipelines.Core.ShaderLibrary.dll</HintPath>
+    </Reference>
+    <Reference Include="UnityEngine.UI">
+      <HintPath>Library\ScriptAssemblies\UnityEngine.UI.dll</HintPath>
     </Reference>
     <Reference Include="Unity.Mathematics">
       <HintPath>Library\ScriptAssemblies\Unity.Mathematics.dll</HintPath>
     </Reference>
-    <Reference Include="Unity.RenderPipelines.ShaderGraph.ShaderGraphLibrary">
-      <HintPath>Library\ScriptAssemblies\Unity.RenderPipelines.ShaderGraph.ShaderGraphLibrary.dll</HintPath>
+    <Reference Include="Unity.ShaderGraph.Editor">
+      <HintPath>Library\ScriptAssemblies\Unity.ShaderGraph.Editor.dll</HintPath>
+    </Reference>
+    <Reference Include="Cinemachine">
+      <HintPath>Library\ScriptAssemblies\Cinemachine.dll</HintPath>
     </Reference>
     <Reference Include="Unity.Burst">
       <HintPath>Library\ScriptAssemblies\Unity.Burst.dll</HintPath>
     </Reference>
-    <Reference Include="Unity.ShaderGraph.Editor">
-      <HintPath>Library\ScriptAssemblies\Unity.ShaderGraph.Editor.dll</HintPath>
+    <Reference Include="com.unity.cinemachine.editor">
+      <HintPath>Library\ScriptAssemblies\com.unity.cinemachine.editor.dll</HintPath>
     </Reference>
-    <Reference Include="Unity.RenderPipelines.Universal.Runtime">
-      <HintPath>Library\ScriptAssemblies\Unity.RenderPipelines.Universal.Runtime.dll</HintPath>
+    <Reference Include="Unity.RenderPipelines.Universal.Editor">
+      <HintPath>Library\ScriptAssemblies\Unity.RenderPipelines.Universal.Editor.dll</HintPath>
     </Reference>
-    <Reference Include="Unity.Burst.Editor">
-      <HintPath>Library\ScriptAssemblies\Unity.Burst.Editor.dll</HintPath>
+    <Reference Include="Unity.Toolchain.Win-x86_64-Linux-x86_64">
+      <HintPath>Library\ScriptAssemblies\Unity.Toolchain.Win-x86_64-Linux-x86_64.dll</HintPath>
+    </Reference>
+    <Reference Include="Unity.Timeline.Editor">
+      <HintPath>Library\ScriptAssemblies\Unity.Timeline.Editor.dll</HintPath>
+    </Reference>
+    <Reference Include="Unity.RenderPipeline.Universal.ShaderLibrary">
+      <HintPath>Library\ScriptAssemblies\Unity.RenderPipeline.Universal.ShaderLibrary.dll</HintPath>
+    </Reference>
+    <Reference Include="Unity.RenderPipelines.ShaderGraph.ShaderGraphLibrary">
+      <HintPath>Library\ScriptAssemblies\Unity.RenderPipelines.ShaderGraph.ShaderGraphLibrary.dll</HintPath>
+    </Reference>
+    <Reference Include="Unity.Mathematics.Editor">
+      <HintPath>Library\ScriptAssemblies\Unity.Mathematics.Editor.dll</HintPath>
+    </Reference>
+    <Reference Include="Unity.RenderPipelines.Core.Editor">
+      <HintPath>Library\ScriptAssemblies\Unity.RenderPipelines.Core.Editor.dll</HintPath>
+    </Reference>
+    <Reference Include="Unity.SysrootPackage.Editor">
+      <HintPath>Library\ScriptAssemblies\Unity.SysrootPackage.Editor.dll</HintPath>
     </Reference>
   </ItemGroup>
   <ItemGroup>

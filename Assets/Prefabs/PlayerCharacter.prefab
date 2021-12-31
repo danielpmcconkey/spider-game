@@ -120,7 +120,7 @@ SpriteRenderer:
   m_RenderingLayerMask: 1
   m_RendererPriority: 0
   m_Materials:
-  - {fileID: 10754, guid: 0000000000000000f000000000000000, type: 0}
+  - {fileID: 2100000, guid: a97c105638bdf8b4a8650670310a4cd3, type: 2}
   m_StaticBatchInfo:
     firstSubMesh: 0
     subMeshCount: 0
@@ -220,7 +220,7 @@ MonoBehaviour:
   canCeilingCrawl: 1
   canGrapple: 1
   canFly: 0
-  animator: {fileID: 3251419005602766947}
+  canHighJump: 0
   rigidBody2D: {fileID: 3251419005602766872}
   bellyCheckTransform: {fileID: 3251419004542632118}
   forwardCheckTransform: {fileID: 3251419006101843424}
@@ -229,6 +229,27 @@ MonoBehaviour:
     serializedVersion: 2
     m_Bits: 64
   targetingReticuleTransform: {fileID: 0}
+  animator: {fileID: 3251419005602766947}
+  idleAnimationName: 
+  movingAnimationName: 
+  jumpingAnimationName: 
+  fallingAnimationName: 
+  damageAnimationName: 
+  deathAnimationName: 
+  maxHP: 100
+  currentHP: 100
+  armorClass: 10
+  contactDamageDealt: 20
+  invincibilityDurationInSeconds: 1.5
+  knockBackForcePercent: 0.5
+  primaryFiringWeaponMaxDistancePercent: 0.5
+  whatIsEnemy:
+    serializedVersion: 2
+    m_Bits: 0
+  bulletImpactPrefab: {fileID: 0}
+  muzzleFlash: {fileID: 0}
+  bulletTraceLinePrefab: {fileID: 0}
+  shootingDamageDealt: 5
   grappleBeamLineRenderer: {fileID: 0}
   grappleBeamJoint: {fileID: 0}
   grappleBeamForcePercent: 0.5
