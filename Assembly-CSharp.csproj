@@ -74,6 +74,7 @@
     <Compile Include="Assets\Scripts\WorldBuilder\RoomBuilder\RoomSave.cs" />
     <Compile Include="Assets\Scripts\CharacterControl\AiControlledCharacter.cs" />
     <Compile Include="Assets\Scripts\CharacterControl\CharacterMovementCapabilities.cs" />
+    <Compile Include="Assets\Scripts\WorldBuilder\LightSwitch.cs" />
     <Compile Include="Assets\Scripts\WorldBuilder\RoomBuilder\TileNeighbors.cs" />
     <Compile Include="Assets\Scripts\WorldBuilder\Globals.cs" />
     <Compile Include="Assets\Scripts\WorldBuilder\Room.cs" />

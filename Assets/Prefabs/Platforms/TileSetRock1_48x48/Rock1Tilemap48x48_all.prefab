@@ -178,6 +178,7 @@ Transform:
   - {fileID: 8003268470785329628}
   - {fileID: 4267079174901662894}
   - {fileID: 593335513328640226}
+  - {fileID: 1062574378222936638}
   m_Father: {fileID: 0}
   m_RootOrder: 0
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
@@ -4535,6 +4536,81 @@ Transform:
   m_CorrespondingSourceObject: {fileID: 3136850232983145390, guid: fad377701573f8946a6cc90e0703464c,
     type: 3}
   m_PrefabInstance: {fileID: 8113077643075646198}
+  m_PrefabAsset: {fileID: 0}
+--- !u!1001 &8137557129009959857
+PrefabInstance:
+  m_ObjectHideFlags: 0
+  serializedVersion: 2
+  m_Modification:
+    m_TransformParent: {fileID: 9125594930629655942}
+    m_Modifications:
+    - target: {fileID: 5866935124942754259, guid: 50cdd1ed2417888438958a27d88191e4,
+        type: 3}
+      propertyPath: m_Name
+      value: SmallRoomLight
+      objectReference: {fileID: 0}
+    - target: {fileID: 9102176016045896079, guid: 50cdd1ed2417888438958a27d88191e4,
+        type: 3}
+      propertyPath: m_RootOrder
+      value: 65
+      objectReference: {fileID: 0}
+    - target: {fileID: 9102176016045896079, guid: 50cdd1ed2417888438958a27d88191e4,
+        type: 3}
+      propertyPath: m_LocalPosition.x
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 9102176016045896079, guid: 50cdd1ed2417888438958a27d88191e4,
+        type: 3}
+      propertyPath: m_LocalPosition.y
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 9102176016045896079, guid: 50cdd1ed2417888438958a27d88191e4,
+        type: 3}
+      propertyPath: m_LocalPosition.z
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 9102176016045896079, guid: 50cdd1ed2417888438958a27d88191e4,
+        type: 3}
+      propertyPath: m_LocalRotation.w
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 9102176016045896079, guid: 50cdd1ed2417888438958a27d88191e4,
+        type: 3}
+      propertyPath: m_LocalRotation.x
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 9102176016045896079, guid: 50cdd1ed2417888438958a27d88191e4,
+        type: 3}
+      propertyPath: m_LocalRotation.y
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 9102176016045896079, guid: 50cdd1ed2417888438958a27d88191e4,
+        type: 3}
+      propertyPath: m_LocalRotation.z
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 9102176016045896079, guid: 50cdd1ed2417888438958a27d88191e4,
+        type: 3}
+      propertyPath: m_LocalEulerAnglesHint.x
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 9102176016045896079, guid: 50cdd1ed2417888438958a27d88191e4,
+        type: 3}
+      propertyPath: m_LocalEulerAnglesHint.y
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 9102176016045896079, guid: 50cdd1ed2417888438958a27d88191e4,
+        type: 3}
+      propertyPath: m_LocalEulerAnglesHint.z
+      value: 0
+      objectReference: {fileID: 0}
+    m_RemovedComponents: []
+  m_SourcePrefab: {fileID: 100100000, guid: 50cdd1ed2417888438958a27d88191e4, type: 3}
+--- !u!4 &1062574378222936638 stripped
+Transform:
+  m_CorrespondingSourceObject: {fileID: 9102176016045896079, guid: 50cdd1ed2417888438958a27d88191e4,
+    type: 3}
+  m_PrefabInstance: {fileID: 8137557129009959857}
   m_PrefabAsset: {fileID: 0}
 --- !u!1001 &8605764999320579565
 PrefabInstance:

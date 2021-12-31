@@ -6,6 +6,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using UnityEngine;
+using UnityEngine.Rendering.Universal;
 
 namespace Assets.Scripts.WorldBuilder
 {
@@ -28,8 +29,9 @@ namespace Assets.Scripts.WorldBuilder
 
 
         #region public methods
-        public Room(GameObject tileSet, RoomSave roomSave, Vector2 upperLeftInGlobalSpace, GameObject roomsGameObject)
+        public Room(int id, GameObject tileSet, RoomSave roomSave, Vector2 upperLeftInGlobalSpace, GameObject roomsGameObject)
         {
+            this.id = id;
             _tileSet = tileSet;
             _roomSave = roomSave;
             roomWidthInTiles = _roomSave.roomWidth;
@@ -67,14 +69,22 @@ namespace Assets.Scripts.WorldBuilder
                     Transform prefabTransform = _tileSet.transform.Find(string.Format("{0}_origin", tilePlacement.tileNum));
                     tile.prefab = prefabTransform.gameObject;
                     AddTileToUnity(tile);
+                    // random lights
+                    if (Utility.RNG.getRandomInt(0, 20) == 7) // 1 in 20
+                    {
+                        AddRandomLight(tile.positionInGlobalSpace);
+                    }
                 }
+
+                
             }
             foreach(Enemy e in _startingEnemies)
             {
                 GameObject enemyObj = DrawPrefab(e.prefab, e.positionInGlobalSpace);
             }
         }
-        
+
+
         public void KnockOutTile(Vector2 positionInGlobalSpace)
         {
             //_tiles[GetTileIndexFromUnityPosition(positionInGlobalSpace.x, positionInGlobalSpace.y)] = null;
@@ -83,6 +93,13 @@ namespace Assets.Scripts.WorldBuilder
 
         #region private methods
         
+        private void AddRandomLight(Vector2 positionInGlobalSpace)
+        {
+            var prefab = _tileSet.transform.Find("SmallRoomLight");
+            GameObject gameObject = DrawPrefab(prefab.gameObject, positionInGlobalSpace);
+            LightSwitch lightSwitch = gameObject.GetComponent<LightSwitch>();
+            lightSwitch.roomId = id;
+        }
         private void AddTileToUnity(Tile tile)
         {
             

@@ -92,7 +92,7 @@ namespace Assets.Scripts.WorldBuilder
             Vector2 startingPointForRooms = new Vector2(-5.0f, 5.0F);
 
             GameObject room000 = Instantiate(new GameObject("Room000"), roomsParent.transform, false);
-            Room room0 = new Room(rock1TileSet, starterRoomSave, startingPointForRooms, room000);
+            Room room0 = new Room(0, rock1TileSet, starterRoomSave, startingPointForRooms, room000);
             _rooms[0] = room0;
 
             // room000 door right is in row 6
@@ -108,7 +108,7 @@ namespace Assets.Scripts.WorldBuilder
                 room001YPosition
                 );
             GameObject room001 = Instantiate(new GameObject("Room001"), roomsParent.transform, false);
-            Room room1 = new Room(rock1TileSet, secondRoomSave, startingPointForRoom001, room001);
+            Room room1 = new Room(1, rock1TileSet, secondRoomSave, startingPointForRoom001, room001);
             _rooms[1] = room1;
 
 

@@ -33,7 +33,7 @@ namespace Assets.Scripts.CharacterControl
 
 
 
-        public int currentRoom { get; private set; }
+        
 
         private CameraControl cameraControl;
         private WorldBuilder.WorldBuilder worldBuilder;
@@ -80,7 +80,7 @@ namespace Assets.Scripts.CharacterControl
             cameraControl = UnityEngine.Camera.main.GetComponent<CameraControl>();
 
             worldBuilder = builder.GetComponent<WorldBuilder.WorldBuilder>();
-            currentRoom = 0;
+            Globals.currentRoom = 0;
         }
         protected override void FixedUpdate()
         {
@@ -109,7 +109,7 @@ namespace Assets.Scripts.CharacterControl
             Events.GameEvents.current.onDoorwayTriggerExit += OnDoorwayExit;
 
             // set the cam controls to the starting room
-            (Vector2 upperLeft, Vector2 lowerRight) roomDimensions = worldBuilder.GetRoomDimensions(currentRoom);
+            (Vector2 upperLeft, Vector2 lowerRight) roomDimensions = worldBuilder.GetRoomDimensions(Globals.currentRoom);
             cameraControl.UpdateRoomDimensions(roomDimensions.upperLeft, roomDimensions.lowerRight);
         }
         protected override void Update()
@@ -205,9 +205,9 @@ namespace Assets.Scripts.CharacterControl
         }
         private void OnDoorwayExit(Vector2 doorPosition)
         {
-            currentRoom = worldBuilder.WhichRoomAreWeIn(transform.position);
+            Globals.currentRoom = worldBuilder.WhichRoomAreWeIn(transform.position);
 
-            (Vector2 upperLeft, Vector2 lowerRight) roomDimensions = worldBuilder.GetRoomDimensions(currentRoom);
+            (Vector2 upperLeft, Vector2 lowerRight) roomDimensions = worldBuilder.GetRoomDimensions(Globals.currentRoom);
             cameraControl.UpdateRoomDimensions(roomDimensions.upperLeft, roomDimensions.lowerRight);
             
         }
