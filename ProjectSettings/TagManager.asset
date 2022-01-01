@@ -19,7 +19,7 @@ TagManager:
   - Enemy
   - Doors
   - RoomBuilderGrid
-  - 
+  - Decoration
   - 
   - 
   - 
@@ -53,6 +53,9 @@ TagManager:
     locked: 0
   - name: Doors
     uniqueID: 956292693
+    locked: 0
+  - name: Decorations
+    uniqueID: 3072666753
     locked: 0
   - name: Reticule
     uniqueID: 485262379

@@ -93,6 +93,8 @@ namespace Assets.Scripts.CharacterControl
                 }
                 else bulletTraceLinePrefab.enabled = false;
             }
+            // instantiate an impact bullet at the shooting point to act as muzzle flash
+            GameObject flash = Instantiate(bulletImpactPrefab, ceilingCheckTransform.position, Quaternion.identity);
 
             _bulletCount++;
         }

@@ -71,6 +71,7 @@
     <Compile Include="Assets\Scripts\CharacterControl\CharacterOrienter.cs" />
     <Compile Include="Assets\Scripts\Events\RoomBuilderEvents.cs" />
     <Compile Include="Assets\Scripts\WorldBuilder\TileSet.cs" />
+    <Compile Include="Assets\Scripts\WorldBuilder\Firefly.cs" />
     <Compile Include="Assets\Scripts\WorldBuilder\RoomBuilder\RoomSave.cs" />
     <Compile Include="Assets\Scripts\CharacterControl\AiControlledCharacter.cs" />
     <Compile Include="Assets\Scripts\CharacterControl\CharacterMovementCapabilities.cs" />

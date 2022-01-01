@@ -108,7 +108,7 @@ namespace Assets.Scripts.WorldBuilder
             if (prefab == baseRockPrefab)
             {
                 // random chance to alternate out the tile
-                int rando = RNG.getRandomInt(0, 120);
+                int rando = RNG.GetRandomInt(0, 120);
                 if (rando < 10)
                 {
                     prefab = baseRockAltPrefab;

@@ -70,7 +70,7 @@ namespace Assets.Scripts.WorldBuilder
                     tile.prefab = prefabTransform.gameObject;
                     AddTileToUnity(tile);
                     // random lights
-                    if (Utility.RNG.getRandomInt(0, 20) == 7) // 1 in 20
+                    if (Utility.RNG.GetRandomInt(0, 20) == 7) // 1 in 20
                     {
                         AddRandomLight(tile.positionInGlobalSpace);
                     }

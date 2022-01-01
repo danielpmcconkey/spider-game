@@ -11,7 +11,7 @@ namespace Assets.Scripts.WorldBuilder
     public class LightSwitch : MonoBehaviour
     {
         [NonSerialized]
-        public int roomId;
+        public int roomId = 0;
         public Light2D mylight;
         public float startingIntensity;
         public float dimmerSpeed = 2f;
