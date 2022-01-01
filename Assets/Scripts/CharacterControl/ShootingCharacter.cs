@@ -13,7 +13,6 @@ namespace Assets.Scripts.CharacterControl
         [Range(0, 1f)] [SerializeField] public float primaryFiringWeaponMaxDistancePercent = 0.5f;
         [SerializeField] public LayerMask whatIsEnemy;
         [SerializeField] public GameObject bulletImpactPrefab;
-        [SerializeField] public GameObject muzzleFlash;
         [SerializeField] public LineRenderer bulletTraceLinePrefab;
         [SerializeField] public float shootingDamageDealt = 5;
 
@@ -39,14 +38,11 @@ namespace Assets.Scripts.CharacterControl
                     if (_bulletCount % 3 == 0) shouldTrace = true; // 33% of the time
                     Fire(shouldTrace);
                 }
-                muzzleFlash.SetActive(true);
-                //RotateMuzzleFlash();
             }
             else
             {
                 _firingTimer = 0f;
                 bulletTraceLinePrefab.enabled = false;
-                muzzleFlash.SetActive(false);
             }
         }
         protected void Fire(bool shouldTrace)
@@ -97,14 +93,6 @@ namespace Assets.Scripts.CharacterControl
             GameObject flash = Instantiate(bulletImpactPrefab, ceilingCheckTransform.position, Quaternion.identity);
 
             _bulletCount++;
-        }
-        private void RotateMuzzleFlash()
-        {
-            const float rotationsPerSecond = 0.1f;
-            float flashZ = muzzleFlash.transform.eulerAngles.z;
-            flashZ += rotationsPerSecond * 360 * Time.deltaTime;
-            if (flashZ > 360) flashZ -= 360;
-            muzzleFlash.transform.eulerAngles = new Vector3(0, 0, flashZ);
-        }
+        }        
     }
 }

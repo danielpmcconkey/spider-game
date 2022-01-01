@@ -21,6 +21,7 @@ namespace Assets.Scripts.WorldBuilder
         public float roomHeightInUnityMeters;
         private List<Enemy> _startingEnemies;
         private GameObject _tileSet;
+        
 
 
         private RoomSave _roomSave;
@@ -75,10 +76,10 @@ namespace Assets.Scripts.WorldBuilder
                         AddRandomLight(tile.positionInGlobalSpace);
                     }
                 }
-
-                
             }
-            foreach(Enemy e in _startingEnemies)
+            AddDecorations();
+
+            foreach (Enemy e in _startingEnemies)
             {
                 GameObject enemyObj = DrawPrefab(e.prefab, e.positionInGlobalSpace);
             }
@@ -92,7 +93,58 @@ namespace Assets.Scripts.WorldBuilder
         #endregion
 
         #region private methods
-        
+        private void AddDecorations()
+        {
+            const float floorAndWallPlacementOdds = 0.75f;
+            // floor decorations
+            int[] tilesThatCanHaveFloorDecor = new int[] { 10, 11, 12, 13, 31 };
+            AddDecorationsOfType(tilesThatCanHaveFloorDecor, "FloorDecor{0}_origin", 7, floorAndWallPlacementOdds);
+            // floor decorations on corner tiles
+            int[] tilesThatCanHaveFloorOnConerDecor = new int[] { 18, 19, 20, 21, 26, 27, 28, 29 };
+            AddDecorationsOfType(tilesThatCanHaveFloorOnConerDecor, "CornerTopDecor{0}_origin", 4, floorAndWallPlacementOdds);
+            // left wall decorations
+            int[] tilesThatCanHaveLeftWallDecor = new int[] { 2, 3, 4, 5, 32 };
+            AddDecorationsOfType(tilesThatCanHaveLeftWallDecor, "SideLeftDecor{0}_origin", 2, floorAndWallPlacementOdds);
+            // left wall decorations on corner tiles
+            int[] tilesThatCanHaveLeftWallOnCornerDecor = new int[] { 18, 19, 22, 23, 26, 27, 29, 30, 32 };
+            AddDecorationsOfType(tilesThatCanHaveLeftWallOnCornerDecor, "CornerLeftDecor{0}_origin", 2, floorAndWallPlacementOdds);
+            // right wall decorations
+            int[] tilesThatCanHaveRightWallDecor = new int[] { 6, 7, 8, 9, 32 };
+            AddDecorationsOfType(tilesThatCanHaveRightWallDecor, "SideRightDecor{0}_origin", 2, floorAndWallPlacementOdds);
+            // right wall decorations on corner tiles
+            int[] tilesThatCanHaveRightWallOnCornerDecor = new int[] { 20, 21, 24, 25, 26, 28, 29, 30, 32 };
+            AddDecorationsOfType(tilesThatCanHaveRightWallOnCornerDecor, "CornerRightDecor{0}_origin", 2, floorAndWallPlacementOdds);
+            // ceiling decorations
+            int[] tilesThatCanHaveCeilingDecor = new int[] { 14, 15, 16, 17, 31 };
+            AddDecorationsOfType(tilesThatCanHaveCeilingDecor, "CeilingDecor{0}_origin", 7, floorAndWallPlacementOdds);
+            //// ceiling decorations on corner tiles
+            //int[] tilesThatCanHaveCeilingOnConerDecor = new int[] { 18, 19, 20, 21, 26, 27, 28, 29 };
+            //AddDecorationsOfType(tilesThatCanHaveCeilingOnConerDecor, "CornerCeilingDecor{0}_origin", 2, floorAndWallPlacementOdds);
+
+        }
+        private void AddDecorationsOfType(int[] tilesThatHaveThisDecor, string prefabNameString, 
+            int numberOfOptions, float oddsOfPlacement)
+        {
+            
+            for (int i = 0; i < _roomSave.tiles.Length; i++)
+            {
+                TilePlacement tilePlacement = _roomSave.tiles[i];
+
+                
+                if (Utility.RNG.GetRandomPercent() < oddsOfPlacement &&
+                    tilesThatHaveThisDecor.Contains(tilePlacement.tileNum))
+                {
+                    int spriteNum = Utility.RNG.GetRandomInt(1, numberOfOptions);
+                    Tile tile = new Tile();
+                    tile.positionInGlobalSpace = GetGlobalPositionFromTileIndex(i);
+                    Transform prefabTransform = _tileSet.transform.Find(string.Format(prefabNameString, spriteNum));
+                    tile.prefab = prefabTransform.gameObject;
+
+                    GameObject decoration = AddTileToUnity(tile);
+                    AssignChildLightsToRoom(decoration);
+                }
+            }
+        }
         private void AddRandomLight(Vector2 positionInGlobalSpace)
         {
             var prefab = _tileSet.transform.Find("SmallRoomLight");
@@ -100,11 +152,21 @@ namespace Assets.Scripts.WorldBuilder
             LightSwitch lightSwitch = gameObject.GetComponent<LightSwitch>();
             lightSwitch.roomId = id;
         }
-        private void AddTileToUnity(Tile tile)
+        private GameObject AddTileToUnity(Tile tile)
         {
             
             // now draw it
-            DrawPrefab(tile.prefab, tile.positionInGlobalSpace);
+            return DrawPrefab(tile.prefab, tile.positionInGlobalSpace);
+        }
+        private void AssignChildLightsToRoom(GameObject decoration)
+        {
+            var lights = //decoration.GetComponents<Light2D>();
+            decoration.GetComponentsInChildren<Light2D>();
+            foreach(var light in lights)
+            {
+                LightSwitch lightSwitch = light.GetComponent<LightSwitch>();
+                lightSwitch.roomId = id;
+            }
         }
         private GameObject DrawPrefab(GameObject prefab, Vector2 positionInGlobalSpace)
         {
