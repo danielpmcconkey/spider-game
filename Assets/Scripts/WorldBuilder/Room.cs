@@ -95,7 +95,7 @@ namespace Assets.Scripts.WorldBuilder
         #region private methods
         private void AddDecorations()
         {
-            const float floorAndWallPlacementOdds = 0.75f;
+            const float floorAndWallPlacementOdds = 1.0f;
             // floor decorations
             int[] tilesThatCanHaveFloorDecor = new int[] { 10, 11, 12, 13, 31 };
             AddDecorationsOfType(tilesThatCanHaveFloorDecor, "FloorDecor{0}_origin", 7, floorAndWallPlacementOdds);
@@ -117,9 +117,9 @@ namespace Assets.Scripts.WorldBuilder
             // ceiling decorations
             int[] tilesThatCanHaveCeilingDecor = new int[] { 14, 15, 16, 17, 31 };
             AddDecorationsOfType(tilesThatCanHaveCeilingDecor, "CeilingDecor{0}_origin", 7, floorAndWallPlacementOdds);
-            //// ceiling decorations on corner tiles
-            //int[] tilesThatCanHaveCeilingOnConerDecor = new int[] { 18, 19, 20, 21, 26, 27, 28, 29 };
-            //AddDecorationsOfType(tilesThatCanHaveCeilingOnConerDecor, "CornerCeilingDecor{0}_origin", 2, floorAndWallPlacementOdds);
+            // ceiling decorations on corner tiles
+            int[] tilesThatCanHaveCeilingOnConerDecor = new int[] { 22, 23, 24, 25, 26, 27, 28, 30 };
+            AddDecorationsOfType(tilesThatCanHaveCeilingOnConerDecor, "CornerCeilingDecor{0}_origin", 2, floorAndWallPlacementOdds);
 
         }
         private void AddDecorationsOfType(int[] tilesThatHaveThisDecor, string prefabNameString, 
@@ -131,7 +131,7 @@ namespace Assets.Scripts.WorldBuilder
                 TilePlacement tilePlacement = _roomSave.tiles[i];
 
                 
-                if (Utility.RNG.GetRandomPercent() < oddsOfPlacement &&
+                if (Utility.RNG.GetRandomPercent() <= oddsOfPlacement &&
                     tilesThatHaveThisDecor.Contains(tilePlacement.tileNum))
                 {
                     int spriteNum = Utility.RNG.GetRandomInt(1, numberOfOptions);

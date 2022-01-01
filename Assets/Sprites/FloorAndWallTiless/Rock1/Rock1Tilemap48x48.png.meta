@@ -1984,6 +1984,48 @@ TextureImporter:
       indices: 
       edges: []
       weights: []
+    - serializedVersion: 2
+      name: Rock1Tilemap48x48_89
+      rect:
+        serializedVersion: 2
+        x: 240
+        y: 0
+        width: 48
+        height: 48
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: f284b4d86f8b83647950f1352c354393
+      internalID: -121396852
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Rock1Tilemap48x48_90
+      rect:
+        serializedVersion: 2
+        x: 288
+        y: 0
+        width: 48
+        height: 48
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: c1fec0bb483beac4897af9fc7a94980e
+      internalID: -1791230281
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
     outline: []
     physicsShape: []
     bones: []
@@ -2051,6 +2093,7 @@ TextureImporter:
       Rock1Tilemap48x48_14: 1087629764
       Rock1Tilemap48x48_77: -1815377486
       Rock1Tilemap48x48_78: -1424573925
+      Rock1Tilemap48x48_90: -1791230281
       Rock1Tilemap48x48_61: 248313286
       Rock1Tilemap48x48_10: -388851216
       Rock1Tilemap48x48_50: 57705333
@@ -2082,6 +2125,7 @@ TextureImporter:
       Rock1Tilemap48x48_57: 1607320456
       Rock1Tilemap48x48_17: 1409176550
       Rock1Tilemap48x48_45: 1806393315
+      Rock1Tilemap48x48_89: -121396852
       Rock1Tilemap48x48_5: 1615198323
       Rock1Tilemap48x48_34: 543383640
   spritePackingTag: 
