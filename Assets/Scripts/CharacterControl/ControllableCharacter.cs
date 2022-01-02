@@ -160,71 +160,75 @@ namespace Assets.Scripts.CharacterControl
             LoggerCustom.SetFrameCount(Time.frameCount);
 
             CheckUserInput();
-            PopulatePlatformCollisionVars();
 
-            // calculate jump thrust limit every frame in case it updated outside of the script
-            jumpThrustLimit = _minJumpThrustLimit +
-                (jumpThrustLimitPercent * (_maxJumpThrustLimit - _minJumpThrustLimit));
-
-            if (canHighJump)
+            if (!GamePauser.isPaused)
             {
-                jumpThrustLimit = jumpThrustLimit * _highJumpMultiplier;
-            }
+                PopulatePlatformCollisionVars();
 
-            // calculate cornering time required every frame in case it updated outside of the script
-            corneringTimeRequired = _minCorneringTimeRequired +
-                (corneringTimeRequiredPercent * (_maxCorneringTimeRequired - _minCorneringTimeRequired));
+                // calculate jump thrust limit every frame in case it updated outside of the script
+                jumpThrustLimit = _minJumpThrustLimit +
+                    (jumpThrustLimitPercent * (_maxJumpThrustLimit - _minJumpThrustLimit));
 
-            _stateController.UpdateCurrentState();
-            characterAnimationController.UpdateCurrentState();
-
-            // respond to H and V movement inputs
-            if (_stateController.currentMovementState == MovementState.GROUNDED)
-            {
-                AddDirectionalMovementForceHGrounded();
-                AddDirectionalMovementForceVGrounded();
-            }
-            if(_stateController.currentMovementState == MovementState.TETHERED
-                || (_stateController.currentMovementState == MovementState.FLOATING && isHorizontalMovementInAirAllowed)
-                || (_stateController.currentMovementState == MovementState.JUMP_ACCELERATING && isHorizontalMovementInAirAllowed)
-                )
-            {
-                AddDirectionalMovementForceHFloating();
-                if (canFly) AddDirectionalMovementForceVFloating();
-            }
-            
-
-
-            // respond to jump button held down
-            if (_stateController.currentMovementState == MovementState.JUMP_ACCELERATING)
-            {
-                if (_userInput.isJumpHeldDown)
+                if (canHighJump)
                 {
-                    float jumpThrustLimit = _minJumpThrustLimit +
-                        (jumpThrustLimitPercent * (_maxJumpThrustLimit - _minJumpThrustLimit));
+                    jumpThrustLimit = jumpThrustLimit * _highJumpMultiplier;
+                }
 
-                    if (canHighJump)
-                    {
-                        jumpThrustLimit = jumpThrustLimit * _highJumpMultiplier;
-                    }
+                // calculate cornering time required every frame in case it updated outside of the script
+                corneringTimeRequired = _minCorneringTimeRequired +
+                    (corneringTimeRequiredPercent * (_maxCorneringTimeRequired - _minCorneringTimeRequired));
 
-                    if (currentJumpThrust < jumpThrustLimit)
+                _stateController.UpdateCurrentState();
+                characterAnimationController.UpdateCurrentState();
+
+                // respond to H and V movement inputs
+                if (_stateController.currentMovementState == MovementState.GROUNDED)
+                {
+                    AddDirectionalMovementForceHGrounded();
+                    AddDirectionalMovementForceVGrounded();
+                }
+                if (_stateController.currentMovementState == MovementState.TETHERED
+                    || (_stateController.currentMovementState == MovementState.FLOATING && isHorizontalMovementInAirAllowed)
+                    || (_stateController.currentMovementState == MovementState.JUMP_ACCELERATING && isHorizontalMovementInAirAllowed)
+                    )
+                {
+                    AddDirectionalMovementForceHFloating();
+                    if (canFly) AddDirectionalMovementForceVFloating();
+                }
+
+
+
+                // respond to jump button held down
+                if (_stateController.currentMovementState == MovementState.JUMP_ACCELERATING)
+                {
+                    if (_userInput.isJumpHeldDown)
                     {
-                        float jumpThrustOverTime = _minJumpThrustOverTime +
-                            (jumpThrustOverTimePercent * (_maxJumpThrustOverTime - _minJumpThrustOverTime));
+                        float jumpThrustLimit = _minJumpThrustLimit +
+                            (jumpThrustLimitPercent * (_maxJumpThrustLimit - _minJumpThrustLimit));
+
                         if (canHighJump)
                         {
-                            jumpThrustOverTime = jumpThrustOverTime * _highJumpMultiplier;
+                            jumpThrustLimit = jumpThrustLimit * _highJumpMultiplier;
                         }
-                        AddJumpForce(jumpThrustOverTime * Time.deltaTime);
+
+                        if (currentJumpThrust < jumpThrustLimit)
+                        {
+                            float jumpThrustOverTime = _minJumpThrustOverTime +
+                                (jumpThrustOverTimePercent * (_maxJumpThrustOverTime - _minJumpThrustOverTime));
+                            if (canHighJump)
+                            {
+                                jumpThrustOverTime = jumpThrustOverTime * _highJumpMultiplier;
+                            }
+                            AddJumpForce(jumpThrustOverTime * Time.deltaTime);
+                        }
                     }
                 }
+
+
+
+                // apply artifical gravity based on which way we're facing
+                AddArtificalGravity();
             }
-
-
-
-            // apply artifical gravity based on which way we're facing
-            AddArtificalGravity();
         }
         #endregion
 

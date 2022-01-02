@@ -7,14 +7,14 @@ using System.Text;
 using System.Threading.Tasks;
 using UnityEngine;
 
-namespace Assets.Scripts.WorldBuilder
+namespace Assets.Scripts.Events
 {
     public class DoorTrigger: MonoBehaviour
     {
         private Vector2 _originalPosition;
         private const float _doorOpenTimeInSeconds = 4.0f;
         [SerializeField] public GameObject doorSlider;
-        [SerializeField] public GameObject doorOrigin;
+        
         [SerializeField] public float doorGravity = 91f;
         [SerializeField] public float doorHeight = 3f;
         private bool _isSliding;
@@ -45,35 +45,31 @@ namespace Assets.Scripts.WorldBuilder
         {
             if(collider.CompareTag("Player"))
             {
-                GameEvents.current.DoorwayTriggerEnter(doorOrigin.transform.position);
                 StartCoroutine(PushDoorUp(_doorOpenTimeInSeconds));
             }
         }
-        private void OnTriggerExit2D(Collider2D collider)
-        {
-            if (collider.CompareTag("Player"))
-            {
-                GameEvents.current.DoorwayTriggerExit(doorOrigin.transform.position);
-            }
-        }
+        
         IEnumerator PushDoorUp(float duration)
         {
+            // use Time.unscaledDeltaTime to allow doors
+            // to move during doorway transitions
+
             _isSliding = true;
             float timeElapsed = 0;
 
             while (timeElapsed < duration)
             {
-                float targetY = doorSlider.transform.position.y + doorGravity * Time.deltaTime;
+                float targetY = doorSlider.transform.position.y + doorGravity * Time.unscaledDeltaTime;
                 if(targetY > _originalPosition.y + doorHeight) targetY = _originalPosition.y + doorHeight;
 
                 doorSlider.transform.position = new Vector2(
                     _originalPosition.x, targetY
                     );
-                timeElapsed += Time.deltaTime;
+                timeElapsed += Time.unscaledDeltaTime;
 
                 yield return null;
             }
-            _isSliding = false;
+            _isSliding = false;            
         }
     }
 }

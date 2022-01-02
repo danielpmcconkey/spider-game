@@ -77,7 +77,7 @@
     <Compile Include="Assets\Scripts\CharacterControl\CharacterMovementCapabilities.cs" />
     <Compile Include="Assets\Scripts\WorldBuilder\LightSwitch.cs" />
     <Compile Include="Assets\Scripts\WorldBuilder\RoomBuilder\TileNeighbors.cs" />
-    <Compile Include="Assets\Scripts\WorldBuilder\Globals.cs" />
+    <Compile Include="Assets\Scripts\Utility\Globals.cs" />
     <Compile Include="Assets\Scripts\WorldBuilder\Room.cs" />
     <Compile Include="Assets\Scripts\Animation\AnimationState.cs" />
     <Compile Include="Assets\Scripts\CharacterControl\AutoSuicide.cs" />
@@ -97,7 +97,7 @@
     <Compile Include="Assets\Scripts\WorldBuilder\RoomBuilder\RoomBeingBuilt.cs" />
     <Compile Include="Assets\Scripts\Utility\Raycaster.cs" />
     <Compile Include="Assets\Scripts\CharacterControl\MovementTrigger.cs" />
-    <Compile Include="Assets\Scripts\WorldBuilder\DoorTrigger.cs" />
+    <Compile Include="Assets\Scripts\Events\DoorTrigger.cs" />
     <Compile Include="Assets\Scripts\CharacterControl\ControllableCharacter.cs" />
     <Compile Include="Assets\Scripts\WorldBuilder\RoomBuilder\TilePlacement.cs" />
     <Compile Include="Assets\Scripts\WorldBuilder\Tile.cs" />
@@ -106,6 +106,8 @@
     <Compile Include="Assets\Scripts\WorldBuilder\RoomBuilder\RoomBuilderReferences.cs" />
     <Compile Include="Assets\Scripts\CharacterControl\MovementState.cs" />
     <Compile Include="Assets\Scripts\Camera\ConstantBackgroundPositioner.cs" />
+    <Compile Include="Assets\Scripts\Utility\GamePauser.cs" />
+    <Compile Include="Assets\Scripts\Events\RoomTransitionTrigger.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="Assets\TextMesh Pro\Shaders\TMPro.cginc" />

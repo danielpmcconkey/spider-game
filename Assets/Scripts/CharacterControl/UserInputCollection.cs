@@ -20,6 +20,7 @@ namespace Assets.Scripts.CharacterControl
         public bool isPrimaryFireButtonPressed;
         public bool isPrimaryFireButtonReleased;
         public bool isPrimaryFireButtonHeldDown;
+        public bool isPausedPressed;
         public float mouseX;
         public float mouseY;
     }

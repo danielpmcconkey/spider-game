@@ -1,4 +1,5 @@
 ﻿using Assets.Scripts.CharacterControl;
+using Assets.Scripts.Utility;
 using Assets.Scripts.WorldBuilder.RoomBuilder;
 using System;
 using System.Collections.Generic;
@@ -104,7 +105,7 @@ namespace Assets.Scripts.WorldBuilder
                 Where(x => x.position.column == - 1).First().position.row;
             float room001YPosition = startingPointForRooms.y - room000DoorRightRow + room001DoorLeftRow;
             Vector2 startingPointForRoom001 = new Vector2(
-                startingPointForRooms.x + room0.roomWidthInTiles,
+                startingPointForRooms.x + room0.roomWidthInTiles + 2,
                 room001YPosition
                 );
             GameObject room001 = Instantiate(new GameObject("Room001"), roomsParent.transform, false);

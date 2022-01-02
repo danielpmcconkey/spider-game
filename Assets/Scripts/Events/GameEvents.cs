@@ -20,8 +20,9 @@ namespace Assets.Scripts.Events
 
         #region Game events
         public event Action<float> onContactDamageForPlayer;
-        public event Action<Vector2> onDoorwayTriggerEnter;
-        public event Action<Vector2> onDoorwayTriggerExit;
+        public event Action<Vector2> onRoomTransitionTriggerEnter;
+        //public event Action<Vector2> onDoorwayTriggerEnter;
+        //public event Action<Vector2> onDoorwayTriggerExit;
 
         public void ContactDamageForPlayerTriggerEnter(float damageAmount)
         {
@@ -30,23 +31,30 @@ namespace Assets.Scripts.Events
                 onContactDamageForPlayer(damageAmount);
             }
         }
-        public void DoorwayTriggerEnter(Vector2 doorPosition)
+        public void RoomTransitionTriggerEnter(Vector2 doorPosition)
         {
-            if (onDoorwayTriggerEnter != null)
+            if (onRoomTransitionTriggerEnter != null)
             {
-                onDoorwayTriggerEnter(doorPosition);
+                onRoomTransitionTriggerEnter(doorPosition);
             }
         }
-        public void DoorwayTriggerExit(Vector2 doorPosition)
-        {
-            if (onDoorwayTriggerExit != null)
-            {
-                onDoorwayTriggerExit(doorPosition);
-            }
-        }
+        //public void DoorwayTriggerEnter(Vector2 doorPosition)
+        //{
+        //    if (onDoorwayTriggerEnter != null)
+        //    {
+        //        onDoorwayTriggerEnter(doorPosition);
+        //    }
+        //}
+        //public void DoorwayTriggerExit(Vector2 doorPosition)
+        //{
+        //    if (onDoorwayTriggerExit != null)
+        //    {
+        //        onDoorwayTriggerExit(doorPosition);
+        //    }
+        //}
         #endregion
 
-        
+
 
     }
 }

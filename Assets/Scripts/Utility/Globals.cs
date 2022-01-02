@@ -4,7 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace Assets.Scripts.WorldBuilder
+namespace Assets.Scripts.Utility
 {
     public static class Globals
     {
@@ -13,5 +13,6 @@ namespace Assets.Scripts.WorldBuilder
         public const int doorHeightInTiles = 3;
         public const float pixelsInAUnityMeter = 48f;
         public static int currentRoom;
+        public static float roomTransitionTimeInSeconds = 1.5f;
     }
 }

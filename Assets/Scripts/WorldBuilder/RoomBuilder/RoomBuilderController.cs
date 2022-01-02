@@ -6,6 +6,7 @@ using System.Linq;
 using Assets.Scripts.Events;
 using System.IO;
 using System;
+using Assets.Scripts.Utility;
 
 namespace Assets.Scripts.WorldBuilder.RoomBuilder
 {

@@ -37,9 +37,15 @@ namespace Assets.Scripts.Camera
         }
         private void FixedUpdate()
         {
-            // take a step toward the target
             MoveTowardTarget();
         }
+        private void Update()
+        {
+            // because FixedUpdate is not called while game is paused
+            // if the game is paused, move the camera during Update()
+            if(GamePauser.isPaused) MoveTowardTarget();
+        }
+
         private void LateUpdate()
         {
             // why put cam control in LateUpdate? 
@@ -94,7 +100,6 @@ namespace Assets.Scripts.Camera
             _idleTimer = 0;
             _gameCamera = transform.gameObject.GetComponent<UnityEngine.Camera>();
             _moveSpeedCurrent = moveSpeed;
-            //_momentum = Vector2.zero;
         }
         private void ClampCamTargetPosition()
         {
@@ -124,22 +129,13 @@ namespace Assets.Scripts.Camera
             if (_camTargetPosition == null || Vector2.Distance(_camTargetPosition, _camPositionWithoutZ) < snapDistance)
                 return;
 
-            //Vector2 oldPosition = new Vector2(transform.position.x, transform.position.y); 
+            // use Time.unscaledDeltaTime so that the camera can still move 
+            // when the engine is paused. (Doorway transitions)
 
             transform.position = Vector3.Lerp(
                 new Vector3(_camPositionWithoutZ.x, _camPositionWithoutZ.y, _camZ),
                 new Vector3(_camTargetPosition.x, _camTargetPosition.y, _camZ),
-                _moveSpeedCurrent * Time.deltaTime);
-
-            //Vector2 newPosition = new Vector2(transform.position.x, transform.position.y);
-
-            //_momentum += (newPosition - oldPosition) * 0.1f;
-
-            //transform.position += new Vector3(_momentum.x, _momentum.y, 0); 
-            
-            
-             
-
+                _moveSpeedCurrent * Time.unscaledDeltaTime);
         }
         #endregion
         

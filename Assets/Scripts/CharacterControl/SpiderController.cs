@@ -105,8 +105,7 @@ namespace Assets.Scripts.CharacterControl
         private void Start()
         {
             Events.GameEvents.current.onContactDamageForPlayer += TakeDamage;
-            Events.GameEvents.current.onDoorwayTriggerEnter += OnDoorwayEnter;
-            Events.GameEvents.current.onDoorwayTriggerExit += OnDoorwayExit;
+            Events.GameEvents.current.onRoomTransitionTriggerEnter += OnRoomTransitionTriggerEnter;
 
             // set the cam controls to the starting room
             (Vector2 upperLeft, Vector2 lowerRight) roomDimensions = worldBuilder.GetRoomDimensions(Globals.currentRoom);
@@ -115,6 +114,13 @@ namespace Assets.Scripts.CharacterControl
         protected override void Update()
         {
             base.Update();
+
+            if(userInput.isPausedPressed)
+            {
+                if (GamePauser.isPaused) GamePauser.ResumeGame();
+                else GamePauser.PauseGame();
+            }
+
 #if DEBUG
             
             ReplayFrame replayFrame = new ReplayFrame();
@@ -180,6 +186,7 @@ namespace Assets.Scripts.CharacterControl
             _userInput.isPrimaryFireButtonHeldDown = Input.GetButton("Fire1");
             _userInput.mouseX = Input.mousePosition.x;
             _userInput.mouseY = Input.mousePosition.y;
+            _userInput.isPausedPressed = Input.GetButtonDown("Submit");
 
 
             if (_userInput.isJumpPressed)
@@ -203,23 +210,22 @@ namespace Assets.Scripts.CharacterControl
             // todo: build a death animation
             // todo: transition to death scene
         }
-        private void OnDoorwayExit(Vector2 doorPosition)
-        {
-            Globals.currentRoom = worldBuilder.WhichRoomAreWeIn(transform.position);
-
-            (Vector2 upperLeft, Vector2 lowerRight) roomDimensions = worldBuilder.GetRoomDimensions(Globals.currentRoom);
-            cameraControl.UpdateRoomDimensions(roomDimensions.upperLeft, roomDimensions.lowerRight);
-            
-        }
-        private void OnDoorwayEnter(Vector2 doorPosition)
+        
+        private void OnRoomTransitionTriggerEnter(Vector2 doorPosition)
         {
             Door d = worldBuilder.GetDoorAtPosition(doorPosition);
             if(d != null)
             {
-                (Vector2 upperLeft, Vector2 lowerRight) roomDimensionsL = worldBuilder.GetRoomDimensions(d.roomLeft.id);
-                (Vector2 upperLeft, Vector2 lowerRight) roomDimensionsR = worldBuilder.GetRoomDimensions(d.roomRight.id);
-                cameraControl.UpdateRoomDimensions(roomDimensionsL.upperLeft, roomDimensionsR.lowerRight);
-            }            
+                if (d.roomLeft.id == Globals.currentRoom && d.roomRight.id != Globals.currentRoom)
+                {
+                    Globals.currentRoom = d.roomRight.id;
+                }
+                else if (d.roomRight.id == Globals.currentRoom && d.roomLeft.id != Globals.currentRoom)
+                {
+                    Globals.currentRoom = d.roomLeft.id;
+                }
+                TransitionRoom(d);
+            }
         }
         protected override void ReactToDamageDealt(bool noIFrames = false)
         {
@@ -229,6 +235,25 @@ namespace Assets.Scripts.CharacterControl
                 StartCoroutine(FlashSprite());
                 base.ReactToDamageDealt(noIFrames);
             }
+        }
+        private void TransitionRoom(Door d)
+        {
+            StartCoroutine(PauseDuringRoomTransition());
+            
+            // set new camera constraint
+            (Vector2 upperLeft, Vector2 lowerRight) roomDimensions = worldBuilder.GetRoomDimensions(Globals.currentRoom);
+            cameraControl.UpdateRoomDimensions(roomDimensions.upperLeft, roomDimensions.lowerRight);
+        }
+        private IEnumerator PauseDuringRoomTransition()
+        {
+            GamePauser.PauseGame();
+            bool isTimerStillGoing = true;
+            while(isTimerStillGoing)
+            {
+                yield return new WaitForSecondsRealtime(Globals.roomTransitionTimeInSeconds);
+                isTimerStillGoing = false;
+            }
+            GamePauser.ResumeGame();
         }
         private IEnumerator FlashSprite()
         {

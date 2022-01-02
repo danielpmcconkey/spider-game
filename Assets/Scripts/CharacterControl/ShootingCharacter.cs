@@ -25,24 +25,30 @@ namespace Assets.Scripts.CharacterControl
         protected override void Update()
         {
             base.Update();
+            
+            // call the base update even if paused so we can know to unpause the game
+            // when the user presses pause again
+            if (!GamePauser.isPaused)
+            {
 
-            // check for firing control
-            if(userInput.isPrimaryFireButtonPressed || userInput.isPrimaryFireButtonHeldDown)
-            {
-                // how rapid is our rapid fire?
-                // 10 times / second?
-                _firingTimer += Time.deltaTime;
-                if(_firingTimer >= 0.1f)
+                // check for firing control
+                if (userInput.isPrimaryFireButtonPressed || userInput.isPrimaryFireButtonHeldDown)
                 {
-                    bool shouldTrace = false; // whether we should show a line along the bullet path
-                    if (_bulletCount % 3 == 0) shouldTrace = true; // 33% of the time
-                    Fire(shouldTrace);
+                    // how rapid is our rapid fire?
+                    // 10 times / second?
+                    _firingTimer += Time.deltaTime;
+                    if (_firingTimer >= 0.1f)
+                    {
+                        bool shouldTrace = false; // whether we should show a line along the bullet path
+                        if (_bulletCount % 3 == 0) shouldTrace = true; // 33% of the time
+                        Fire(shouldTrace);
+                    }
                 }
-            }
-            else
-            {
-                _firingTimer = 0f;
-                bulletTraceLinePrefab.enabled = false;
+                else
+                {
+                    _firingTimer = 0f;
+                    bulletTraceLinePrefab.enabled = false;
+                }
             }
         }
         protected void Fire(bool shouldTrace)

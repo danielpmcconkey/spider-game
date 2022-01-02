@@ -37,25 +37,32 @@ namespace Assets.Scripts.CharacterControl
         protected override void Update()
         {
             base.Update();
-            if (_stateController.currentMovementState == MovementState.TETHERED)
+
+            // call the base update even if paused so we can know to unpause the game
+            // when the user presses pause again
+
+            if (!GamePauser.isPaused)
             {
-                if (_userInput.moveVPressure > 0.1f || _userInput.moveVPressure < -0.1f)
+                if (_stateController.currentMovementState == MovementState.TETHERED)
                 {
-                    Climb(_userInput.moveVPressure);
+                    if (_userInput.moveVPressure > 0.1f || _userInput.moveVPressure < -0.1f)
+                    {
+                        Climb(_userInput.moveVPressure);
+                    }
                 }
-            }
-            // make sure the grapple beam's position zero stays with the character
-            if (_stateController.currentMovementState == MovementState.TETHERED)
-                UpdateGrappleBeam();
-            // fade out the grapple beam line, but keep it anchored, if we missed
-            if (_stateController.currentMovementState != MovementState.TETHERED
-                && grappleBeamLineRenderer.enabled)
-            {
-                UpdateGrappleBeam();
-                _missLineCountdown -= Time.deltaTime;
-                if(_missLineCountdown < 0.01f)
+                // make sure the grapple beam's position zero stays with the character
+                if (_stateController.currentMovementState == MovementState.TETHERED)
+                    UpdateGrappleBeam();
+                // fade out the grapple beam line, but keep it anchored, if we missed
+                if (_stateController.currentMovementState != MovementState.TETHERED
+                    && grappleBeamLineRenderer.enabled)
                 {
-                    DisableGrapple();
+                    UpdateGrappleBeam();
+                    _missLineCountdown -= Time.deltaTime;
+                    if (_missLineCountdown < 0.01f)
+                    {
+                        DisableGrapple();
+                    }
                 }
             }
         }
