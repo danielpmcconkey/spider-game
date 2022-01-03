@@ -915,21 +915,35 @@ namespace Assets.Scripts.CharacterControl
             // default it to right to avoid any weird accidental combinations
             FacingDirection targetHeading = FacingDirection.RIGHT;
 
-            if (characterOrienter.headingDirection == FacingDirection.UP && characterOrienter.thrustingDirection == FacingDirection.LEFT)
+            if (characterOrienter.headingDirection == FacingDirection.UP 
+                && characterOrienter.thrustingDirection == FacingDirection.LEFT)
             {
                 targetHeading = FacingDirection.RIGHT;
             }
-            if (characterOrienter.headingDirection == FacingDirection.UP && characterOrienter.thrustingDirection == FacingDirection.RIGHT)
+            if (characterOrienter.headingDirection == FacingDirection.UP 
+                && characterOrienter.thrustingDirection == FacingDirection.RIGHT)
             {
                 targetHeading = FacingDirection.LEFT;
             }
-            if (characterOrienter.headingDirection == FacingDirection.DOWN && characterOrienter.thrustingDirection == FacingDirection.LEFT)
+            if (characterOrienter.headingDirection == FacingDirection.DOWN 
+                && characterOrienter.thrustingDirection == FacingDirection.LEFT)
             {
                 targetHeading = FacingDirection.LEFT;
             }
-            if (characterOrienter.headingDirection == FacingDirection.DOWN && characterOrienter.thrustingDirection == FacingDirection.RIGHT)
+            if (characterOrienter.headingDirection == FacingDirection.DOWN
+                && characterOrienter.thrustingDirection == FacingDirection.RIGHT)
             {
                 targetHeading = FacingDirection.RIGHT;
+            }
+            if (characterOrienter.headingDirection == FacingDirection.LEFT
+                && characterOrienter.thrustingDirection == FacingDirection.UP)
+            {
+                targetHeading = FacingDirection.LEFT;
+            }
+            if (characterOrienter.headingDirection == FacingDirection.LEFT
+                && characterOrienter.thrustingDirection == FacingDirection.DOWN)
+            {
+                targetHeading = FacingDirection.LEFT;
             }
             SetFacingDirections(targetHeading, FacingDirection.UP);
 

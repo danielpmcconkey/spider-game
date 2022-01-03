@@ -1,7 +1,7 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
 <Project ToolsVersion="4.0" DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <PropertyGroup>
-    <LangVersion>latest</LangVersion>
+    <LangVersion>7.3</LangVersion>
   </PropertyGroup>
   <PropertyGroup>
     <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
@@ -72,12 +72,14 @@
     <Compile Include="Assets\Scripts\Events\RoomBuilderEvents.cs" />
     <Compile Include="Assets\Scripts\WorldBuilder\TileSet.cs" />
     <Compile Include="Assets\Scripts\WorldBuilder\Firefly.cs" />
+    <Compile Include="Assets\Scripts\Utility\GamePauser.cs" />
     <Compile Include="Assets\Scripts\WorldBuilder\RoomBuilder\RoomSave.cs" />
     <Compile Include="Assets\Scripts\CharacterControl\AiControlledCharacter.cs" />
     <Compile Include="Assets\Scripts\CharacterControl\CharacterMovementCapabilities.cs" />
     <Compile Include="Assets\Scripts\WorldBuilder\LightSwitch.cs" />
     <Compile Include="Assets\Scripts\WorldBuilder\RoomBuilder\TileNeighbors.cs" />
     <Compile Include="Assets\Scripts\Utility\Globals.cs" />
+    <Compile Include="Assets\Scripts\Camera\ConstantBackgroundPositioner.cs" />
     <Compile Include="Assets\Scripts\WorldBuilder\Room.cs" />
     <Compile Include="Assets\Scripts\Animation\AnimationState.cs" />
     <Compile Include="Assets\Scripts\CharacterControl\AutoSuicide.cs" />
@@ -100,14 +102,12 @@
     <Compile Include="Assets\Scripts\Events\DoorTrigger.cs" />
     <Compile Include="Assets\Scripts\CharacterControl\ControllableCharacter.cs" />
     <Compile Include="Assets\Scripts\WorldBuilder\RoomBuilder\TilePlacement.cs" />
+    <Compile Include="Assets\Scripts\Events\RoomTransitionTrigger.cs" />
     <Compile Include="Assets\Scripts\WorldBuilder\Tile.cs" />
     <Compile Include="Assets\Scripts\Utility\Replay.cs" />
     <Compile Include="Assets\Scripts\WorldBuilder\RoomBuilder\Door.cs" />
     <Compile Include="Assets\Scripts\WorldBuilder\RoomBuilder\RoomBuilderReferences.cs" />
     <Compile Include="Assets\Scripts\CharacterControl\MovementState.cs" />
-    <Compile Include="Assets\Scripts\Camera\ConstantBackgroundPositioner.cs" />
-    <Compile Include="Assets\Scripts\Utility\GamePauser.cs" />
-    <Compile Include="Assets\Scripts\Events\RoomTransitionTrigger.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="Assets\TextMesh Pro\Shaders\TMPro.cginc" />
