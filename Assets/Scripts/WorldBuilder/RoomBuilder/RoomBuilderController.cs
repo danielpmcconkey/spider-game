@@ -412,8 +412,8 @@ namespace Assets.Scripts.WorldBuilder.RoomBuilder
 
             RoomSave emptySave = new RoomSave()
             {
-                tileWidth = (int)(Globals.tileWidthInUnityMeters * Globals.pixelsInAUnityMeter),
-                tileHeight = (int)(Globals.tileHeightInUnityMeters * Globals.pixelsInAUnityMeter),
+                tileWidth = MeasurementConverter.TilesXToPixels(1),
+                tileHeight = MeasurementConverter.TilesYToPixels(1),
                 roomName = "New room",
                 fileName = "New room",
                 roomWidth = width,

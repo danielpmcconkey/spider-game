@@ -107,7 +107,24 @@ namespace Assets.Scripts.CharacterControl
             Events.GameEvents.current.onContactDamageForPlayer += TakeDamage;
             Events.GameEvents.current.onRoomTransitionTriggerEnter += OnRoomTransitionTriggerEnter;
 
-            // set the cam controls to the starting room
+
+            // pause game until after the world is built
+            // to avoid null references
+            // todo: move the world building to a start screen
+            // and run it behind the scenes
+            StartCoroutine(PauseGameUntilWorldIsBuilt());
+            
+            
+            
+        }
+        IEnumerator PauseGameUntilWorldIsBuilt()
+        {
+            GamePauser.PauseGame();
+            while (!Globals.isWorldBuilt)
+            {
+                yield return new WaitForSecondsRealtime(0.25f);
+            }
+            GamePauser.ResumeGame();
             (Vector2 upperLeft, Vector2 lowerRight) roomDimensions = worldBuilder.GetRoomDimensions(Globals.currentRoom);
             cameraControl.UpdateRoomDimensions(roomDimensions.upperLeft, roomDimensions.lowerRight);
         }

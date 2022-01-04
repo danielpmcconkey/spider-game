@@ -1,4 +1,5 @@
 ﻿using Assets.Scripts.CharacterControl;
+using Assets.Scripts.Events;
 using Assets.Scripts.Utility;
 using Assets.Scripts.WorldBuilder.RoomBuilder;
 using System;
@@ -40,12 +41,12 @@ namespace Assets.Scripts.WorldBuilder
             roomHeightInTiles = _roomSave.roomHeight;
             this.upperLeftInGlobalSpace = upperLeftInGlobalSpace;
             lowerRightInGlobalSpace = new Vector2(
-                upperLeftInGlobalSpace.x + (Globals.tileWidthInUnityMeters * roomWidthInTiles),
-                upperLeftInGlobalSpace.y - (Globals.tileHeightInUnityMeters * roomHeightInTiles));
+                upperLeftInGlobalSpace.x + MeasurementConverter.TilesXToUnityMeters(roomWidthInTiles),
+                upperLeftInGlobalSpace.y - MeasurementConverter.TilesYToUnityMeters(roomHeightInTiles));
             _roomGameObject = roomsGameObject;
 
-            roomWidthInUnityMeters = roomWidthInTiles * Globals.tileWidthInUnityMeters;
-            roomHeightInUnityMeters = roomHeightInTiles * Globals.tileHeightInUnityMeters;
+            roomWidthInUnityMeters = MeasurementConverter.TilesXToUnityMeters(roomWidthInTiles);
+            roomHeightInUnityMeters = MeasurementConverter.TilesYToUnityMeters(roomHeightInTiles);
 
             _startingEnemies = new List<Enemy>();
         }
@@ -177,12 +178,20 @@ namespace Assets.Scripts.WorldBuilder
         }
         private Vector2 GetGlobalPositionFromTileIndex(int index)
         {
-            Vector2 position = Vector2.zero;
-            int row = (int)Mathf.Floor(index / (float)roomWidthInTiles);
-            int column = (int)Mathf.Floor(index % roomWidthInTiles);
-            position.x = upperLeftInGlobalSpace.x + (column * Globals.tileWidthInUnityMeters);
-            position.y = upperLeftInGlobalSpace.y - (row * Globals.tileHeightInUnityMeters);
-            return position;
+            try
+            {
+                Vector2 position = Vector2.zero;
+                int row = (int)Mathf.Floor(index / (float)roomWidthInTiles);
+                int column = (int)Mathf.Floor(index % roomWidthInTiles);
+                position.x = upperLeftInGlobalSpace.x + MeasurementConverter.TilesXToUnityMeters(column);
+                position.y = upperLeftInGlobalSpace.y - MeasurementConverter.TilesYToUnityMeters(row);
+                return position;
+            }
+            catch (Exception)
+            {
+
+                throw;
+            }
         }
         private int GetTileIndexFromUnityPosition(float x, float y)
         {
@@ -190,8 +199,8 @@ namespace Assets.Scripts.WorldBuilder
             int yAsHundredTimes = (int)Math.Round(Math.Round(y, 2) * 100);
             int xUlAsHundredTimes = (int)Math.Round(Math.Round(upperLeftInGlobalSpace.x, 2) * 100);
             int yUlAsHundredTimes = (int)Math.Round(Math.Round(upperLeftInGlobalSpace.y, 2) * 100);
-            int tileWidthAsHundredTimes = (int)Math.Round(Math.Round(Globals.tileWidthInUnityMeters, 2) * 100);
-            int tileHeightAsHundredTimes = (int)Math.Round(Math.Round(Globals.tileHeightInUnityMeters, 2) * 100);
+            int tileWidthAsHundredTimes = (int)Math.Round(Math.Round(MeasurementConverter.TilesXToUnityMeters(1), 2) * 100);
+            int tileHeightAsHundredTimes = (int)Math.Round(Math.Round(MeasurementConverter.TilesYToUnityMeters(1), 2) * 100);
 
             // remember that unity y gets lower as we go downward
             // but our index goes from up-left to down-right

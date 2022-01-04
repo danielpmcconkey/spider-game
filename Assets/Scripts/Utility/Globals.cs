@@ -15,5 +15,10 @@ namespace Assets.Scripts.Utility
         public const float pixelsInAUnityMeter = 48f;
         public static int currentRoom;
         public static float roomTransitionTimeInSeconds = 1.5f;
+        public const int standardRoomWidth = 25;
+        public const int standardRoomHeight = 15;
+        public const float unityWorldUpLeftX = 0;
+        public const float unityWorldUpLeftY = 0;
+        public static bool isWorldBuilt = false;
     }
 }

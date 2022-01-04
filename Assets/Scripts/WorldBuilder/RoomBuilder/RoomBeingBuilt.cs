@@ -232,20 +232,21 @@ namespace Assets.Scripts.WorldBuilder.RoomBuilder
 
                         
 
-                        x1 = (doorIn.position.column + tileBorderBuffer) * Globals.tileWidthInUnityMeters;
+                        x1 = MeasurementConverter.TilesXToUnityMeters(doorIn.position.column + tileBorderBuffer);
                         if (doorIn.position.column == -1)
                         {
                             // move it 2 to the right
-                            x1 += 2 * Globals.tileWidthInUnityMeters;
+                            x1 += MeasurementConverter.TilesXToUnityMeters(2);
                         }
-                        x3 = (doorOut.position.column + tileBorderBuffer) * Globals.tileWidthInUnityMeters;
+                        x3 = MeasurementConverter.TilesXToUnityMeters(doorOut.position.column + tileBorderBuffer);
                         if (doorOut.position.column == -1)
                         {
                             // move it 2 to the right
-                            x3 += 2 * Globals.tileWidthInUnityMeters;
+                            x3 += MeasurementConverter.TilesXToUnityMeters(2);
                         }
-                        y1 = (doorIn.position.row + tileBorderBuffer) * Globals.tileHeightInUnityMeters;
-                        y3 = (doorOut.position.row + tileBorderBuffer + Globals.doorHeightInTiles) * Globals.tileHeightInUnityMeters;
+                        y1 = MeasurementConverter.TilesYToUnityMeters(doorIn.position.row + tileBorderBuffer);
+                        y3 = MeasurementConverter.TilesYToUnityMeters(
+                            doorOut.position.row + tileBorderBuffer + Globals.doorHeightInTiles);
 
                         // set x2 and y2 to be in the middle of 1 and 3
                         x2 = x1 + ((x3 - x1) / 2);

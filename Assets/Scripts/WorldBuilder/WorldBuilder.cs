@@ -1,5 +1,6 @@
 ﻿using Assets.Scripts.CharacterControl;
 using Assets.Scripts.Utility;
+using Assets.Scripts.WorldBuilder.Bot;
 using Assets.Scripts.WorldBuilder.RoomBuilder;
 using System;
 using System.Collections.Generic;
@@ -19,22 +20,7 @@ namespace Assets.Scripts.WorldBuilder
         [Header("Tile sets")]
         [Space(10)]
         [SerializeField] public GameObject rock1TileSet;
-        //[SerializeField] public GameObject rock1Base;
-        //[SerializeField] public GameObject rock1Top;
-        //[SerializeField] public GameObject rock1Bottom;
-        //[SerializeField] public GameObject rock1Left;
-        //[SerializeField] public GameObject rock1Right;
-        //[SerializeField] public GameObject rock1CornerUpLeft;
-        //[SerializeField] public GameObject rock1CornerUpRight;
-        //[SerializeField] public GameObject rock1CornerBottomLeft;
-        //[SerializeField] public GameObject rock1CornerBottomRight;
-        //[SerializeField] public GameObject rock1EndCapUp;
-        //[SerializeField] public GameObject rock1EndCapDown;
-        //[SerializeField] public GameObject rock1EndCapLeft;
-        //[SerializeField] public GameObject rock1EndCapRight;
-        //[SerializeField] public GameObject rock1SingleWide;
-        //[SerializeField] public GameObject rock1SingleTall;
-        //[SerializeField] public GameObject rock1Door;
+        
         [Space(10)]
         [Header("Enemies")]
         [Space(10)]
@@ -44,6 +30,17 @@ namespace Assets.Scripts.WorldBuilder
         private RoomSave[] _roomSaves;
 
         
+        void Awake()
+        {
+            
+
+
+
+            _doors = new List<Door>();
+            //BuildStarterRoom();
+            BuildWorld();
+            Globals.isWorldBuilt = true;
+        }
 
         public Door GetDoorAtPosition(Vector2 globalPosition)
         {
@@ -52,6 +49,19 @@ namespace Assets.Scripts.WorldBuilder
                 if (d.positionInGlobalSpace == globalPosition) return d;             
             }
             return null;
+        }
+        public (Vector2 upperLeft, Vector2 lowerRight) GetRoomDimensions(int roomId)
+        {
+            try
+            {
+                Vector2 upperLeft = _rooms[roomId].upperLeftInGlobalSpace;
+                Vector2 lowerRight = _rooms[roomId].lowerRightInGlobalSpace;
+                return (upperLeft, lowerRight);
+            }
+            catch (Exception)
+            {
+                throw;
+            }
         }
         public int WhichRoomAreWeIn(Vector2 currentLocation)
         {
@@ -67,24 +77,37 @@ namespace Assets.Scripts.WorldBuilder
             }
             return -1;
         }
-        
-        void Awake()
+
+
+        private void BuildWorld()
         {
-            int howManyRooms = 2;
+            WBBot bot = new WBBot();
+            World world = bot.CreateWorld(WorldSizeValues.sizes[(int)WorldSizes.SMALL], 78446);
+
+            int howManyRooms = world.rooms.Count;
             _rooms = new Room[howManyRooms];
 
+            for(int i = 0; i < howManyRooms; i++)
+            {
+                RoomBlueprint blueprint = world.rooms[i];
 
+                RoomSave roomSave = new RoomSave();
+                roomSave.roomName = "";
+                roomSave.tileWidth = MeasurementConverter.TilesXToPixels(1);
+                roomSave.tileHeight = MeasurementConverter.TilesYToPixels(1);
+                roomSave.roomWidth = blueprint.roomWidthInTiles;
+                roomSave.roomHeight = blueprint.roomHeightInTiles;
+                roomSave.tiles = blueprint.tiles;
+                roomSave.doors = new List<RoomBuilder.Door>();
 
-            _doors = new List<Door>();
-            BuildStarterRoom();
+                string unityRoomName = string.Format("Room{0}", i);
+                GameObject roomGameObject = Instantiate(new GameObject(unityRoomName), roomsParent.transform, false);
+                Room room = new Room(blueprint.id, rock1TileSet, roomSave, blueprint.upperLeftInGlobalSpace , roomGameObject);
+                _rooms[0] = room;
+                room.DrawSelf();
+            }
         }
 
-        public (Vector2 upperLeft, Vector2 lowerRight) GetRoomDimensions(int roomId)
-        {
-            Vector2 upperLeft = _rooms[roomId].upperLeftInGlobalSpace;
-            Vector2 lowerRight = _rooms[roomId].lowerRightInGlobalSpace;
-            return (upperLeft, lowerRight);
-        }
         private void BuildStarterRoom()
         {
             _roomSaves = RoomBuilderHelper.GetAllRoomSaves();

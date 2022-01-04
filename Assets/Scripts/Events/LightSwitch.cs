@@ -7,7 +7,7 @@ using System.Threading.Tasks;
 using UnityEngine;
 using UnityEngine.Rendering.Universal;
 
-namespace Assets.Scripts.WorldBuilder
+namespace Assets.Scripts.Events
 {
     public class LightSwitch : MonoBehaviour
     {

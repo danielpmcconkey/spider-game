@@ -1,7 +1,7 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
 <Project ToolsVersion="4.0" DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <PropertyGroup>
-    <LangVersion>7.3</LangVersion>
+    <LangVersion>latest</LangVersion>
   </PropertyGroup>
   <PropertyGroup>
     <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
@@ -76,7 +76,7 @@
     <Compile Include="Assets\Scripts\WorldBuilder\RoomBuilder\RoomSave.cs" />
     <Compile Include="Assets\Scripts\CharacterControl\AiControlledCharacter.cs" />
     <Compile Include="Assets\Scripts\CharacterControl\CharacterMovementCapabilities.cs" />
-    <Compile Include="Assets\Scripts\WorldBuilder\LightSwitch.cs" />
+    <Compile Include="Assets\Scripts\Events\LightSwitch.cs" />
     <Compile Include="Assets\Scripts\WorldBuilder\RoomBuilder\TileNeighbors.cs" />
     <Compile Include="Assets\Scripts\Utility\Globals.cs" />
     <Compile Include="Assets\Scripts\Camera\ConstantBackgroundPositioner.cs" />
@@ -88,7 +88,6 @@
     <Compile Include="Assets\Scripts\WorldBuilder\WorldBuilder.cs" />
     <Compile Include="Assets\Scripts\CharacterControl\CharacterContacts.cs" />
     <Compile Include="Assets\Scripts\WorldBuilder\RoomBuilder\RoomBuilderHelper.cs" />
-    <Compile Include="Assets\Scripts\WorldBuilder\TestAddWallsAndFloor.cs" />
     <Compile Include="Assets\Scripts\Camera\CameraControl.cs" />
     <Compile Include="Assets\Scripts\CharacterControl\UserInputCollection.cs" />
     <Compile Include="Assets\Scripts\Events\UIController.cs" />
@@ -108,6 +107,14 @@
     <Compile Include="Assets\Scripts\WorldBuilder\RoomBuilder\Door.cs" />
     <Compile Include="Assets\Scripts\WorldBuilder\RoomBuilder\RoomBuilderReferences.cs" />
     <Compile Include="Assets\Scripts\CharacterControl\MovementState.cs" />
+    <Compile Include="Assets\Scripts\Utility\GridHelper.cs" />
+    <Compile Include="Assets\Scripts\WorldBuilder\Bot\RoomBot.cs" />
+    <Compile Include="Assets\Scripts\WorldBuilder\Bot\RoomBlueprint.cs" />
+    <Compile Include="Assets\Scripts\Utility\MeasurementConverter.cs" />
+    <Compile Include="Assets\Scripts\WorldBuilder\World.cs" />
+    <Compile Include="Assets\Scripts\WorldBuilder\Bot\WBBot.cs" />
+    <Compile Include="Assets\Scripts\WorldBuilder\WorldSizeValues.cs" />
+    <Compile Include="Assets\Scripts\WorldBuilder\WorldSize.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="Assets\TextMesh Pro\Shaders\TMPro.cginc" />
