@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 
 namespace Assets.Scripts.WorldBuilder
 {
-    public enum WorldSizes { SMALL = 0, MEDIUM = 1, LARGE = 2, XL = 3 }
+    public enum WorldSizes { SMALL = 0, MEDIUM = 1, LARGE = 2, XL = 3, DEBUG = 4 }
     public static class WorldSizeValues
     {
         public static WorldSize[] sizes { get; set; }
@@ -56,6 +56,13 @@ namespace Assets.Scripts.WorldBuilder
                     maxWidth = 32,
                     minHeight = 27,
                     maxHeight = 32,
+                },
+                new WorldSize{
+                    name = "DEBUG",
+                    minWidth = 2,
+                    maxWidth = 2,
+                    minHeight = 2,
+                    maxHeight = 2,
                 },
             };
         }

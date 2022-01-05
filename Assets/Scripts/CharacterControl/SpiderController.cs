@@ -233,13 +233,13 @@ namespace Assets.Scripts.CharacterControl
             Door d = worldBuilder.GetDoorAtPosition(doorPosition);
             if(d != null)
             {
-                if (d.roomLeft.id == Globals.currentRoom && d.roomRight.id != Globals.currentRoom)
+                if (d.room1Id == Globals.currentRoom && d.room2Id != Globals.currentRoom)
                 {
-                    Globals.currentRoom = d.roomRight.id;
+                    Globals.currentRoom = d.room2Id;
                 }
-                else if (d.roomRight.id == Globals.currentRoom && d.roomLeft.id != Globals.currentRoom)
+                else if (d.room2Id == Globals.currentRoom && d.room1Id != Globals.currentRoom)
                 {
-                    Globals.currentRoom = d.roomLeft.id;
+                    Globals.currentRoom = d.room1Id;
                 }
                 TransitionRoom(d);
             }

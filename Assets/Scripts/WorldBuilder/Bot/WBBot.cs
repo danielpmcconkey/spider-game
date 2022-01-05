@@ -22,13 +22,12 @@ namespace Assets.Scripts.WorldBuilder.Bot
             SizeWorld();
             // create a grid of empty rooms, all equally sized
             AddEmptyWorldGrid();
-            // now combine some of them
+            // now combine some of them (adding all possible doors)
             CombineGridCellsIntoRooms();
+            // remove unneeded doors
+            FinalizeRoomDoors();
             // actually turn them into rooms and add perimiter tiles
             MakeRoomsFromGrid();
-
-
-            //joinRooms();
             //decorateRooms();
 
 
@@ -36,16 +35,16 @@ namespace Assets.Scripts.WorldBuilder.Bot
             return world;
         }
 
-        private void AddCeilingToRoom(RoomBlueprint room, WorldGridCell cell)
-        {
-
-        }
+        
         private void AddEmptyWorldGrid()
         {
             // create a grid of empty rooms, all equally sized
+            // also add a door between each grid cell
+            // we'll later take away doors
             
             
             world.worldGrid = new WorldGridCell[world.worldHeightInStandardRooms * world.worldWidthInStandardRooms];
+            world.doors = new List<Door>();
 
             int roomId = 0;
             for (int i = 0; i < world.worldHeightInStandardRooms; i++)
@@ -54,9 +53,90 @@ namespace Assets.Scripts.WorldBuilder.Bot
                 {
                     WorldGridCell cell = new WorldGridCell() { row = i, column = i2, roomId = roomId };
                     world.worldGrid[roomId] = cell;
+
+                    // add a door down and right
+                    if (i < world.worldHeightInStandardRooms - 1)
+                    {
+                        // add a door down
+                        int randTilesIn = RNG.GetRandomInt(0, Globals.standardRoomWidth - 4); // the 4 removes the perimiter
+                        float posX =
+                            ConvertGridColumnToUnityX(i2) // left-most point of the room
+                            + MeasurementConverter.TilesXToUnityMeters(2) // forward 2 for the room perimiter
+                            + MeasurementConverter.TilesXToUnityMeters(randTilesIn); // forward by rand number of tiles
+                        float posY =
+                            ConvertGridRowToUnityY(i) // top of the room
+                            - MeasurementConverter.TilesYToUnityMeters(Globals.standardRoomHeight) // bottom of the room
+                            + MeasurementConverter.TilesYToUnityMeters(2); // back up 2 tiles for the room perimiter
+
+                        Door d = new Door()
+                        {
+                            room1Id = roomId,
+                            room2Id = roomId + world.worldWidthInStandardRooms,
+                            isHorizontal = true,
+                            positionInGlobalSpace = new Vector2(posX, posY),
+                        };
+                        world.doors.Add(d);
+                    }
+                    if (i2 < world.worldWidthInStandardRooms - 1)
+                    {
+                        // add a door right
+                        int randTilesIn = RNG.GetRandomInt(0, Globals.standardRoomHeight - 4); // the 4 removes the perimiter
+                        float posX =
+                            ConvertGridColumnToUnityX(i2) // left-most point of the room
+                            + MeasurementConverter.TilesXToUnityMeters(Globals.standardRoomWidth) // right-most point
+                            - MeasurementConverter.TilesXToUnityMeters(2); // back up 2 for the room perimiter
+                        float posY =
+                            ConvertGridRowToUnityY(i) // top of the room
+                            - MeasurementConverter.TilesYToUnityMeters(2) // forward 2 for the room perimiter
+                            - MeasurementConverter.TilesYToUnityMeters(randTilesIn); // forward by rand number of tiles
+
+                        Door d = new Door()
+                        {
+                            room1Id = roomId,
+                            room2Id = roomId + 1,
+                            isHorizontal = false,
+                            positionInGlobalSpace = new Vector2(posX, posY),
+                        };
+                        world.doors.Add(d);
+                    }
+
                     roomId++;
                 }
             }
+        }
+        private List<int> AddRoomConnectionsRecurrsive(List<int> knownConnectedIds, int roomId)
+        {            
+            List<Door> doorsInThisRoom = world.doors.Where(x => x.room1Id == roomId).ToList();
+            foreach(Door d in doorsInThisRoom)
+            {
+                if (!knownConnectedIds.Contains(d.room2Id))
+                {
+                    knownConnectedIds.Add(d.room2Id);
+                    knownConnectedIds = AddRoomConnectionsRecurrsive(knownConnectedIds, d.room2Id);
+                }
+            }
+            return knownConnectedIds;
+        }
+        private bool AreAllRoomsConnected()
+        {
+            // used to determine if we removed one door too many
+
+            // create an empty "connected room IDs" container. we'll go through the connections
+            // and add them into this container. at the end, we make sure that all IDs are in 
+            // this container
+            List<int> knownConnectedIds = new List<int>();
+            // get a list of all room IDs we have
+            List<int> roomIds = world.worldGrid.GroupBy(x => x.roomId).Select(grp => grp.First().roomId).ToList();
+            // start with the first room
+            knownConnectedIds.Add(roomIds[0]);
+            // now recurssively add each room as its connections
+            AddRoomConnectionsRecurrsive(knownConnectedIds, roomIds[0]);
+            // now check to make sure all rooms are connected
+            foreach(int id in roomIds)
+            {
+                if (!knownConnectedIds.Contains(id)) return false;
+            }
+            return true;
         }
         private void CombineGridCellsIntoRooms(int cursor = 0)
         {
@@ -107,15 +187,7 @@ namespace Assets.Scripts.WorldBuilder.Bot
                     else
                     {
                         // actually combine these two
-                        int newRoomId = (targetCell.roomId < candidateCell.roomId) ? targetCell.roomId : candidateCell.roomId;
-                        for(int i = 0; i < world.worldGrid.Length; i++)
-                        {
-                            if (world.worldGrid[i].roomId == targetCell.roomId || 
-                                world.worldGrid[i].roomId == candidateCell.roomId)
-                            {
-                                world.worldGrid[i].roomId = newRoomId;
-                            }
-                        }
+                        CombineTwoGridCells(targetCell, candidateCell);
 
                         // run it again until we're good
                         CombineGridCellsIntoRooms(cursor + 1);
@@ -123,6 +195,47 @@ namespace Assets.Scripts.WorldBuilder.Bot
                 }
             }
             else return;
+        }
+        private void CombineTwoGridCells(WorldGridCell targetCell, WorldGridCell candidateCell)
+        {
+            // first remove any doors between these cells
+            List<Door> newDoors = new List<Door>();
+            foreach(Door d in world.doors)
+            {
+                if (d.room1Id == targetCell.roomId && d.room2Id == candidateCell.roomId ||
+                    d.room1Id == candidateCell.roomId && d.room2Id == targetCell.roomId)
+                {
+                    // get rid of it by not adding
+                }
+                else newDoors.Add(d);
+            }
+            world.doors = newDoors;
+
+            // now combine cells by updating their roomIds
+
+            int newRoomId = (targetCell.roomId < candidateCell.roomId) ? targetCell.roomId : candidateCell.roomId;
+            for (int i = 0; i < world.worldGrid.Length; i++)
+            {
+                if (world.worldGrid[i].roomId == targetCell.roomId ||
+                    world.worldGrid[i].roomId == candidateCell.roomId)
+                {
+                    world.worldGrid[i].roomId = newRoomId;
+                }
+            }
+
+            // now update any doors to use the new ID
+            foreach (Door d in world.doors)
+            {
+                if(d.room1Id == targetCell.roomId || d.room1Id == candidateCell.roomId)
+                {
+                    d.room1Id = newRoomId;
+                }
+                if (d.room2Id == targetCell.roomId || d.room2Id == candidateCell.roomId)
+                {
+                    d.room2Id = newRoomId;
+                }
+            }
+
         }
         private float ConvertGridColumnToUnityX(int gridColumn)
         {
@@ -179,7 +292,7 @@ namespace Assets.Scripts.WorldBuilder.Bot
                     new Position() { row = cellLowRightRow, column = cellLowRightColumn });
 
                 // if there's no room above add a ceiling
-                if (cells.Where(x => x.row == cell.row - 1).Count() == 0)
+                if (cells.Where(x => x.row == cell.row - 1 && x.column == cell.column).Count() == 0)
                 {
                     for(int i = cellUpLeftOrdinal; i <= cellUpRightOrdinal; i++)
                     {                        
@@ -188,7 +301,7 @@ namespace Assets.Scripts.WorldBuilder.Bot
                     }
                 }
                 // if there's no room to the right add the right wall
-                if (cells.Where(x => x.column == cell.column + 1).Count() == 0)
+                if (cells.Where(x => x.column == cell.column + 1 && x.row == cell.row).Count() == 0)
                 {
                     for (int i = cellUpRightOrdinal; i <= cellLowRightOrdinal; i += widthInTiles)
                     {
@@ -205,7 +318,7 @@ namespace Assets.Scripts.WorldBuilder.Bot
                     }
                 }
                 // if there's no room below add a floor
-                if (cells.Where(x => x.row == cell.row + 1).Count() == 0)
+                if (cells.Where(x => x.row == cell.row + 1 && x.column == cell.column).Count() == 0)
                 {
                     for (int i = cellLowLeftOrdinal; i <= cellLowRightOrdinal; i++)
                     {
@@ -214,7 +327,7 @@ namespace Assets.Scripts.WorldBuilder.Bot
                     }
                 }
                 // if there's no room to the left add the left wall
-                if (cells.Where(x => x.column == cell.column - 1).Count() == 0)
+                if (cells.Where(x => x.column == cell.column - 1 && x.row == cell.row).Count() == 0)
                 {
                     for (int i = cellUpLeftOrdinal; i <= cellLowLeftOrdinal; i += widthInTiles)
                     {
@@ -224,6 +337,31 @@ namespace Assets.Scripts.WorldBuilder.Bot
                 }
             }
 
+        }
+        private void FinalizeRoomDoors()
+        {
+            // The doors are already there. We need to remove as many as we can
+            // while still leaving all rooms connected
+
+
+            // remove half of the doors
+            int doorRemovalCountTarget = (int)Math.Floor(world.doors.Count * 0.5f) + 1;
+            int doorRemovalCount = 0;
+
+            while(doorRemovalCount < doorRemovalCountTarget)
+            {
+                int indexToRemove = RNG.GetRandomInt(0, world.doors.Count);
+                Door sacrifice = world.doors[indexToRemove];
+                world.doors.RemoveAt(indexToRemove);
+
+                if (AreAllRoomsConnected()) doorRemovalCount++;
+                else
+                {
+                    // add back in the sacrificial door to keep all rooms connected
+                    world.doors.Add(sacrifice);
+                }
+            }
+            
         }
         private int GetGridOrdinalFromPosition(Position position)
         {
@@ -239,8 +377,6 @@ namespace Assets.Scripts.WorldBuilder.Bot
             world.rooms = new List<RoomBlueprint>();
             foreach(int id in roomIds)
             {
-                
-
                 // grab all grid cells
                 List<WorldGridCell> cells = world.worldGrid.Where(x => x.roomId == id).ToList();
 

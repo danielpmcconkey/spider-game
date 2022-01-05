@@ -9,9 +9,10 @@ namespace Assets.Scripts.WorldBuilder
 {
     public class Door
     {
-        public Room roomLeft;
-        public Room roomRight;
+        public int room1Id; // left or up
+        public int room2Id; // right or down
         public Vector2 positionInGlobalSpace;
-        public bool _isLocked = false;
+        public bool isLocked = false;
+        public bool isHorizontal = false;
     }
 }

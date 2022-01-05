@@ -1,7 +1,7 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
 <Project ToolsVersion="4.0" DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <PropertyGroup>
-    <LangVersion>latest</LangVersion>
+    <LangVersion>7.3</LangVersion>
   </PropertyGroup>
   <PropertyGroup>
     <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
@@ -59,7 +59,11 @@
     <Compile Include="Assets\Scripts\Events\GameEvents.cs" />
     <Compile Include="Assets\Scripts\Utility\LoggerCustom.cs" />
     <Compile Include="Assets\Scripts\CharacterControl\SpiderController.cs" />
+    <Compile Include="Assets\Scripts\Utility\MeasurementConverter.cs" />
+    <Compile Include="Assets\Scripts\WorldBuilder\World.cs" />
     <Compile Include="Assets\Scripts\WorldBuilder\Door.cs" />
+    <Compile Include="Assets\Scripts\WorldBuilder\Bot\RoomBlueprint.cs" />
+    <Compile Include="Assets\Scripts\Utility\GridHelper.cs" />
     <Compile Include="Assets\Scripts\WorldBuilder\RoomBuilder\DoorConnection.cs" />
     <Compile Include="Assets\Scripts\WorldBuilder\RoomBuilder\Position.cs" />
     <Compile Include="Assets\Scripts\CharacterControl\ShootingCharacter.cs" />
@@ -72,11 +76,13 @@
     <Compile Include="Assets\Scripts\Events\RoomBuilderEvents.cs" />
     <Compile Include="Assets\Scripts\WorldBuilder\TileSet.cs" />
     <Compile Include="Assets\Scripts\WorldBuilder\Firefly.cs" />
+    <Compile Include="Assets\Scripts\WorldBuilder\WorldSize.cs" />
     <Compile Include="Assets\Scripts\Utility\GamePauser.cs" />
     <Compile Include="Assets\Scripts\WorldBuilder\RoomBuilder\RoomSave.cs" />
     <Compile Include="Assets\Scripts\CharacterControl\AiControlledCharacter.cs" />
     <Compile Include="Assets\Scripts\CharacterControl\CharacterMovementCapabilities.cs" />
     <Compile Include="Assets\Scripts\Events\LightSwitch.cs" />
+    <Compile Include="Assets\Scripts\WorldBuilder\WorldSizeValues.cs" />
     <Compile Include="Assets\Scripts\WorldBuilder\RoomBuilder\TileNeighbors.cs" />
     <Compile Include="Assets\Scripts\Utility\Globals.cs" />
     <Compile Include="Assets\Scripts\Camera\ConstantBackgroundPositioner.cs" />
@@ -91,6 +97,7 @@
     <Compile Include="Assets\Scripts\Camera\CameraControl.cs" />
     <Compile Include="Assets\Scripts\CharacterControl\UserInputCollection.cs" />
     <Compile Include="Assets\Scripts\Events\UIController.cs" />
+    <Compile Include="Assets\Scripts\WorldBuilder\Bot\WBBot.cs" />
     <Compile Include="Assets\Scripts\Combat\HealthBar.cs" />
     <Compile Include="Assets\Scripts\WorldBuilder\RoomBuilder\EditMode.cs" />
     <Compile Include="Assets\Scripts\Animation\CharacterAnimationController.cs" />
@@ -106,15 +113,8 @@
     <Compile Include="Assets\Scripts\Utility\Replay.cs" />
     <Compile Include="Assets\Scripts\WorldBuilder\RoomBuilder\Door.cs" />
     <Compile Include="Assets\Scripts\WorldBuilder\RoomBuilder\RoomBuilderReferences.cs" />
-    <Compile Include="Assets\Scripts\CharacterControl\MovementState.cs" />
-    <Compile Include="Assets\Scripts\Utility\GridHelper.cs" />
     <Compile Include="Assets\Scripts\WorldBuilder\Bot\RoomBot.cs" />
-    <Compile Include="Assets\Scripts\WorldBuilder\Bot\RoomBlueprint.cs" />
-    <Compile Include="Assets\Scripts\Utility\MeasurementConverter.cs" />
-    <Compile Include="Assets\Scripts\WorldBuilder\World.cs" />
-    <Compile Include="Assets\Scripts\WorldBuilder\Bot\WBBot.cs" />
-    <Compile Include="Assets\Scripts\WorldBuilder\WorldSizeValues.cs" />
-    <Compile Include="Assets\Scripts\WorldBuilder\WorldSize.cs" />
+    <Compile Include="Assets\Scripts\CharacterControl\MovementState.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="Assets\TextMesh Pro\Shaders\TMPro.cginc" />

@@ -19,5 +19,6 @@ namespace Assets.Scripts.WorldBuilder
         public int worldHeightInStandardRooms;
         public WorldGridCell[] worldGrid;
         public List<RoomBlueprint> rooms;
+        public List<Door> doors;
     }
 }
