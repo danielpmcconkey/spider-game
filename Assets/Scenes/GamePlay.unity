@@ -2409,7 +2409,7 @@ DistanceJoint2D:
   m_Anchor: {x: 0, y: 0}
   m_ConnectedAnchor: {x: 0, y: 0}
   m_AutoConfigureDistance: 1
-  m_Distance: 0.005
+  m_Distance: 4.2426405
   m_MaxDistanceOnly: 0
 --- !u!70 &1304622923
 CapsuleCollider2D:
@@ -2938,12 +2938,12 @@ PrefabInstance:
     - target: {fileID: 3251419005602766949, guid: e5aa7d7847a68704f8237d0bc6043afb,
         type: 3}
       propertyPath: m_LocalPosition.x
-      value: 0
+      value: 3
       objectReference: {fileID: 0}
     - target: {fileID: 3251419005602766949, guid: e5aa7d7847a68704f8237d0bc6043afb,
         type: 3}
       propertyPath: m_LocalPosition.y
-      value: 0
+      value: -3
       objectReference: {fileID: 0}
     - target: {fileID: 3251419005602766949, guid: e5aa7d7847a68704f8237d0bc6043afb,
         type: 3}

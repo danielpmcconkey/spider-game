@@ -83,7 +83,7 @@ namespace Assets.Scripts.WorldBuilder
         private void BuildWorld()
         {
             WBBot bot = new WBBot();
-            World world = bot.CreateWorld(WorldSizeValues.sizes[(int)WorldSizes.SMALL], 78446);
+            World world = bot.CreateWorld(WorldSizeValues.sizes[(int)WorldSizes.DEBUG], 78446);
 
             int howManyRooms = world.rooms.Count;
             _rooms = new Room[howManyRooms];
@@ -201,9 +201,9 @@ namespace Assets.Scripts.WorldBuilder
         {
             
             float posX = roomLeft.lowerRightInGlobalSpace.x - 1;
-            float posY = roomLeft.lowerRightInGlobalSpace.y + heightFromLeftFloorInTiles + Globals.doorHeightInTiles;
+            float posY = roomLeft.lowerRightInGlobalSpace.y + heightFromLeftFloorInTiles + Globals.doorVHeightInTiles;
             // now knock out perimiter blocks in each room
-            for (int i = 0; i < Globals.doorHeightInTiles; i++)
+            for (int i = 0; i < Globals.doorVHeightInTiles; i++)
             {
                 roomLeft.KnockOutTile(new Vector2(posX, posY - i));
                 roomRight.KnockOutTile(new Vector2(posX + 1, posY - i));
@@ -220,9 +220,9 @@ namespace Assets.Scripts.WorldBuilder
         {
             foreach (Door d in _doors)
             {
-                for(int i = 0; i < Globals.doorHeightInTiles; i++)
+                for(int i = 0; i < Globals.doorVHeightInTiles; i++)
                 {
-                    for(int i2 = 0; i2 < Globals.doorWidthInTiles; i2++)
+                    for(int i2 = 0; i2 < Globals.doorHWidthInTiles; i2++)
                     {
                         Vector2 trialPosition = new Vector2(d.positionInGlobalSpace.x + i2, d.positionInGlobalSpace.y - i);
                         if (trialPosition == position) return true;

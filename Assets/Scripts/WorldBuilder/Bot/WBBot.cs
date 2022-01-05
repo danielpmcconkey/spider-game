@@ -28,6 +28,7 @@ namespace Assets.Scripts.WorldBuilder.Bot
             FinalizeRoomDoors();
             // actually turn them into rooms and add perimiter tiles
             MakeRoomsFromGrid();
+            KnockOutTilesBehindDoors();
             //decorateRooms();
 
 
@@ -35,7 +36,7 @@ namespace Assets.Scripts.WorldBuilder.Bot
             return world;
         }
 
-        
+
         private void AddEmptyWorldGrid()
         {
             // create a grid of empty rooms, all equally sized
@@ -360,8 +361,7 @@ namespace Assets.Scripts.WorldBuilder.Bot
                     // add back in the sacrificial door to keep all rooms connected
                     world.doors.Add(sacrifice);
                 }
-            }
-            
+            }            
         }
         private int GetGridOrdinalFromPosition(Position position)
         {
@@ -370,6 +370,45 @@ namespace Assets.Scripts.WorldBuilder.Bot
         private Position GetPositionFromGridOrdinal(int gridOrdinal)
         {
             return GridHelper.GetPositionFromOrdinal(world.worldWidthInStandardRooms, gridOrdinal);
+        }
+        private void KnockOutTilesAtPosition(Vector2 knockOutPosition, int roomId)
+        {
+            RoomBlueprint r = world.rooms.Where(x => x.id == roomId).FirstOrDefault();
+            for(int i = 0; i < r.tiles.Length; i++)
+            {
+                var t = r.tiles[i];
+                if (t.isSolid)
+                {
+                    Position tilePositionLocal = GridHelper.GetPositionFromOrdinal(r.roomWidthInTiles, i);
+                    Vector2 tilePositionGlobal = new Vector2(
+                        r.upperLeftInGlobalSpace.x + MeasurementConverter.TilesXToUnityMeters(tilePositionLocal.column),
+                        r.upperLeftInGlobalSpace.y - MeasurementConverter.TilesYToUnityMeters(tilePositionLocal.row)
+                        );
+                    if(tilePositionGlobal == knockOutPosition)
+                    {
+                        r.tiles[i].isSolid = false;
+                        r.tiles[i].tileNum = 0;
+                    }
+                }
+            }            
+        }
+        private void KnockOutTilesBehindDoors()
+        {
+            foreach (Door d in world.doors)
+            {
+                int tilesX = (d.isHorizontal) ? Globals.doorHWidthInTiles : Globals.doorVWidthInTiles;
+                int tilesY = (d.isHorizontal) ? Globals.doorHHeightInTiles : Globals.doorVHeightInTiles;
+                for (int i = 0; i < tilesY; i++)
+                {
+                    for (int i2 = 0; i2 < tilesX; i2++)
+                    {
+                        float posX = d.positionInGlobalSpace.x + (MeasurementConverter.TilesXToUnityMeters(i2));
+                        float posY = d.positionInGlobalSpace.y - (MeasurementConverter.TilesYToUnityMeters(i));
+                        KnockOutTilesAtPosition(new Vector2(posX, posY), d.room1Id);
+                        KnockOutTilesAtPosition(new Vector2(posX, posY), d.room2Id);
+                    }
+                }
+            }
         }
         private void MakeRoomsFromGrid()
         {
@@ -433,5 +472,7 @@ namespace Assets.Scripts.WorldBuilder.Bot
             world.worldWidthInStandardRooms = RNG.GetRandomInt(size.minWidth, size.maxWidth + 1);
             world.worldHeightInStandardRooms = RNG.GetRandomInt(size.minHeight, size.maxHeight + 1);
         }
+
+
     }
 }

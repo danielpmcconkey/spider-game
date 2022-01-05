@@ -59,10 +59,10 @@ namespace Assets.Scripts.WorldBuilder
                 },
                 new WorldSize{
                     name = "DEBUG",
-                    minWidth = 2,
-                    maxWidth = 2,
-                    minHeight = 2,
-                    maxHeight = 2,
+                    minWidth = 4,
+                    maxWidth = 4,
+                    minHeight = 4,
+                    maxHeight = 4,
                 },
             };
         }

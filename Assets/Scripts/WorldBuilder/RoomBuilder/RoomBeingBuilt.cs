@@ -246,7 +246,7 @@ namespace Assets.Scripts.WorldBuilder.RoomBuilder
                         }
                         y1 = MeasurementConverter.TilesYToUnityMeters(doorIn.position.row + tileBorderBuffer);
                         y3 = MeasurementConverter.TilesYToUnityMeters(
-                            doorOut.position.row + tileBorderBuffer + Globals.doorHeightInTiles);
+                            doorOut.position.row + tileBorderBuffer + Globals.doorVHeightInTiles);
 
                         // set x2 and y2 to be in the middle of 1 and 3
                         x2 = x1 + ((x3 - x1) / 2);
