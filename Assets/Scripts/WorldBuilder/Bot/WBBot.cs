@@ -59,7 +59,7 @@ namespace Assets.Scripts.WorldBuilder.Bot
                     if (i < world.worldHeightInStandardRooms - 1)
                     {
                         // add a door down
-                        int randTilesIn = RNG.GetRandomInt(0, Globals.standardRoomWidth - 4); // the 4 removes the perimiter
+                        int randTilesIn = RNG.GetRandomInt(0, Globals.standardRoomWidth - 4 - Globals.doorHWidthInTiles); // the 4 removes the perimiter
                         float posX =
                             ConvertGridColumnToUnityX(i2) // left-most point of the room
                             + MeasurementConverter.TilesXToUnityMeters(2) // forward 2 for the room perimiter
@@ -81,7 +81,7 @@ namespace Assets.Scripts.WorldBuilder.Bot
                     if (i2 < world.worldWidthInStandardRooms - 1)
                     {
                         // add a door right
-                        int randTilesIn = RNG.GetRandomInt(0, Globals.standardRoomHeight - 4); // the 4 removes the perimiter
+                        int randTilesIn = RNG.GetRandomInt(0, Globals.standardRoomHeight - 4 - Globals.doorVHeightInTiles); // the 4 removes the perimiter
                         float posX =
                             ConvertGridColumnToUnityX(i2) // left-most point of the room
                             + MeasurementConverter.TilesXToUnityMeters(Globals.standardRoomWidth) // right-most point

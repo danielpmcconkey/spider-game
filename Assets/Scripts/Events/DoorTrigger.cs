@@ -13,10 +13,10 @@ namespace Assets.Scripts.Events
     {
         private Vector2 _originalPosition;
         private const float _doorOpenTimeInSeconds = 4.0f;
-        [SerializeField] public GameObject doorSlider;
-        
+        [SerializeField] public GameObject doorSlider;        
         [SerializeField] public float doorGravity = 91f;
         [SerializeField] public float doorHeight = 3f;
+
         private bool _isSliding;
 
         private void Start()

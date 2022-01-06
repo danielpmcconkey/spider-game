@@ -83,7 +83,7 @@ namespace Assets.Scripts.WorldBuilder
         private void BuildWorld()
         {
             WBBot bot = new WBBot();
-            World world = bot.CreateWorld(WorldSizeValues.sizes[(int)WorldSizes.DEBUG], 78446);
+            World world = bot.CreateWorld(WorldSizeValues.sizes[(int)WorldSizes.SMALL], 78446);
 
             int howManyRooms = world.rooms.Count;
             _rooms = new Room[howManyRooms];
@@ -112,6 +112,7 @@ namespace Assets.Scripts.WorldBuilder
             foreach (Door d in world.doors)
             {
                 Transform doorTransform = rock1TileSet.transform.Find("Door_origin");
+                if(d.isHorizontal) doorTransform = rock1TileSet.transform.Find("HorizontalDoor_origin");
                 Quaternion rotation = new Quaternion(0, 0, 0, 0);
                 Instantiate(doorTransform.gameObject, d.positionInGlobalSpace, rotation, roomsParent.transform);
 
