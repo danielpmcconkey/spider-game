@@ -12,7 +12,7 @@ using UnityEngine.Rendering.Universal;
 
 namespace Assets.Scripts.WorldBuilder
 {
-    public class Room
+    public class Room : ActivatableGameObject
     {
         public int id;
         public Vector2 upperLeftInGlobalSpace;
@@ -23,11 +23,7 @@ namespace Assets.Scripts.WorldBuilder
         public float roomHeightInUnityMeters;
         private List<Enemy> _startingEnemies;
         private GameObject _tileSet;
-        
-
-
         private RoomSave _roomSave;
-        private GameObject _roomGameObject;
 
 
 
@@ -43,14 +39,13 @@ namespace Assets.Scripts.WorldBuilder
             lowerRightInGlobalSpace = new Vector2(
                 upperLeftInGlobalSpace.x + MeasurementConverter.TilesXToUnityMeters(roomWidthInTiles),
                 upperLeftInGlobalSpace.y - MeasurementConverter.TilesYToUnityMeters(roomHeightInTiles));
-            _roomGameObject = roomsGameObject;
+            _gameObject = roomsGameObject;
 
             roomWidthInUnityMeters = MeasurementConverter.TilesXToUnityMeters(roomWidthInTiles);
             roomHeightInUnityMeters = MeasurementConverter.TilesYToUnityMeters(roomHeightInTiles);
 
-            _startingEnemies = new List<Enemy>();
+            _startingEnemies = new List<Enemy>();            
         }
-
         public void AddStartingEnemy(GameObject prefab, Vector2 positionInGlobalSpace, GameObject playerCharacter)
         {
             _startingEnemies.Add(new Enemy()
@@ -86,8 +81,6 @@ namespace Assets.Scripts.WorldBuilder
                 GameObject enemyObj = DrawPrefab(e.prefab, e.positionInGlobalSpace);
             }
         }
-
-
         public void KnockOutTile(Vector2 positionInGlobalSpace)
         {
             //_tiles[GetTileIndexFromUnityPosition(positionInGlobalSpace.x, positionInGlobalSpace.y)] = null;
@@ -174,7 +167,7 @@ namespace Assets.Scripts.WorldBuilder
         {
             Vector3 position = positionInGlobalSpace;
             Quaternion rotation = new Quaternion(0, 0, 0, 0);
-            return UnityEngine.Object.Instantiate(prefab, position, rotation, _roomGameObject.transform);
+            return UnityEngine.Object.Instantiate(prefab, position, rotation, _gameObject.transform);
         }
         private Vector2 GetGlobalPositionFromTileIndex(int index)
         {
@@ -212,7 +205,6 @@ namespace Assets.Scripts.WorldBuilder
             int numColsIn = (xAsHundredTimes - xUlAsHundredTimes) / tileWidthAsHundredTimes;
             return valueInFirstColumnOfThatRow + numColsIn;
         }
-
         #endregion
 
 

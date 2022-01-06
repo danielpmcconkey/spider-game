@@ -127,6 +127,9 @@ namespace Assets.Scripts.CharacterControl
             GamePauser.ResumeGame();
             (Vector2 upperLeft, Vector2 lowerRight) roomDimensions = worldBuilder.GetRoomDimensions(Globals.currentRoom);
             cameraControl.UpdateRoomDimensions(roomDimensions.upperLeft, roomDimensions.lowerRight);
+
+
+            worldBuilder.ToggleActiveRooms();
         }
         protected override void Update()
         {
@@ -260,6 +263,8 @@ namespace Assets.Scripts.CharacterControl
             // set new camera constraint
             (Vector2 upperLeft, Vector2 lowerRight) roomDimensions = worldBuilder.GetRoomDimensions(Globals.currentRoom);
             cameraControl.UpdateRoomDimensions(roomDimensions.upperLeft, roomDimensions.lowerRight);
+
+            worldBuilder.ToggleActiveRooms();
         }
         private IEnumerator PauseDuringRoomTransition()
         {

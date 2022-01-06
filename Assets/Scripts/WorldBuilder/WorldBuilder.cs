@@ -32,10 +32,6 @@ namespace Assets.Scripts.WorldBuilder
         
         void Awake()
         {
-            
-
-
-
             _doors = new List<Door>();
             //BuildStarterRoom();
             BuildWorld();
@@ -78,7 +74,45 @@ namespace Assets.Scripts.WorldBuilder
         //    }
         //    return -1;
         //}
+        public void ToggleActiveRooms()
+        {
+            List<int> activeRooms = new List<int>();
+            activeRooms.Add(Globals.currentRoom);
+            activeRooms = AddRoomConnectionsRecurrsive(activeRooms, Globals.currentRoom, 0);
 
+            foreach(Room r in _rooms)
+            {
+                if (activeRooms.Contains(r.id)) r.ActivateSelf();
+                else r.DeActivateSelf();
+            }
+            foreach(Door d in _doors)
+            {
+                if (activeRooms.Contains(d.room1Id) || activeRooms.Contains(d.room2Id)) d.ActivateSelf();
+                else d.DeActivateSelf();
+            }
+        }
+        private List<int> AddRoomConnectionsRecurrsive(List<int> knownConnectedIds, int roomId, int layers = -1)
+        {
+            // layers is the number of layers of recurrsion. if -1 then no limit
+
+            List<Door> doorsInThisRoom = _doors.Where(x => x.room1Id == roomId || x.room2Id == roomId).ToList();
+            foreach (Door d in doorsInThisRoom)
+            {
+                if (!knownConnectedIds.Contains(d.room1Id))
+                {
+                    knownConnectedIds.Add(d.room1Id);
+                    if (layers == -1) knownConnectedIds = AddRoomConnectionsRecurrsive(knownConnectedIds, d.room1Id, -1);
+                    else if (layers > 0) knownConnectedIds = AddRoomConnectionsRecurrsive(knownConnectedIds, d.room1Id, --layers);
+                }
+                if (!knownConnectedIds.Contains(d.room2Id))
+                {
+                    knownConnectedIds.Add(d.room2Id);
+                    if(layers == -1) knownConnectedIds = AddRoomConnectionsRecurrsive(knownConnectedIds, d.room2Id, -1);
+                    else if(layers > 0) knownConnectedIds = AddRoomConnectionsRecurrsive(knownConnectedIds, d.room2Id, --layers);
+                }
+            }
+            return knownConnectedIds;
+        }
 
         private void BuildWorld()
         {
@@ -106,15 +140,16 @@ namespace Assets.Scripts.WorldBuilder
                 Room room = new Room(blueprint.id, rock1TileSet, roomSave, blueprint.upperLeftInGlobalSpace , roomGameObject);
                 _rooms[i] = room;
                 room.DrawSelf();
-
-                
+                room.DeActivateSelf();
             }
             foreach (Door d in world.doors)
             {
                 Transform doorTransform = rock1TileSet.transform.Find("Door_origin");
                 if(d.isHorizontal) doorTransform = rock1TileSet.transform.Find("HorizontalDoor_origin");
                 Quaternion rotation = new Quaternion(0, 0, 0, 0);
-                Instantiate(doorTransform.gameObject, d.positionInGlobalSpace, rotation, roomsParent.transform);
+                GameObject gameobject = Instantiate(
+                    doorTransform.gameObject, d.positionInGlobalSpace, rotation, roomsParent.transform);
+                d.SwapGameObject(gameobject);
 
                 _doors.Add(d);
             }
@@ -213,9 +248,14 @@ namespace Assets.Scripts.WorldBuilder
 
             Vector3 position = new Vector2(posX, posY);
             Quaternion rotation = new Quaternion(0, 0, 0, 0);
-            Instantiate(prefab, position, rotation, roomsParent.transform);
+            GameObject gameObject = Instantiate(prefab, position, rotation, roomsParent.transform);
 
-            _doors.Add(new Door() { room1Id = roomLeft.id, room2Id = roomRight.id, positionInGlobalSpace = position });
+            _doors.Add(new Door(gameObject)
+            {
+                room1Id = roomLeft.id,
+                room2Id = roomRight.id,
+                positionInGlobalSpace = position
+            });
         }
         private bool IsDoorTileAtPosition(Vector2 position)
         {

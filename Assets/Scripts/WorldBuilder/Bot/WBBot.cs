@@ -69,7 +69,7 @@ namespace Assets.Scripts.WorldBuilder.Bot
                             - MeasurementConverter.TilesYToUnityMeters(Globals.standardRoomHeight) // bottom of the room
                             + MeasurementConverter.TilesYToUnityMeters(2); // back up 2 tiles for the room perimiter
 
-                        Door d = new Door()
+                        Door d = new Door(null)
                         {
                             room1Id = roomId,
                             room2Id = roomId + world.worldWidthInStandardRooms,
@@ -91,7 +91,7 @@ namespace Assets.Scripts.WorldBuilder.Bot
                             - MeasurementConverter.TilesYToUnityMeters(2) // forward 2 for the room perimiter
                             - MeasurementConverter.TilesYToUnityMeters(randTilesIn); // forward by rand number of tiles
 
-                        Door d = new Door()
+                        Door d = new Door(null)
                         {
                             room1Id = roomId,
                             room2Id = roomId + 1,
@@ -105,15 +105,24 @@ namespace Assets.Scripts.WorldBuilder.Bot
                 }
             }
         }
-        private List<int> AddRoomConnectionsRecurrsive(List<int> knownConnectedIds, int roomId)
-        {            
-            List<Door> doorsInThisRoom = world.doors.Where(x => x.room1Id == roomId).ToList();
-            foreach(Door d in doorsInThisRoom)
+        private List<int> AddRoomConnectionsRecurrsive(List<int> knownConnectedIds, int roomId, int layers = -1)
+        {
+            // layers is the number of layers of recurrsion. if -1 then no limit
+
+            List<Door> doorsInThisRoom = world.doors.Where(x => x.room1Id == roomId || x.room2Id == roomId).ToList();
+            foreach (Door d in doorsInThisRoom)
             {
+                if (!knownConnectedIds.Contains(d.room1Id))
+                {
+                    knownConnectedIds.Add(d.room1Id);
+                    if (layers == -1) knownConnectedIds = AddRoomConnectionsRecurrsive(knownConnectedIds, d.room1Id, -1);
+                    else if (layers > 0) knownConnectedIds = AddRoomConnectionsRecurrsive(knownConnectedIds, d.room1Id, --layers);
+                }
                 if (!knownConnectedIds.Contains(d.room2Id))
                 {
                     knownConnectedIds.Add(d.room2Id);
-                    knownConnectedIds = AddRoomConnectionsRecurrsive(knownConnectedIds, d.room2Id);
+                    if (layers == -1) knownConnectedIds = AddRoomConnectionsRecurrsive(knownConnectedIds, d.room2Id, -1);
+                    else if (layers > 0) knownConnectedIds = AddRoomConnectionsRecurrsive(knownConnectedIds, d.room2Id, --layers);
                 }
             }
             return knownConnectedIds;
