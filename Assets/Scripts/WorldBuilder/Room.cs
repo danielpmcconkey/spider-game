@@ -24,6 +24,7 @@ namespace Assets.Scripts.WorldBuilder
         private List<Enemy> _startingEnemies;
         private GameObject _tileSet;
         private RoomSave _roomSave;
+        private List<RoomMask> _roomMasks;
 
 
 
@@ -46,6 +47,13 @@ namespace Assets.Scripts.WorldBuilder
 
             _startingEnemies = new List<Enemy>();            
         }
+        public void ActivateMasks()
+        {
+            foreach (RoomMask mask in _roomMasks)
+            {
+                mask.ActivateSelf();
+            }
+        }
         public void AddStartingEnemy(GameObject prefab, Vector2 positionInGlobalSpace, GameObject playerCharacter)
         {
             _startingEnemies.Add(new Enemy()
@@ -54,6 +62,13 @@ namespace Assets.Scripts.WorldBuilder
                 positionInGlobalSpace = positionInGlobalSpace,
                 targetCharacter = playerCharacter
             });
+        }
+        public void DeActivateMasks()
+        {
+            foreach(RoomMask mask in _roomMasks)
+            {
+                mask.DeActivateSelf();
+            }
         }
         public void DrawSelf()
         {
@@ -84,6 +99,10 @@ namespace Assets.Scripts.WorldBuilder
         public void KnockOutTile(Vector2 positionInGlobalSpace)
         {
             //_tiles[GetTileIndexFromUnityPosition(positionInGlobalSpace.x, positionInGlobalSpace.y)] = null;
+        }
+        public void SwapRoomMasks(List<RoomMask> masks)
+        {
+            _roomMasks = masks;
         }
         #endregion
 

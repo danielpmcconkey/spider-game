@@ -19,5 +19,6 @@ namespace Assets.Scripts.WorldBuilder.Bot
         public float roomHeightInUnityMeters;
         public TilePlacement[] tiles;
         public List<Door> doors;
+        public List<RoomMask> roomMasks;
     }
 }

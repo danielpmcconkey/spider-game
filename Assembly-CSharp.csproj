@@ -116,6 +116,7 @@
     <Compile Include="Assets\Scripts\WorldBuilder\Bot\RoomBot.cs" />
     <Compile Include="Assets\Scripts\CharacterControl\MovementState.cs" />
     <Compile Include="Assets\Scripts\WorldBuilder\ActivatableGameObject.cs" />
+    <Compile Include="Assets\Scripts\WorldBuilder\RoomMask.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="Assets\TextMesh Pro\Shaders\TMPro.cginc" />

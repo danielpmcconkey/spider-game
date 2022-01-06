@@ -28,6 +28,9 @@ namespace Assets.Scripts.WorldBuilder.Bot
             FinalizeRoomDoors();
             // actually turn them into rooms and add perimiter tiles
             MakeRoomsFromGrid();
+            // put masking objects around rooms and do this before knocking out tiles behind doors
+            AddRoomMasks();
+            // remove any tiles that are row replaced by doors
             KnockOutTilesBehindDoors();
             //decorateRooms();
 
@@ -126,6 +129,66 @@ namespace Assets.Scripts.WorldBuilder.Bot
                 }
             }
             return knownConnectedIds;
+        }
+        private void AddRoomMask(RoomBlueprint r)
+        {
+            // at this point in room building, the only blocks left are our perimiter tiles
+
+            r.roomMasks = new List<RoomMask>();
+
+            const float maskDistanceAroundRoom = 5f;
+
+            // get overall boundaries
+            Vector2 maskBoundUL = new Vector2(r.upperLeftInGlobalSpace.x - maskDistanceAroundRoom,
+                r.upperLeftInGlobalSpace.y + maskDistanceAroundRoom);
+            Vector2 maskBoundLR = new Vector2(r.lowerRightInGlobalSpace.x + maskDistanceAroundRoom,
+                r.lowerRightInGlobalSpace.y - maskDistanceAroundRoom);
+
+            // start with the easy ones: the borders
+            // left border
+            RoomMask leftBorder = new RoomMask();
+            leftBorder.positionInGlobalSpace = new Vector2(
+                maskBoundUL.x + (maskDistanceAroundRoom / 2),
+                (maskBoundUL.y + maskBoundLR.y) / 2
+                );
+            leftBorder.scale = new Vector2(maskDistanceAroundRoom, Mathf.Abs(maskBoundLR.y - maskBoundUL.y));
+            r.roomMasks.Add(leftBorder);
+            // right border
+            RoomMask rightBorder = new RoomMask();
+            rightBorder.positionInGlobalSpace = new Vector2(
+                maskBoundLR.x - (maskDistanceAroundRoom / 2),
+                (maskBoundUL.y + maskBoundLR.y) / 2
+                );
+            rightBorder.scale = new Vector2(maskDistanceAroundRoom, Mathf.Abs(maskBoundLR.y - maskBoundUL.y));
+            r.roomMasks.Add(rightBorder);
+            // top border
+            RoomMask topBorder = new RoomMask();
+            topBorder.positionInGlobalSpace = new Vector2(
+                (maskBoundUL.x + maskBoundLR.x) / 2,
+                maskBoundUL.y - (maskDistanceAroundRoom / 2)
+                );
+            topBorder.scale = new Vector2(Mathf.Abs(maskBoundLR.x - maskBoundUL.x), maskDistanceAroundRoom);
+            r.roomMasks.Add(topBorder);
+            // bottom border
+            RoomMask bottomBorder = new RoomMask();
+            bottomBorder.positionInGlobalSpace = new Vector2(
+                (maskBoundUL.x + maskBoundLR.x) / 2,
+                maskBoundLR.y + (maskDistanceAroundRoom / 2)
+                );
+            bottomBorder.scale = new Vector2(Mathf.Abs(maskBoundLR.x - maskBoundUL.x), maskDistanceAroundRoom);
+            r.roomMasks.Add(bottomBorder);
+
+
+
+
+
+        }
+        private void AddRoomMasks()
+        {
+            foreach(RoomBlueprint r in world.rooms)
+            {
+                AddRoomMask(r);
+            }
         }
         private bool AreAllRoomsConnected()
         {
@@ -445,7 +508,7 @@ namespace Assets.Scripts.WorldBuilder.Bot
                 int maxRowBottomInTiles = maxRowTopInTiles + Globals.standardRoomHeight;
 
                 int heightInTiles = Math.Abs(minRowTopInTiles - maxRowBottomInTiles);
-                float distanceY = heightInTiles * MeasurementConverter.TilesYToUnityMeters(Globals.standardRoomHeight);
+                float distanceY = MeasurementConverter.TilesYToUnityMeters(heightInTiles);
                 float lowerRightY = upLeftY - distanceY;
 
                 

@@ -84,6 +84,9 @@ namespace Assets.Scripts.WorldBuilder
             {
                 if (activeRooms.Contains(r.id)) r.ActivateSelf();
                 else r.DeActivateSelf();
+
+                if (r.id == Globals.currentRoom) r.ActivateMasks();
+                else r.DeActivateMasks();
             }
             foreach(Door d in _doors)
             {
@@ -141,6 +144,17 @@ namespace Assets.Scripts.WorldBuilder
                 _rooms[i] = room;
                 room.DrawSelf();
                 room.DeActivateSelf();
+
+                foreach(RoomMask mask in blueprint.roomMasks)
+                {
+                    Transform maskTransform = rock1TileSet.transform.Find("Mask");
+                    Quaternion rotation = new Quaternion(0, 0, 0, 0);
+                    GameObject maskGameobject = Instantiate(
+                        maskTransform.gameObject, mask.positionInGlobalSpace, rotation, roomGameObject.transform);
+                    mask.SwapGameObject(maskGameobject);
+                    maskGameobject.transform.localScale = mask.scale;
+                }
+                room.SwapRoomMasks(blueprint.roomMasks);
             }
             foreach (Door d in world.doors)
             {
