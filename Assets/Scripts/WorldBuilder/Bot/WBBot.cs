@@ -178,7 +178,36 @@ namespace Assets.Scripts.WorldBuilder.Bot
             bottomBorder.scale = new Vector2(Mathf.Abs(maskBoundLR.x - maskBoundUL.x), maskDistanceAroundRoom);
             r.roomMasks.Add(bottomBorder);
 
+            // now try to fill in any empty room grid cells
+            var cellsInRoom = world.worldGrid.Where(x => x.roomId == r.id);
+            int topMostRow = cellsInRoom.Min(x => x.row);
+            int bottomMostRow = cellsInRoom.Max(x => x.row);
+            int leftMostColumn = cellsInRoom.Min(x => x.column);
+            int rightMostColumn = cellsInRoom.Max(x => x.column);
 
+            for(int i = topMostRow; i <= bottomMostRow; i++)
+            {
+                for(int i2 = leftMostColumn; i2 <= rightMostColumn; i2++)
+                {
+                    if(cellsInRoom.Where(x => x.row == i && x.column == i2).Count() > 0)
+                    {
+                        // there's a cell here, no need to create a mask
+                    }
+                    else
+                    {
+                        float posX = ConvertGridColumnToUnityX(i2) + 
+                            (MeasurementConverter.TilesXToUnityMeters(Globals.standardRoomWidth / 2f));
+                        float posY = ConvertGridRowToUnityY(i) -
+                            (MeasurementConverter.TilesYToUnityMeters(Globals.standardRoomHeight / 2f));
+                        float scaleX = MeasurementConverter.TilesXToUnityMeters(Globals.standardRoomWidth);
+                        float scaleY = MeasurementConverter.TilesYToUnityMeters(Globals.standardRoomHeight);
+                        RoomMask cellMask = new RoomMask();
+                        cellMask.positionInGlobalSpace = new Vector2(posX, posY);
+                        cellMask.scale = new Vector2(scaleX, scaleY);
+                        r.roomMasks.Add(cellMask);
+                    }
+                }
+            }
 
 
 

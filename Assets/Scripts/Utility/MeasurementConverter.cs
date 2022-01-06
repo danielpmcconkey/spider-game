@@ -9,7 +9,7 @@ namespace Assets.Scripts.Utility
     
     public static class MeasurementConverter
     {
-        public static float TilesXToUnityMeters(int tiles)
+        public static float TilesXToUnityMeters(float tiles)
         {
             // if Globals.tileWidthInUnityMeters = 0.5 then 2 
             // tiles = 1 unity meter. if 
@@ -17,7 +17,7 @@ namespace Assets.Scripts.Utility
             // tiles = 1 unity meter
             return tiles * Globals.tileWidthInUnityMeters;
         }
-        public static float TilesYToUnityMeters(int tiles)
+        public static float TilesYToUnityMeters(float tiles)
         {
             // if Globals.tileWidthInUnityMeters = 0.5 then 2 
             // tiles = 1 unity meter. if 
