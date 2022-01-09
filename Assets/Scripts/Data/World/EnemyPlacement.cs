@@ -5,11 +5,11 @@ using System.Text;
 using System.Threading.Tasks;
 using UnityEngine;
 
-namespace Assets.Scripts.WorldBuilder
+namespace Assets.Scripts.Data.World
 {
-    public class Tile
+    public class EnemyPlacement
     {
-        public GameObject prefab;
         public Vector2 positionInGlobalSpace;
+        public int roomId;
     }
 }

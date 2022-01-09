@@ -5,12 +5,15 @@ using System.Text;
 using System.Threading.Tasks;
 using UnityEngine;
 
-namespace Assets.Scripts.WorldBuilder.RoomBuilder
+namespace Assets.Scripts.Data.World
 {
-    [Serializable]
-    public struct TilePlacement
+    public class TilePlacement
     {
         public bool isSolid;
         public int tileNum;
+        public Vector2 positionInGlobalSpace;
+        public int roomId;
+        public int rowInRoom;
+        public int columnInRoom;
     }
 }

@@ -5,9 +5,9 @@ using System.Text;
 using System.Threading.Tasks;
 using UnityEngine;
 
-namespace Assets.Scripts.WorldBuilder
+namespace Assets.Scripts.Data.World
 {
-    public class RoomMask : ActivatableGameObject
+    public class RoomMaskPlacement
     {
         public Vector2 positionInGlobalSpace;
         public Vector2 scale;

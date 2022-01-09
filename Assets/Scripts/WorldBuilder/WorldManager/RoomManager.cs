@@ -1,4 +1,5 @@
 ﻿using Assets.Scripts.CharacterControl;
+using Assets.Scripts.Data.World;
 using Assets.Scripts.Events;
 using Assets.Scripts.Utility;
 using Assets.Scripts.WorldBuilder.RoomBuilder;
@@ -10,9 +11,9 @@ using System.Threading.Tasks;
 using UnityEngine;
 using UnityEngine.Rendering.Universal;
 
-namespace Assets.Scripts.WorldBuilder
+namespace Assets.Scripts.WorldBuilder.WorldManager
 {
-    public class Room : ActivatableGameObject
+    public class RoomManager : ActivatableGameObjectManager
     {
         public int id;
         public Vector2 upperLeftInGlobalSpace;
@@ -21,89 +22,105 @@ namespace Assets.Scripts.WorldBuilder
         public int roomHeightInTiles;
         public float roomWidthInUnityMeters;
         public float roomHeightInUnityMeters;
-        private List<Enemy> _startingEnemies;
-        private GameObject _tileSet;
-        private RoomSave _roomSave;
-        private List<RoomMask> _roomMasks;
+        private GameObject _tilePalette;
+        private RoomPlacement _roomPlacement;
+
+        private List<RoomMaskManager> _roomMasks;
+        private List<EnemyManager> _startingEnemies;
 
 
 
         #region public methods
-        public Room(int id, GameObject tileSet, RoomSave roomSave, Vector2 upperLeftInGlobalSpace, GameObject roomsGameObject)
+        public RoomManager(int id, GameObject tilePalette, RoomPlacement roomPlacement, GameObject roomsGameObject) 
+            : base(roomsGameObject)
         {
             this.id = id;
-            _tileSet = tileSet;
-            _roomSave = roomSave;
-            roomWidthInTiles = _roomSave.roomWidth;
-            roomHeightInTiles = _roomSave.roomHeight;
-            this.upperLeftInGlobalSpace = upperLeftInGlobalSpace;
+            _tilePalette = tilePalette;
+            _roomPlacement = roomPlacement;
+            roomWidthInTiles = _roomPlacement.roomWidthInTiles;
+            roomHeightInTiles = _roomPlacement.roomHeightInTiles;
+            this.upperLeftInGlobalSpace = _roomPlacement.upperLeftInGlobalSpace;
             lowerRightInGlobalSpace = new Vector2(
                 upperLeftInGlobalSpace.x + MeasurementConverter.TilesXToUnityMeters(roomWidthInTiles),
                 upperLeftInGlobalSpace.y - MeasurementConverter.TilesYToUnityMeters(roomHeightInTiles));
-            _gameObject = roomsGameObject;
 
             roomWidthInUnityMeters = MeasurementConverter.TilesXToUnityMeters(roomWidthInTiles);
             roomHeightInUnityMeters = MeasurementConverter.TilesYToUnityMeters(roomHeightInTiles);
 
-            _startingEnemies = new List<Enemy>();            
+            _startingEnemies = new List<EnemyManager>();
+            BuildMasksFromBlueprint();
+        }
+        private void BuildMasksFromBlueprint()
+        {
+            _roomMasks = new List<RoomMaskManager>();
+            foreach(RoomMaskPlacement maskPlacement in _roomPlacement.roomMasks)
+            {
+                Transform maskTransform = _tilePalette.transform.Find("Mask");
+                Quaternion rotation = new Quaternion(0, 0, 0, 0);
+                GameObject maskGameobject = GameObject.Instantiate(
+                    maskTransform.gameObject, maskPlacement.positionInGlobalSpace, rotation, _gameObject.transform);
+                RoomMaskManager roomMaskManager = new RoomMaskManager(maskGameobject);
+                maskGameobject.transform.localScale = maskPlacement.scale;
+                _roomMasks.Add(roomMaskManager);
+            }
         }
         public void ActivateMasks()
         {
-            foreach (RoomMask mask in _roomMasks)
+            foreach (RoomMaskManager mask in _roomMasks)
             {
                 mask.ActivateSelf();
             }
         }
-        public void AddStartingEnemy(GameObject prefab, Vector2 positionInGlobalSpace, GameObject playerCharacter)
-        {
-            _startingEnemies.Add(new Enemy()
-            {
-                prefab = prefab,
-                positionInGlobalSpace = positionInGlobalSpace,
-                targetCharacter = playerCharacter
-            });
-        }
+        //public void AddStartingEnemy(GameObject prefab, Vector2 positionInGlobalSpace, GameObject playerCharacter)
+        //{
+        //    _startingEnemies.Add(new EnemyManager()
+        //    {
+        //        prefab = prefab,
+        //        positionInGlobalSpace = positionInGlobalSpace,
+        //        targetCharacter = playerCharacter
+        //    });
+        //}
         public void DeActivateMasks()
         {
-            foreach(RoomMask mask in _roomMasks)
+            foreach(RoomMaskManager mask in _roomMasks)
             {
                 mask.DeActivateSelf();
             }
         }
         public void DrawSelf()
         {
-            for (int i = 0; i < _roomSave.tiles.Length; i++)
+            for (int i = 0; i < _roomPlacement.tiles.Length; i++)
             {
-                TilePlacement tilePlacement = _roomSave.tiles[i];
-                if (tilePlacement.tileNum > 0)
+                TilePlacement tilePlacement = _roomPlacement.tiles[i];
+                if (tilePlacement != null && tilePlacement.tileNum > 0)
                 {
-                    Tile tile = new Tile();
-                    tile.positionInGlobalSpace = GetGlobalPositionFromTileIndex(i);
-                    Transform prefabTransform = _tileSet.transform.Find(string.Format("{0}_origin", tilePlacement.tileNum));
+                    TileManager tile = new TileManager();
+                    tile.tilePlacement = tilePlacement;
+                    Transform prefabTransform = _tilePalette.transform.Find(string.Format("{0}_origin", tilePlacement.tileNum));
                     tile.prefab = prefabTransform.gameObject;
                     AddTileToUnity(tile);
                     // random lights
                     if (Utility.RNG.GetRandomInt(0, 20) == 7) // 1 in 20
                     {
-                        AddRandomLight(tile.positionInGlobalSpace);
+                        AddRandomLight(tilePlacement.positionInGlobalSpace);
                     }
                 }
             }
             AddDecorations();
 
-            foreach (Enemy e in _startingEnemies)
+            foreach (EnemyManager e in _startingEnemies)
             {
-                GameObject enemyObj = DrawPrefab(e.prefab, e.positionInGlobalSpace);
+                GameObject enemyObj = DrawPrefab(e.prefab, e.enemyPlacement.positionInGlobalSpace);
             }
         }
-        public void KnockOutTile(Vector2 positionInGlobalSpace)
-        {
-            //_tiles[GetTileIndexFromUnityPosition(positionInGlobalSpace.x, positionInGlobalSpace.y)] = null;
-        }
-        public void SwapRoomMasks(List<RoomMask> masks)
-        {
-            _roomMasks = masks;
-        }
+        //public void KnockOutTile(Vector2 positionInGlobalSpace)
+        //{
+        //    //_tiles[GetTileIndexFromUnityPosition(positionInGlobalSpace.x, positionInGlobalSpace.y)] = null;
+        //}
+        //public void SwapRoomMasks(List<RoomMaskManager> masks)
+        //{
+        //    _roomMasks = masks;
+        //}
         #endregion
 
         #region private methods
@@ -140,18 +157,18 @@ namespace Assets.Scripts.WorldBuilder
             int numberOfOptions, float oddsOfPlacement)
         {
             
-            for (int i = 0; i < _roomSave.tiles.Length; i++)
+            for (int i = 0; i < _roomPlacement.tiles.Length; i++)
             {
-                TilePlacement tilePlacement = _roomSave.tiles[i];
+                TilePlacement tilePlacement = _roomPlacement.tiles[i];
 
                 
-                if (Utility.RNG.GetRandomPercent() <= oddsOfPlacement &&
+                if (tilePlacement != null && Utility.RNG.GetRandomPercent() <= oddsOfPlacement &&
                     tilesThatHaveThisDecor.Contains(tilePlacement.tileNum))
                 {
                     int spriteNum = Utility.RNG.GetRandomInt(1, numberOfOptions);
-                    Tile tile = new Tile();
-                    tile.positionInGlobalSpace = GetGlobalPositionFromTileIndex(i);
-                    Transform prefabTransform = _tileSet.transform.Find(string.Format(prefabNameString, spriteNum));
+                    TileManager tile = new TileManager();
+                    //tile.positionInGlobalSpace = GetGlobalPositionFromTileIndex(i);
+                    Transform prefabTransform = _tilePalette.transform.Find(string.Format(prefabNameString, spriteNum));
                     tile.prefab = prefabTransform.gameObject;
 
                     GameObject decoration = AddTileToUnity(tile);
@@ -161,16 +178,16 @@ namespace Assets.Scripts.WorldBuilder
         }
         private void AddRandomLight(Vector2 positionInGlobalSpace)
         {
-            var prefab = _tileSet.transform.Find("SmallRoomLight");
+            var prefab = _tilePalette.transform.Find("SmallRoomLight");
             GameObject gameObject = DrawPrefab(prefab.gameObject, positionInGlobalSpace);
             LightSwitch lightSwitch = gameObject.GetComponent<LightSwitch>();
             lightSwitch.roomId = id;
         }
-        private GameObject AddTileToUnity(Tile tile)
+        private GameObject AddTileToUnity(TileManager tile)
         {
             
             // now draw it
-            return DrawPrefab(tile.prefab, tile.positionInGlobalSpace);
+            return DrawPrefab(tile.prefab, tile.tilePlacement.positionInGlobalSpace);
         }
         private void AssignChildLightsToRoom(GameObject decoration)
         {
@@ -205,25 +222,25 @@ namespace Assets.Scripts.WorldBuilder
                 throw;
             }
         }
-        private int GetTileIndexFromUnityPosition(float x, float y)
-        {
-            int xAsHundredTimes = (int)Math.Round(Math.Round(x, 2) * 100);
-            int yAsHundredTimes = (int)Math.Round(Math.Round(y, 2) * 100);
-            int xUlAsHundredTimes = (int)Math.Round(Math.Round(upperLeftInGlobalSpace.x, 2) * 100);
-            int yUlAsHundredTimes = (int)Math.Round(Math.Round(upperLeftInGlobalSpace.y, 2) * 100);
-            int tileWidthAsHundredTimes = (int)Math.Round(Math.Round(MeasurementConverter.TilesXToUnityMeters(1), 2) * 100);
-            int tileHeightAsHundredTimes = (int)Math.Round(Math.Round(MeasurementConverter.TilesYToUnityMeters(1), 2) * 100);
+        //private int GetTileIndexFromUnityPosition(float x, float y)
+        //{
+        //    int xAsHundredTimes = (int)Math.Round(Math.Round(x, 2) * 100);
+        //    int yAsHundredTimes = (int)Math.Round(Math.Round(y, 2) * 100);
+        //    int xUlAsHundredTimes = (int)Math.Round(Math.Round(upperLeftInGlobalSpace.x, 2) * 100);
+        //    int yUlAsHundredTimes = (int)Math.Round(Math.Round(upperLeftInGlobalSpace.y, 2) * 100);
+        //    int tileWidthAsHundredTimes = (int)Math.Round(Math.Round(MeasurementConverter.TilesXToUnityMeters(1), 2) * 100);
+        //    int tileHeightAsHundredTimes = (int)Math.Round(Math.Round(MeasurementConverter.TilesYToUnityMeters(1), 2) * 100);
 
-            // remember that unity y gets lower as we go downward
-            // but our index goes from up-left to down-right
-            //
-            // also, I rounded and multiplied by 100 because floats 
-            // were doing weird things with the math
-            int numRowsDown = (yUlAsHundredTimes - yAsHundredTimes) / tileHeightAsHundredTimes;
-            int valueInFirstColumnOfThatRow = numRowsDown * roomWidthInTiles;
-            int numColsIn = (xAsHundredTimes - xUlAsHundredTimes) / tileWidthAsHundredTimes;
-            return valueInFirstColumnOfThatRow + numColsIn;
-        }
+        //    // remember that unity y gets lower as we go downward
+        //    // but our index goes from up-left to down-right
+        //    //
+        //    // also, I rounded and multiplied by 100 because floats 
+        //    // were doing weird things with the math
+        //    int numRowsDown = (yUlAsHundredTimes - yAsHundredTimes) / tileHeightAsHundredTimes;
+        //    int valueInFirstColumnOfThatRow = numRowsDown * roomWidthInTiles;
+        //    int numColsIn = (xAsHundredTimes - xUlAsHundredTimes) / tileWidthAsHundredTimes;
+        //    return valueInFirstColumnOfThatRow + numColsIn;
+        //}
         #endregion
 
 

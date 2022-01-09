@@ -1,7 +1,9 @@
 ﻿using Assets.Scripts.CharacterControl;
+using Assets.Scripts.Data.World;
 using Assets.Scripts.Utility;
 using Assets.Scripts.WorldBuilder.Bot;
 using Assets.Scripts.WorldBuilder.RoomBuilder;
+using Assets.Scripts.WorldBuilder.WorldManager;
 using System;
 using System.Collections.Generic;
 using System.IO;
@@ -19,28 +21,27 @@ namespace Assets.Scripts.WorldBuilder
         [Space(10)]
         [Header("Tile sets")]
         [Space(10)]
-        [SerializeField] public GameObject rock1TileSet;
+        [SerializeField] public GameObject rock1TilePalette;
         
         [Space(10)]
         [Header("Enemies")]
         [Space(10)]
         [SerializeField] public GameObject floatingBot;
-        private Room[] _rooms;
-        private List<Door> _doors;
-        private RoomSave[] _roomSaves;
+
+        
+        private RoomManager[] _rooms;
+        private List<DoorManager> _doors;
 
         
         void Awake()
         {
-            _doors = new List<Door>();
-            //BuildStarterRoom();
             BuildWorld();
             Globals.isWorldBuilt = true;
         }
 
-        public Door GetDoorAtPosition(Vector2 globalPosition)
+        public DoorPlacement GetDoorAtPosition(Vector2 globalPosition)
         {
-            foreach(Door d in _doors)
+            foreach(DoorPlacement d in Globals.world.doorPlacements)
             {
                 if (d.positionInGlobalSpace == globalPosition) return d;             
             }
@@ -60,27 +61,13 @@ namespace Assets.Scripts.WorldBuilder
                 throw;
             }
         }
-        //public int WhichRoomAreWeIn(Vector2 currentLocation)
-        //{
-        //    for(int i = 0; i < _rooms.Length; i++)
-        //    {
-        //        if(_rooms[i].upperLeftInGlobalSpace.x <= currentLocation.x
-        //            && _rooms[i].lowerRightInGlobalSpace.x > currentLocation.x
-        //            && _rooms[i].upperLeftInGlobalSpace.y >= currentLocation.y
-        //            && _rooms[i].lowerRightInGlobalSpace.y < currentLocation.y)
-        //        {
-        //            return i;
-        //        }
-        //    }
-        //    return -1;
-        //}
         public void ToggleActiveRooms()
         {
             List<int> activeRooms = new List<int>();
             activeRooms.Add(Globals.currentRoom);
-            activeRooms = AddRoomConnectionsRecurrsive(activeRooms, Globals.currentRoom, 0);
+            activeRooms = RoomAndTileHelper.GetRoomConnections(Globals.currentRoom, 1);
 
-            foreach(Room r in _rooms)
+            foreach(RoomManager r in _rooms)
             {
                 if (activeRooms.Contains(r.id)) r.ActivateSelf();
                 else r.DeActivateSelf();
@@ -88,192 +75,162 @@ namespace Assets.Scripts.WorldBuilder
                 if (r.id == Globals.currentRoom) r.ActivateMasks();
                 else r.DeActivateMasks();
             }
-            foreach(Door d in _doors)
+            foreach(DoorManager d in _doors)
             {
-                if (activeRooms.Contains(d.room1Id) || activeRooms.Contains(d.room2Id)) d.ActivateSelf();
+                if (activeRooms.Contains(d.doorPlacement.room1Id) || 
+                    activeRooms.Contains(d.doorPlacement.room2Id)) d.ActivateSelf();
                 else d.DeActivateSelf();
             }
         }
-        private List<int> AddRoomConnectionsRecurrsive(List<int> knownConnectedIds, int roomId, int layers = -1)
-        {
-            // layers is the number of layers of recurrsion. if -1 then no limit
-
-            List<Door> doorsInThisRoom = _doors.Where(x => x.room1Id == roomId || x.room2Id == roomId).ToList();
-            foreach (Door d in doorsInThisRoom)
-            {
-                if (!knownConnectedIds.Contains(d.room1Id))
-                {
-                    knownConnectedIds.Add(d.room1Id);
-                    if (layers == -1) knownConnectedIds = AddRoomConnectionsRecurrsive(knownConnectedIds, d.room1Id, -1);
-                    else if (layers > 0) knownConnectedIds = AddRoomConnectionsRecurrsive(knownConnectedIds, d.room1Id, --layers);
-                }
-                if (!knownConnectedIds.Contains(d.room2Id))
-                {
-                    knownConnectedIds.Add(d.room2Id);
-                    if(layers == -1) knownConnectedIds = AddRoomConnectionsRecurrsive(knownConnectedIds, d.room2Id, -1);
-                    else if(layers > 0) knownConnectedIds = AddRoomConnectionsRecurrsive(knownConnectedIds, d.room2Id, --layers);
-                }
-            }
-            return knownConnectedIds;
-        }
-
+        
         private void BuildWorld()
         {
-            WBBot bot = new WBBot();
-            World world = bot.CreateWorld(WorldSizeValues.sizes[(int)WorldSizes.SMALL], 78446);
+            CreatorBot bot = new CreatorBot();
+            bot.CreateWorld(WorldSizeValues.sizes[(int)WorldSizes.SMALL], 78446);
 
-            int howManyRooms = world.rooms.Count;
-            _rooms = new Room[howManyRooms];
+            CreateRoomManagersFromBluePrint();
+            CreateDoorManagersFromBluePrint();
+        }
+        //private void BuildStarterRoom()
+        //{
+        //    _roomSaves = RoomBuilderHelper.GetAllRoomPlacements();
+        //    RoomPlacement starterRoomPlacement = _roomSaves.Where(x => x.roomName == "Cave Exit West").FirstOrDefault();
+        //    RoomPlacement secondRoomPlacement = _roomSaves.Where(x => x.roomName == "Psionics Chamber").FirstOrDefault();
 
-            for(int i = 0; i < howManyRooms; i++)
+        //    Vector2 startingPointForRooms = new Vector2(-5.0f, 5.0F);
+
+        //    GameObject room000 = Instantiate(new GameObject("Room000"), roomsParent.transform, false);
+        //    RoomManager room0 = new RoomManager(0, rock1TilePalette, starterRoomPlacement, startingPointForRooms, room000);
+        //    _rooms[0] = room0;
+
+        //    // room000 door right is in row 6
+        //    // room001 door left is in row 14
+        //    // so need to start room001 14 rows above room000's right door
+        //    int room000DoorRightRow = starterRoomPlacement.doors.
+        //        Where(x => x.position.column == starterRoomPlacement.roomWidth - 1).First().position.row;
+        //    int room001DoorLeftRow = secondRoomPlacement.doors.
+        //        Where(x => x.position.column == - 1).First().position.row;
+        //    float room001YPosition = startingPointForRooms.y - room000DoorRightRow + room001DoorLeftRow;
+        //    Vector2 startingPointForRoom001 = new Vector2(
+        //        startingPointForRooms.x + room0.roomWidthInTiles + 2,
+        //        room001YPosition
+        //        );
+        //    GameObject room001 = Instantiate(new GameObject("Room001"), roomsParent.transform, false);
+        //    RoomManager room1 = new RoomManager(1, rock1TilePalette, secondRoomPlacement, startingPointForRoom001, room001);
+        //    _rooms[1] = room1;
+
+
+        //    // draw the door between them
+        //    Transform doorTransform = rock1TilePalette.transform.Find("Door_origin");
+        //    ConnectRoomsWithDoor(room0, room1, doorTransform.gameObject, 1.0f);
+        //    room0.DrawSelf();
+        //    room1.DrawSelf();
+
+
+        //    //room0.AddPerimiterTiles();
+        //    //// tile above the floor = -7.68
+        //    //room0.AddPlatformTiles(new Vector2(-1f, -4.0f), 4, 5);
+        //    //room0.AddPlatformTiles(new Vector2(5f, -5f), 12, 1);
+        //    //room0.AddPlatformTiles(new Vector2(5f, -1f), 5, 1);
+        //    //room0.AddPlatformTiles(new Vector2(12.0f, -1f), 5, 1);
+        //    //room0.AddPlatformTiles(new Vector2(5f, 3f), 12, 1);
+        //    //room0.AddPlatformTiles(new Vector2(20f, 0f), 2, 7);
+        //    //room0.AddPlatformTiles(new Vector2(24f, 1f), 1, 10);
+        //    //room0.AddPlatformTiles(new Vector2(26f, 0f), 1, 9);
+        //    //room0.AddPlatformTiles(new Vector2(28f, -1f), 1, 8);
+        //    //room0.AddPlatformTiles(new Vector2(30f, -2f), 1, 7);
+        //    //room0.AddStartingEnemy(floatingBot, new Vector2(26f, -4f), playerCharacter);
+        //    //room0.AddStartingEnemy(floatingBot, new Vector2(28f, 0f), playerCharacter);
+        //    //room0.AddStartingEnemy(floatingBot, new Vector2(30f, 0f), playerCharacter);
+        //    //room0.AddStartingEnemy(floatingBot, new Vector2(32f, 0f), playerCharacter);
+        //    //room0.AddStartingEnemy(floatingBot, new Vector2(34f, 0f), playerCharacter);
+        //    //room0.AddStartingEnemy(floatingBot, new Vector2(36f, 0f), playerCharacter);
+        //    //room0.AddStartingEnemy(floatingBot, new Vector2(26f, -5f), playerCharacter);
+        //    //room0.AddStartingEnemy(floatingBot, new Vector2(28f, 1f), playerCharacter);
+        //    //room0.AddStartingEnemy(floatingBot, new Vector2(30f, 1f), playerCharacter);
+        //    //room0.AddStartingEnemy(floatingBot, new Vector2(32f, 1f), playerCharacter);
+        //    //room0.AddStartingEnemy(floatingBot, new Vector2(34f, 1f), playerCharacter);
+        //    //room0.AddStartingEnemy(floatingBot, new Vector2(36f, 1f), playerCharacter);
+
+
+        //    //
+
+        //    //Room room1 = new Room(_tileSetRock1, 20, 20, new Vector2(34.0f, 10.0F), room001);
+        //    //_rooms[1] = room1;
+        //    //room1.AddPerimiterTiles();
+        //    //room1.AddPlatformTiles(new Vector2(38f, 6f), 1, 11);
+        //    //room1.AddStartingEnemy(floatingBot, new Vector2(40f, 0f), playerCharacter);
+        //    //room1.AddStartingEnemy(floatingBot, new Vector2(42f, 0f), playerCharacter);
+        //    //room1.AddStartingEnemy(floatingBot, new Vector2(44f, 0f), playerCharacter);
+        //    //room1.AddStartingEnemy(floatingBot, new Vector2(46f, 0f), playerCharacter);
+        //    //room1.AddStartingEnemy(floatingBot, new Vector2(48f, 0f), playerCharacter);
+
+        //    //SealTheMap();
+
+        //}
+        //private void ConnectRoomsWithDoor(RoomManager roomLeft, RoomManager roomRight, GameObject prefab, 
+        //    float heightFromLeftFloorInTiles)
+        //{
+            
+        //    float posX = roomLeft.lowerRightInGlobalSpace.x - 1;
+        //    float posY = roomLeft.lowerRightInGlobalSpace.y + heightFromLeftFloorInTiles + Globals.doorVHeightInTiles;
+        //    // now knock out perimiter blocks in each room
+        //    for (int i = 0; i < Globals.doorVHeightInTiles; i++)
+        //    {
+        //        roomLeft.KnockOutTile(new Vector2(posX, posY - i));
+        //        roomRight.KnockOutTile(new Vector2(posX + 1, posY - i));
+        //    }
+
+
+        //    Vector3 position = new Vector2(posX, posY);
+        //    Quaternion rotation = new Quaternion(0, 0, 0, 0);
+        //    GameObject gameObject = Instantiate(prefab, position, rotation, roomsParent.transform);
+
+        //    _doors.Add(new DoorManager(gameObject)
+        //    {
+        //        room1Id = roomLeft.id,
+        //        room2Id = roomRight.id,
+        //        positionInGlobalSpace = position
+        //    });
+        //}
+        private void CreateDoorManagersFromBluePrint()
+        {
+            _doors = new List<DoorManager>();
+            foreach (DoorPlacement d in Globals.world.doorPlacements)
             {
-                RoomBlueprint blueprint = world.rooms[i];
-
-                RoomSave roomSave = new RoomSave();
-                roomSave.roomName = "";
-                roomSave.tileWidth = MeasurementConverter.TilesXToPixels(1);
-                roomSave.tileHeight = MeasurementConverter.TilesYToPixels(1);
-                roomSave.roomWidth = blueprint.roomWidthInTiles;
-                roomSave.roomHeight = blueprint.roomHeightInTiles;
-                roomSave.tiles = blueprint.tiles;
-                roomSave.doors = new List<RoomBuilder.Door>();
-
-                string unityRoomName = string.Format("Room{0}", blueprint.id);
-                GameObject roomGameObject = Instantiate(new GameObject(unityRoomName), roomsParent.transform, false);
-                Room room = new Room(blueprint.id, rock1TileSet, roomSave, blueprint.upperLeftInGlobalSpace , roomGameObject);
-                _rooms[i] = room;
-                room.DrawSelf();
-                room.DeActivateSelf();
-
-                foreach(RoomMask mask in blueprint.roomMasks)
-                {
-                    Transform maskTransform = rock1TileSet.transform.Find("Mask");
-                    Quaternion rotation = new Quaternion(0, 0, 0, 0);
-                    GameObject maskGameobject = Instantiate(
-                        maskTransform.gameObject, mask.positionInGlobalSpace, rotation, roomGameObject.transform);
-                    mask.SwapGameObject(maskGameobject);
-                    maskGameobject.transform.localScale = mask.scale;
-                }
-                room.SwapRoomMasks(blueprint.roomMasks);
-            }
-            foreach (Door d in world.doors)
-            {
-                Transform doorTransform = rock1TileSet.transform.Find("Door_origin");
-                if(d.isHorizontal) doorTransform = rock1TileSet.transform.Find("HorizontalDoor_origin");
+                Transform doorTransform = rock1TilePalette.transform.Find("Door_origin");
+                if (d.isHorizontal) doorTransform = rock1TilePalette.transform.Find("HorizontalDoor_origin");
                 Quaternion rotation = new Quaternion(0, 0, 0, 0);
                 GameObject gameobject = Instantiate(
                     doorTransform.gameObject, d.positionInGlobalSpace, rotation, roomsParent.transform);
-                d.SwapGameObject(gameobject);
 
-                _doors.Add(d);
+                DoorManager doorManager = new DoorManager(gameobject);
+                doorManager.doorPlacement = d;
+                _doors.Add(doorManager);
+
+                doorManager.DeActivateSelf();
             }
         }
-
-        private void BuildStarterRoom()
+        private void CreateRoomManagersFromBluePrint()
         {
-            _roomSaves = RoomBuilderHelper.GetAllRoomSaves();
-            RoomSave starterRoomSave = _roomSaves.Where(x => x.roomName == "Cave Exit West").FirstOrDefault();
-            RoomSave secondRoomSave = _roomSaves.Where(x => x.roomName == "Psionics Chamber").FirstOrDefault();
+            int howManyRooms = Globals.world.rooms.Count;
+            _rooms = new RoomManager[howManyRooms];
 
-            Vector2 startingPointForRooms = new Vector2(-5.0f, 5.0F);
-
-            GameObject room000 = Instantiate(new GameObject("Room000"), roomsParent.transform, false);
-            Room room0 = new Room(0, rock1TileSet, starterRoomSave, startingPointForRooms, room000);
-            _rooms[0] = room0;
-
-            // room000 door right is in row 6
-            // room001 door left is in row 14
-            // so need to start room001 14 rows above room000's right door
-            int room000DoorRightRow = starterRoomSave.doors.
-                Where(x => x.position.column == starterRoomSave.roomWidth - 1).First().position.row;
-            int room001DoorLeftRow = secondRoomSave.doors.
-                Where(x => x.position.column == - 1).First().position.row;
-            float room001YPosition = startingPointForRooms.y - room000DoorRightRow + room001DoorLeftRow;
-            Vector2 startingPointForRoom001 = new Vector2(
-                startingPointForRooms.x + room0.roomWidthInTiles + 2,
-                room001YPosition
-                );
-            GameObject room001 = Instantiate(new GameObject("Room001"), roomsParent.transform, false);
-            Room room1 = new Room(1, rock1TileSet, secondRoomSave, startingPointForRoom001, room001);
-            _rooms[1] = room1;
-
-
-            // draw the door between them
-            Transform doorTransform = rock1TileSet.transform.Find("Door_origin");
-            ConnectRoomsWithDoor(room0, room1, doorTransform.gameObject, 1.0f);
-            room0.DrawSelf();
-            room1.DrawSelf();
-
-
-            //room0.AddPerimiterTiles();
-            //// tile above the floor = -7.68
-            //room0.AddPlatformTiles(new Vector2(-1f, -4.0f), 4, 5);
-            //room0.AddPlatformTiles(new Vector2(5f, -5f), 12, 1);
-            //room0.AddPlatformTiles(new Vector2(5f, -1f), 5, 1);
-            //room0.AddPlatformTiles(new Vector2(12.0f, -1f), 5, 1);
-            //room0.AddPlatformTiles(new Vector2(5f, 3f), 12, 1);
-            //room0.AddPlatformTiles(new Vector2(20f, 0f), 2, 7);
-            //room0.AddPlatformTiles(new Vector2(24f, 1f), 1, 10);
-            //room0.AddPlatformTiles(new Vector2(26f, 0f), 1, 9);
-            //room0.AddPlatformTiles(new Vector2(28f, -1f), 1, 8);
-            //room0.AddPlatformTiles(new Vector2(30f, -2f), 1, 7);
-            //room0.AddStartingEnemy(floatingBot, new Vector2(26f, -4f), playerCharacter);
-            //room0.AddStartingEnemy(floatingBot, new Vector2(28f, 0f), playerCharacter);
-            //room0.AddStartingEnemy(floatingBot, new Vector2(30f, 0f), playerCharacter);
-            //room0.AddStartingEnemy(floatingBot, new Vector2(32f, 0f), playerCharacter);
-            //room0.AddStartingEnemy(floatingBot, new Vector2(34f, 0f), playerCharacter);
-            //room0.AddStartingEnemy(floatingBot, new Vector2(36f, 0f), playerCharacter);
-            //room0.AddStartingEnemy(floatingBot, new Vector2(26f, -5f), playerCharacter);
-            //room0.AddStartingEnemy(floatingBot, new Vector2(28f, 1f), playerCharacter);
-            //room0.AddStartingEnemy(floatingBot, new Vector2(30f, 1f), playerCharacter);
-            //room0.AddStartingEnemy(floatingBot, new Vector2(32f, 1f), playerCharacter);
-            //room0.AddStartingEnemy(floatingBot, new Vector2(34f, 1f), playerCharacter);
-            //room0.AddStartingEnemy(floatingBot, new Vector2(36f, 1f), playerCharacter);
-
-
-            //
-
-            //Room room1 = new Room(_tileSetRock1, 20, 20, new Vector2(34.0f, 10.0F), room001);
-            //_rooms[1] = room1;
-            //room1.AddPerimiterTiles();
-            //room1.AddPlatformTiles(new Vector2(38f, 6f), 1, 11);
-            //room1.AddStartingEnemy(floatingBot, new Vector2(40f, 0f), playerCharacter);
-            //room1.AddStartingEnemy(floatingBot, new Vector2(42f, 0f), playerCharacter);
-            //room1.AddStartingEnemy(floatingBot, new Vector2(44f, 0f), playerCharacter);
-            //room1.AddStartingEnemy(floatingBot, new Vector2(46f, 0f), playerCharacter);
-            //room1.AddStartingEnemy(floatingBot, new Vector2(48f, 0f), playerCharacter);
-
-            //SealTheMap();
-
-        }
-        private void ConnectRoomsWithDoor(Room roomLeft, Room roomRight, GameObject prefab, 
-            float heightFromLeftFloorInTiles)
-        {
-            
-            float posX = roomLeft.lowerRightInGlobalSpace.x - 1;
-            float posY = roomLeft.lowerRightInGlobalSpace.y + heightFromLeftFloorInTiles + Globals.doorVHeightInTiles;
-            // now knock out perimiter blocks in each room
-            for (int i = 0; i < Globals.doorVHeightInTiles; i++)
+            for (int i = 0; i < howManyRooms; i++)
             {
-                roomLeft.KnockOutTile(new Vector2(posX, posY - i));
-                roomRight.KnockOutTile(new Vector2(posX + 1, posY - i));
+                RoomPlacement blueprint = Globals.world.rooms[i];
+
+                string unityRoomName = string.Format("Room{0}", blueprint.id);
+                GameObject roomGameObject = Instantiate(new GameObject(unityRoomName), roomsParent.transform, false);
+                RoomManager room = new RoomManager(blueprint.id, rock1TilePalette, blueprint, roomGameObject);
+                _rooms[i] = room;
+                room.DrawSelf();
+                room.DeActivateSelf();
             }
-
-
-            Vector3 position = new Vector2(posX, posY);
-            Quaternion rotation = new Quaternion(0, 0, 0, 0);
-            GameObject gameObject = Instantiate(prefab, position, rotation, roomsParent.transform);
-
-            _doors.Add(new Door(gameObject)
-            {
-                room1Id = roomLeft.id,
-                room2Id = roomRight.id,
-                positionInGlobalSpace = position
-            });
         }
         private bool IsDoorTileAtPosition(Vector2 position)
         {
-            foreach (Door d in _doors)
+            foreach (DoorPlacement d in Globals.world.doorPlacements)
             {
                 for(int i = 0; i < Globals.doorVHeightInTiles; i++)
                 {

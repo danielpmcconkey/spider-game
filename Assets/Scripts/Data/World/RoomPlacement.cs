@@ -6,9 +6,9 @@ using System.Text;
 using System.Threading.Tasks;
 using UnityEngine;
 
-namespace Assets.Scripts.WorldBuilder.Bot
+namespace Assets.Scripts.Data.World
 {
-    public class RoomBlueprint
+    public class RoomPlacement
     {
         public int id;
         public Vector2 upperLeftInGlobalSpace;
@@ -18,7 +18,7 @@ namespace Assets.Scripts.WorldBuilder.Bot
         public float roomWidthInUnityMeters;
         public float roomHeightInUnityMeters;
         public TilePlacement[] tiles;
-        public List<Door> doors;
-        public List<RoomMask> roomMasks;
+        public List<DoorPlacement> doors;
+        public List<RoomMaskPlacement> roomMasks;
     }
 }

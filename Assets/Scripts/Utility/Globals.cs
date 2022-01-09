@@ -1,4 +1,5 @@
-﻿using System;
+﻿using Assets.Scripts.Data.World;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -22,5 +23,6 @@ namespace Assets.Scripts.Utility
         public const float unityWorldUpLeftX = 0;
         public const float unityWorldUpLeftY = 0;
         public static bool isWorldBuilt = false;
+        public static World world;
     }
 }

@@ -7,6 +7,7 @@ using Assets.Scripts.Events;
 using System.IO;
 using System;
 using Assets.Scripts.Utility;
+using Assets.Scripts.Data.World;
 
 namespace Assets.Scripts.WorldBuilder.RoomBuilder
 {
@@ -24,7 +25,7 @@ namespace Assets.Scripts.WorldBuilder.RoomBuilder
         [SerializeField] public UnityEngine.Camera mainCamera;
         [SerializeField] public float cameraSpeed = 10;
 
-        private RoomSave[] _roomSaves;
+        private RoomPlacement[] _RoomPlacements;
         private bool _isMouseDown = false;
         private int _lastTileFlipped = -1;
         private bool _hasUnsavedChanges;
@@ -52,7 +53,7 @@ namespace Assets.Scripts.WorldBuilder.RoomBuilder
         private Button _btnSaveRoom;
         private Button _btnTileEditMode;
         private Button _btnDoorEditMode;
-        private DropdownField _dropDownSelectRoomSave;
+        private DropdownField _dropDownSelectRoomPlacement;
         private Label _lblConfirmWarning;
         private SliderInt _sliderWidth;
         private SliderInt _sliderHeight;
@@ -105,7 +106,7 @@ namespace Assets.Scripts.WorldBuilder.RoomBuilder
                 dependencyButton = dependencyButton,
             };
 
-            _roomSaves = RoomBuilderHelper.GetAllRoomSaves();
+            //_RoomPlacements = RoomBuilderHelper.GetAllRoomPlacements();
 
             InitializeUIComponents();
             _hasUndrawnAssets = false;
@@ -166,7 +167,7 @@ namespace Assets.Scripts.WorldBuilder.RoomBuilder
             _btnCloseLoadDialog = root.Q<Button>("btnCloseLoadDialog");
             _btnLoadRoom = root.Q<Button>("btnLoadRoom");
             _btnOpenLoadDialog = root.Q<Button>("btnOpenLoadDialog");
-            _dropDownSelectRoomSave = root.Q<DropdownField>("dropDownSelectRoomSave");
+            _dropDownSelectRoomPlacement = root.Q<DropdownField>("dropDownSelectRoomPlacement");
             _veLoadDialog = root.Q<VisualElement>("veLoadDialog");
 
             // new room
@@ -211,7 +212,7 @@ namespace Assets.Scripts.WorldBuilder.RoomBuilder
             _veHighlightDoorEditMode.visible = false;
 
 
-            PopulateRoomSaveDropdownChoices();
+            PopulateRoomPlacementDropdownChoices();
 
             // wire in the events
             _btnCloseConfirmDialog.clicked += btnCloseConfirmDialog_Click;
@@ -228,7 +229,7 @@ namespace Assets.Scripts.WorldBuilder.RoomBuilder
             _btnTileEditMode.clicked += btnTileEditMode_Click;
             _btnDoorEditMode.clicked += btnDoorEditMode_Click;
             _btnNewRoom.clicked += btnNewRoom_Click;
-            _btnSaveRoomDependency.clicked += btnSaveRoomDependency_Click;
+            //_btnSaveRoomDependency.clicked += btnSaveRoomDependency_Click;
             _btnCloseRoomDependencyDialog.clicked += btnCloseRoomDependencyDialog_Click;
 
         }
@@ -284,35 +285,35 @@ namespace Assets.Scripts.WorldBuilder.RoomBuilder
                 yield return 0;
             }
         }
-        private void PopulateRoomDependencyDialog()
-        {
-            DoorConnection doorConnection = _room.doors.SelectMany(s => s.doorConnections).
-                FirstOrDefault(s => s.doorConnectionId == _roomDependencyBeingEdited);
+    //    private void PopulateRoomDependencyDialog()
+    //    {
+    //        DoorConnection doorConnection = _room.doors.SelectMany(s => s.doorConnections).
+    //            FirstOrDefault(s => s.doorConnectionId == _roomDependencyBeingEdited);
 
-            _toggleDependency_isImpossible.value = doorConnection.isImpossible;
-            _toggleDependency_requiresHighJump.value = doorConnection.requiresHighJump;
-            _toggleDependency_requiresWallWalk.value = doorConnection.requiresWallWalk;
-            _toggleDependency_requiresCeilingWalk.value = doorConnection.requiresCeilingWalk;
-            _toggleDependency_requiresGrapple.value = doorConnection.requiresGrapple;
-            _toggleDependency_requiresUserCapability01.value = doorConnection.requiresUserCapability01;
-            _toggleDependency_requiresUserCapability02.value = doorConnection.requiresUserCapability02;
-            _toggleDependency_requiresUserCapability03.value = doorConnection.requiresUserCapability03;
-            _toggleDependency_requiresUserCapability04.value = doorConnection.requiresUserCapability04;
-            _toggleDependency_requiresUserCapability05.value = doorConnection.requiresUserCapability05;
-            _toggleDependency_requiresUserCapability06.value = doorConnection.requiresUserCapability06;
-            _toggleDependency_requiresUserCapability07.value = doorConnection.requiresUserCapability07;
-            _toggleDependency_requiresUserCapability08.value = doorConnection.requiresUserCapability08;
-    }
-        private void PopulateRoomSaveDropdownChoices()
+    //        _toggleDependency_isImpossible.value = doorConnection.isImpossible;
+    //        _toggleDependency_requiresHighJump.value = doorConnection.requiresHighJump;
+    //        _toggleDependency_requiresWallWalk.value = doorConnection.requiresWallWalk;
+    //        _toggleDependency_requiresCeilingWalk.value = doorConnection.requiresCeilingWalk;
+    //        _toggleDependency_requiresGrapple.value = doorConnection.requiresGrapple;
+    //        _toggleDependency_requiresUserCapability01.value = doorConnection.requiresUserCapability01;
+    //        _toggleDependency_requiresUserCapability02.value = doorConnection.requiresUserCapability02;
+    //        _toggleDependency_requiresUserCapability03.value = doorConnection.requiresUserCapability03;
+    //        _toggleDependency_requiresUserCapability04.value = doorConnection.requiresUserCapability04;
+    //        _toggleDependency_requiresUserCapability05.value = doorConnection.requiresUserCapability05;
+    //        _toggleDependency_requiresUserCapability06.value = doorConnection.requiresUserCapability06;
+    //        _toggleDependency_requiresUserCapability07.value = doorConnection.requiresUserCapability07;
+    //        _toggleDependency_requiresUserCapability08.value = doorConnection.requiresUserCapability08;
+    //}
+        private void PopulateRoomPlacementDropdownChoices()
         {
-            _dropDownSelectRoomSave.choices = _roomSaves.OrderBy(x => x.roomName).Select(y => y.roomName).ToList();
+            //_dropDownSelectRoomPlacement.choices = _RoomPlacements.OrderBy(x => x.roomName).Select(y => y.roomName).ToList();
         }
         private bool Save()
         {
             // todo: make the save path directory a config value
             const string pathDir = @"E:\Unity Projects\SpiderPocGit\Assets\Resources\RoomTemplates";
             string fileName = _textFileName.text;
-            string json = RoomBuilderHelper.Serialize(_room, fileName);
+            string json = "";// RoomBuilderHelper.Serialize(_room, fileName);
 
             try
             {
@@ -357,7 +358,7 @@ namespace Assets.Scripts.WorldBuilder.RoomBuilder
         {
             if (_confirmAction == ConfirmAction.OVERWRITE_SAVE)
             {
-                _room.roomName = _textRoomName.text;
+                //_room.roomName = _textRoomName.text;
                 if (Save())
                 {
                     HideUIDialogs();
@@ -389,18 +390,18 @@ namespace Assets.Scripts.WorldBuilder.RoomBuilder
         }
         private void btnLoadRoom_Click()
         {
-            string nameSelected = _dropDownSelectRoomSave.text;
+            string nameSelected = _dropDownSelectRoomPlacement.text;
             
             if(nameSelected != string.Empty)
             {
-                RoomSave save = _roomSaves.Where(x => x.roomName == nameSelected).FirstOrDefault();
+                RoomPlacement save = new RoomPlacement();// _RoomPlacements.Where(x => x.roomName == nameSelected).FirstOrDefault();
 
                 _room = new RoomBeingBuilt(save, _references);
                 _room.DrawRoom(_editMode);
                 _hasUnsavedChanges = false;
                 StartCoroutine(MoveCameraToRoomCenter());
-                _textRoomName.SetValueWithoutNotify(_room.roomName);
-                _textFileName.SetValueWithoutNotify(_room.roomName);
+                //_textRoomName.SetValueWithoutNotify(_room.roomName);
+                _textFileName.SetValueWithoutNotify(Guid.NewGuid().ToString());
 
             }
             _veLoadDialog.visible = false;
@@ -410,14 +411,10 @@ namespace Assets.Scripts.WorldBuilder.RoomBuilder
             int width = int.Parse(_textRoomWidth.text);
             int height = int.Parse(_textRoomHeight.text);
 
-            RoomSave emptySave = new RoomSave()
+            RoomPlacement emptySave = new RoomPlacement()
             {
-                tileWidth = MeasurementConverter.TilesXToPixels(1),
-                tileHeight = MeasurementConverter.TilesYToPixels(1),
-                roomName = "New room",
-                fileName = "New room",
-                roomWidth = width,
-                roomHeight = height,
+                roomWidthInTiles = width,
+                roomHeightInTiles = height,
             };
 
             _room = new RoomBeingBuilt(emptySave, _references);
@@ -462,52 +459,53 @@ namespace Assets.Scripts.WorldBuilder.RoomBuilder
         }
         private void btnSaveRoom_Click()
         {
-            string roomName = _textRoomName.text;
-            string fileName = _textFileName.text;
-            RoomSave existingSave = _roomSaves.Where(x => x.roomName == roomName || x.fileName == fileName).FirstOrDefault();
-            if (existingSave.roomName != null)
-            {
-                _veConfirmDialog.visible = true;
-                _lblConfirmWarning.text = "Warning! A room with that name already existis. Do you want to overwrite it?";
-                _confirmAction = ConfirmAction.OVERWRITE_SAVE;
-            }
-            else
-            {
-                _room.roomName = roomName;
-                if (Save())
-                {
-                    HideUIDialogs();
-                    _veSaveSuccessDialog.visible = true;
-                }
-                else
-                {
-                    // todo: create a fail message dialog
-                }
+            //string roomName = _textRoomName.text;
+            //string fileName = _textFileName.text;
+            //RoomPlacement existingSave = _RoomPlacements.
+            //    Where(x => x.roomName == roomName || x.fileName == fileName).FirstOrDefault();
+            ////if (existingSave.roomName != null)
+            ////{
+            ////    _veConfirmDialog.visible = true;
+            ////    _lblConfirmWarning.text = "Warning! A room with that name already existis. Do you want to overwrite it?";
+            ////    _confirmAction = ConfirmAction.OVERWRITE_SAVE;
+            ////}
+            ////else
+            ////{
+            //    //_room.roomName = roomName;
+            //    if (Save())
+            //    {
+            //        HideUIDialogs();
+            //        _veSaveSuccessDialog.visible = true;
+            //    }
+            //    else
+            //    {
+            //        // todo: create a fail message dialog
+            //    }
 
-            }
+            ////}
         }
-        private void btnSaveRoomDependency_Click()
-        {
-            DoorConnection doorConnection = _room.doors.SelectMany(s => s.doorConnections).
-                FirstOrDefault(s => s.doorConnectionId == _roomDependencyBeingEdited);
+        //private void btnSaveRoomDependency_Click()
+        //{
+        //    DoorConnection doorConnection = _room.doors.SelectMany(s => s.doorConnections).
+        //        FirstOrDefault(s => s.doorConnectionId == _roomDependencyBeingEdited);
 
-            doorConnection.isImpossible = _toggleDependency_isImpossible.value;
-            doorConnection.requiresHighJump = _toggleDependency_requiresHighJump.value;
-            doorConnection.requiresWallWalk = _toggleDependency_requiresWallWalk.value;
-            doorConnection.requiresCeilingWalk = _toggleDependency_requiresCeilingWalk.value;
-            doorConnection.requiresGrapple = _toggleDependency_requiresGrapple.value;
-            doorConnection.requiresUserCapability01 = _toggleDependency_requiresUserCapability01.value;
-            doorConnection.requiresUserCapability02 = _toggleDependency_requiresUserCapability02.value;
-            doorConnection.requiresUserCapability03 = _toggleDependency_requiresUserCapability03.value;
-            doorConnection.requiresUserCapability04 = _toggleDependency_requiresUserCapability04.value;
-            doorConnection.requiresUserCapability05 = _toggleDependency_requiresUserCapability05.value;
-            doorConnection.requiresUserCapability06 = _toggleDependency_requiresUserCapability06.value;
-            doorConnection.requiresUserCapability07 = _toggleDependency_requiresUserCapability07.value;
-            doorConnection.requiresUserCapability08 = _toggleDependency_requiresUserCapability08.value;
+        //    doorConnection.isImpossible = _toggleDependency_isImpossible.value;
+        //    doorConnection.requiresHighJump = _toggleDependency_requiresHighJump.value;
+        //    doorConnection.requiresWallWalk = _toggleDependency_requiresWallWalk.value;
+        //    doorConnection.requiresCeilingWalk = _toggleDependency_requiresCeilingWalk.value;
+        //    doorConnection.requiresGrapple = _toggleDependency_requiresGrapple.value;
+        //    doorConnection.requiresUserCapability01 = _toggleDependency_requiresUserCapability01.value;
+        //    doorConnection.requiresUserCapability02 = _toggleDependency_requiresUserCapability02.value;
+        //    doorConnection.requiresUserCapability03 = _toggleDependency_requiresUserCapability03.value;
+        //    doorConnection.requiresUserCapability04 = _toggleDependency_requiresUserCapability04.value;
+        //    doorConnection.requiresUserCapability05 = _toggleDependency_requiresUserCapability05.value;
+        //    doorConnection.requiresUserCapability06 = _toggleDependency_requiresUserCapability06.value;
+        //    doorConnection.requiresUserCapability07 = _toggleDependency_requiresUserCapability07.value;
+        //    doorConnection.requiresUserCapability08 = _toggleDependency_requiresUserCapability08.value;
 
-            HideUIDialogs();
-            _veSaveRoomDialog.visible = true;
-        }
+        //    HideUIDialogs();
+        //    _veSaveRoomDialog.visible = true;
+        //}
         private void btnTileEditMode_Click()
         {
             _editMode = EditMode.TILE;
@@ -519,7 +517,7 @@ namespace Assets.Scripts.WorldBuilder.RoomBuilder
         {
             _roomDependencyBeingEdited = doorConnectionId;
             _veRoomDependencyDialog.visible = true;
-            PopulateRoomDependencyDialog();
+            //PopulateRoomDependencyDialog();
         }
         private void OnBuilderSquareMouseDown(Vector2 position)
         {
@@ -535,10 +533,10 @@ namespace Assets.Scripts.WorldBuilder.RoomBuilder
                 }
                 else if (_editMode == EditMode.DOOR)
                 {
-                    int row = ((int)Mathf.Round(position.y) * -1) - 1;  // subtract 1 for border row
-                    int column = (int)Mathf.Round(position.x) - 1;  // subtract 1 for border col
+                    //int row = ((int)Mathf.Round(position.y) * -1) - 1;  // subtract 1 for border row
+                    //int column = (int)Mathf.Round(position.x) - 1;  // subtract 1 for border col
 
-                    _room.ReverseDoor(row, column);
+                    //_room.ReverseDoor(row, column);
                 }
                 _hasUnsavedChanges = true;
                 _hasUndrawnAssets = true;

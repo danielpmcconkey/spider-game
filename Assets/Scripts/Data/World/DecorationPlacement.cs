@@ -5,12 +5,12 @@ using System.Text;
 using System.Threading.Tasks;
 using UnityEngine;
 
-namespace Assets.Scripts.WorldBuilder
+namespace Assets.Scripts.Data.World
 {
-    public class Enemy
+    public class DecorationPlacement
     {
-        public GameObject prefab;
         public Vector2 positionInGlobalSpace;
-        public GameObject targetCharacter;
+        public int roomId;
+        public DecorationsCatalog catalogEntry;
     }
 }

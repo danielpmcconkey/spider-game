@@ -10,6 +10,8 @@ using System.Text;
 using UnityEngine;
 using Assets.Scripts.WorldBuilder;
 using UnityEngine.SceneManagement;
+using Assets.Scripts.Data.World;
+using Assets.Scripts.WorldBuilder.WorldManager;
 
 namespace Assets.Scripts.CharacterControl
 {
@@ -233,7 +235,7 @@ namespace Assets.Scripts.CharacterControl
         
         private void OnRoomTransitionTriggerEnter(Vector2 doorPosition)
         {
-            Door d = worldBuilder.GetDoorAtPosition(doorPosition);
+            DoorPlacement d = worldBuilder.GetDoorAtPosition(doorPosition);
             if(d != null)
             {
                 if (d.room1Id == Globals.currentRoom && d.room2Id != Globals.currentRoom)
@@ -244,7 +246,7 @@ namespace Assets.Scripts.CharacterControl
                 {
                     Globals.currentRoom = d.room1Id;
                 }
-                TransitionRoom(d);
+                TransitionRoom();
             }
         }
         protected override void ReactToDamageDealt(bool noIFrames = false)
@@ -256,7 +258,7 @@ namespace Assets.Scripts.CharacterControl
                 base.ReactToDamageDealt(noIFrames);
             }
         }
-        private void TransitionRoom(Door d)
+        private void TransitionRoom()
         {
             StartCoroutine(PauseDuringRoomTransition());
             

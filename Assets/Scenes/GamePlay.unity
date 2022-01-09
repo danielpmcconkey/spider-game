@@ -1974,9 +1974,9 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: b5a51b3f5d5b2af43aa4b0a54afe95a1, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  playerCharacter: {fileID: 0}
+  playerCharacter: {fileID: 593497461}
   roomsParent: {fileID: 1856427072}
-  rock1TileSet: {fileID: 8442991064221805352, guid: f27ffce143cf5344eb5912acc2245e9b,
+  rock1TilePalette: {fileID: 8442991064221805352, guid: f27ffce143cf5344eb5912acc2245e9b,
     type: 3}
   floatingBot: {fileID: 2934860196678712737, guid: fa30f2d5986ee5e479c53f4eb8839267,
     type: 3}

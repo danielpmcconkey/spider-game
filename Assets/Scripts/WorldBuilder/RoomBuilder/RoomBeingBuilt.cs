@@ -1,4 +1,5 @@
-﻿using Assets.Scripts.Utility;
+﻿using Assets.Scripts.Data.World;
+using Assets.Scripts.Utility;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -12,11 +13,11 @@ namespace Assets.Scripts.WorldBuilder.RoomBuilder
     {
         public int tileWidth = 48;
         public int tileHeight = 48;
-        public string roomName;
+        //public string roomName;
         public int roomWidth = -1;
         public int roomHeight = -1;
         public TilePlacement[] tiles;
-        public List<Door> doors;
+        public List<DoorPlacement> doors;
 
         private List<int> _topRowTiles;
         private List<int> _bottomRowTiles;
@@ -24,21 +25,20 @@ namespace Assets.Scripts.WorldBuilder.RoomBuilder
         private List<int> _rightColumnTiles;
         RoomBuilderReferences _references;
 
-        public RoomBeingBuilt(RoomSave restore, RoomBuilderReferences references)
+        public RoomBeingBuilt( RoomPlacement restore, RoomBuilderReferences references)
             
             //LineRenderer gridLinePrefab, GameObject gridParent, GameObject tileSet,
             //GameObject tileParent, GameObject mouseTriggerSquare, LineRenderer doorLinePrefab)
         {
             _references = references;
 
-            roomName = restore.roomName;
-            tileWidth = restore.tileWidth;
-            tileHeight = restore.tileHeight;
-            roomWidth = restore.roomWidth;
-            roomHeight = restore.roomHeight;
+            tileWidth = (int)Globals.tileWidthInUnityMeters;
+            tileHeight = (int)Globals.tileHeightInUnityMeters;
+            roomWidth = restore.roomWidthInTiles;
+            roomHeight = restore.roomHeightInTiles;
             tiles = restore.tiles;
-            if (restore.doors != null) doors = new List<Door>(restore.doors);
-            else doors = new List<Door>();
+            if (restore.doors != null) doors = new List<DoorPlacement>(restore.doors);
+            else doors = new List<DoorPlacement>();
             AddPerimeterTiles(true);
             //_hasGridBeenDrawn = false;
         }
@@ -50,7 +50,7 @@ namespace Assets.Scripts.WorldBuilder.RoomBuilder
             if (roomWidth > 0 && roomHeight > 0)
             {
                 DrawTiles();
-                DrawDoors(editMode);
+                //DrawDoors(editMode);
                 DrawGrid(editMode);
                 // if (!_hasGridBeenDrawn) DrawGrid();
             }
@@ -80,27 +80,27 @@ namespace Assets.Scripts.WorldBuilder.RoomBuilder
             int tileNum = (row * roomWidth) + column;
             return tileNum;
         }
-        public void ReverseDoor(int row, int column)
-        {
-            bool isDoorAlreadyThere = false;
-            List<Door> newDoors = new List<Door>();
+        //public void ReverseDoor(int row, int column)
+        //{
+        //    bool isDoorAlreadyThere = false;
+        //    List<DoorPlacement> newDoors = new List<DoorPlacement>();
 
-            foreach (Door d in doors)
-            {
-                if (d.position.row == row && d.position.column == column)
-                {
-                    // if already there, don't add it to the new list (reverse it by deleting)
-                    isDoorAlreadyThere = true;
-                }
-                else newDoors.Add(d);
-            }
-            if (!isDoorAlreadyThere)
-            {
-                // it was never there, so create it and add it
-                newDoors.Add(new Door(row, column));
-            }
-            doors = newDoors;
-        }
+        //    foreach (DoorPlacement d in doors)
+        //    {
+        //        if (d.position.row == row && d.position.column == column)
+        //        {
+        //            // if already there, don't add it to the new list (reverse it by deleting)
+        //            isDoorAlreadyThere = true;
+        //        }
+        //        else newDoors.Add(d);
+        //    }
+        //    if (!isDoorAlreadyThere)
+        //    {
+        //        // it was never there, so create it and add it
+        //        newDoors.Add(new DoorPlacement(row, column));
+        //    }
+        //    doors = newDoors;
+        //}
         public void ReverseTile(int tileNum)
         {
             if (tileNum < 0) return;
@@ -119,7 +119,7 @@ namespace Assets.Scripts.WorldBuilder.RoomBuilder
             roomWidth = width;
             roomHeight = height;
             tiles = new TilePlacement[width * height];
-            doors = new List<Door>();
+            doors = new List<DoorPlacement>();
             AddPerimeterTiles();
         }
         #endregion
@@ -191,109 +191,109 @@ namespace Assets.Scripts.WorldBuilder.RoomBuilder
                 _rightColumnTiles.Add(i + roomWidth - 1);
             }
         }
-        private void DrawDoorConnectors()
-        {
-            const int tileBorderBuffer = 1;
+        //private void DrawDoorConnectors()
+        //{
+        //    const int tileBorderBuffer = 1;
 
-            if (doors == null) return;
+        //    if (doors == null) return;
 
-            for(int i = 0; i < doors.Count; i++) 
-            {
-                Door doorIn = doors[i];
+        //    for(int i = 0; i < doors.Count; i++) 
+        //    {
+        //        DoorPlacement doorIn = doors[i];
 
-                if (doorIn.doorConnections == null) doorIn.doorConnections = new List<DoorConnection>();
+        //        if (doorIn.doorConnections == null) doorIn.doorConnections = new List<DoorConnection>();
 
-                for (int i2 = 0; i2 < doors.Count; i2++) 
-                {
-                    Door doorOut = doors[i2];
+        //        for (int i2 = 0; i2 < doors.Count; i2++) 
+        //        {
+        //            DoorPlacement doorOut = doors[i2];
                     
                     
 
-                    if (doorIn.guid != doorOut.guid)
-                    {
-                        // make sure we have teh right door connection object
-                        DoorConnection doorConnection = new DoorConnection(doorIn.guid, doorOut.guid);
+        //            if (doorIn.guid != doorOut.guid)
+        //            {
+        //                // make sure we have teh right door connection object
+        //                DoorConnection doorConnection = new DoorConnection(doorIn.guid, doorOut.guid);
 
-                        var existingMatches = doorIn.doorConnections.Where(
-                            x => x.doorInId == doorIn.guid
-                            && x.doorOutId == doorOut.guid);
+        //                var existingMatches = doorIn.doorConnections.Where(
+        //                    x => x.doorInId == doorIn.guid
+        //                    && x.doorOutId == doorOut.guid);
 
-                        if (existingMatches.Count() > 0) doorConnection = existingMatches.First();
-                        else doorIn.doorConnections.Add(doorConnection);
+        //                if (existingMatches.Count() > 0) doorConnection = existingMatches.First();
+        //                else doorIn.doorConnections.Add(doorConnection);
 
 
-                        // now draft our line points
-                        float x1 = 0f;
-                        float x2 = 0f;
-                        float y1 = 0f;
-                        float y2 = 0f;
-                        float x3 = 0f;
-                        float y3 = 0f;
+        //                // now draft our line points
+        //                float x1 = 0f;
+        //                float x2 = 0f;
+        //                float y1 = 0f;
+        //                float y2 = 0f;
+        //                float x3 = 0f;
+        //                float y3 = 0f;
 
                         
 
-                        x1 = MeasurementConverter.TilesXToUnityMeters(doorIn.position.column + tileBorderBuffer);
-                        if (doorIn.position.column == -1)
-                        {
-                            // move it 2 to the right
-                            x1 += MeasurementConverter.TilesXToUnityMeters(2);
-                        }
-                        x3 = MeasurementConverter.TilesXToUnityMeters(doorOut.position.column + tileBorderBuffer);
-                        if (doorOut.position.column == -1)
-                        {
-                            // move it 2 to the right
-                            x3 += MeasurementConverter.TilesXToUnityMeters(2);
-                        }
-                        y1 = MeasurementConverter.TilesYToUnityMeters(doorIn.position.row + tileBorderBuffer);
-                        y3 = MeasurementConverter.TilesYToUnityMeters(
-                            doorOut.position.row + tileBorderBuffer + Globals.doorVHeightInTiles);
+        //                x1 = MeasurementConverter.TilesXToUnityMeters(doorIn.position.column + tileBorderBuffer);
+        //                if (doorIn.position.column == -1)
+        //                {
+        //                    // move it 2 to the right
+        //                    x1 += MeasurementConverter.TilesXToUnityMeters(2);
+        //                }
+        //                x3 = MeasurementConverter.TilesXToUnityMeters(doorOut.position.column + tileBorderBuffer);
+        //                if (doorOut.position.column == -1)
+        //                {
+        //                    // move it 2 to the right
+        //                    x3 += MeasurementConverter.TilesXToUnityMeters(2);
+        //                }
+        //                y1 = MeasurementConverter.TilesYToUnityMeters(doorIn.position.row + tileBorderBuffer);
+        //                y3 = MeasurementConverter.TilesYToUnityMeters(
+        //                    doorOut.position.row + tileBorderBuffer + Globals.doorVHeightInTiles);
 
-                        // set x2 and y2 to be in the middle of 1 and 3
-                        x2 = x1 + ((x3 - x1) / 2);
-                        y2 = y1 + ((y3 - y1) / 2);
+        //                // set x2 and y2 to be in the middle of 1 and 3
+        //                x2 = x1 + ((x3 - x1) / 2);
+        //                y2 = y1 + ((y3 - y1) / 2);
                         
-                        // if x1 and x3 are are the same, move x2 over
-                        if(x1 == x3)
-                        {
-                            if (y1 > y3) x2 += 3;
-                            else x2 -= 3;
-                        }
+        //                // if x1 and x3 are are the same, move x2 over
+        //                if(x1 == x3)
+        //                {
+        //                    if (y1 > y3) x2 += 3;
+        //                    else x2 -= 3;
+        //                }
 
-                        // move y2 up if doorIn is on the left and down if on the right
-                        if (x1 < x3) y2 += 2;
-                        else y2 -= 2;
+        //                // move y2 up if doorIn is on the left and down if on the right
+        //                if (x1 < x3) y2 += 2;
+        //                else y2 -= 2;
 
-                        // now draw the line
-                        LineRenderer line = LineRenderer.Instantiate(_references.doorLinePrefab,
-                            _references.tileParent.transform, false);
-                        line.SetPosition(0, new Vector3(x1, -y1, 4));
-                        line.SetPosition(1, new Vector3(x2, -y2, -4));
-                        line.SetPosition(2, new Vector3(x3, -y3, -4));
-                        line.sortingLayerName = "UI";
+        //                // now draw the line
+        //                LineRenderer line = LineRenderer.Instantiate(_references.doorLinePrefab,
+        //                    _references.tileParent.transform, false);
+        //                line.SetPosition(0, new Vector3(x1, -y1, 4));
+        //                line.SetPosition(1, new Vector3(x2, -y2, -4));
+        //                line.SetPosition(2, new Vector3(x3, -y3, -4));
+        //                line.sortingLayerName = "UI";
 
-                        // now draw the dependencyButton
-                        GameObject dependencyButton = DrawPrefab(_references.dependencyButton,
-                            new Vector3(x2, -y2, -5), _references.tileParent);
+        //                // now draw the dependencyButton
+        //                GameObject dependencyButton = DrawPrefab(_references.dependencyButton,
+        //                    new Vector3(x2, -y2, -5), _references.tileParent);
 
-                        BuilderDependencyMouseTrigger script = dependencyButton.GetComponent<BuilderDependencyMouseTrigger>();
-                        script.doorConnectionId = doorConnection.doorConnectionId;
-                    }
-                }
-            }
-        }
-        private void DrawDoors(EditMode editMode)
-        {
-            if (doors == null) doors = new List<Door>();
-            foreach (Door d in doors)
-            {
-                float x = (d.position.column + 1) * tileWidth / Globals.pixelsInAUnityMeter;
-                float y = (d.position.row + 1) * tileHeight / Globals.pixelsInAUnityMeter * -1;
+        //                BuilderDependencyMouseTrigger script = dependencyButton.GetComponent<BuilderDependencyMouseTrigger>();
+        //                script.doorConnectionId = doorConnection.doorConnectionId;
+        //            }
+        //        }
+        //    }
+        //}
+        //private void DrawDoors(EditMode editMode)
+        //{
+        //    if (doors == null) doors = new List<DoorPlacement>();
+        //    foreach (DoorPlacement d in doors)
+        //    {
+        //        float x = (d.position.column + 1) * tileWidth / Globals.pixelsInAUnityMeter;
+        //        float y = (d.position.row + 1) * tileHeight / Globals.pixelsInAUnityMeter * -1;
 
-                Transform prefabTransform = _references.tileSet.transform.Find("Door_origin");
-                DrawPrefab(prefabTransform.gameObject, new Vector3(x, y, 20), _references.tileParent);
-            }
-            if (editMode == EditMode.DOOR) DrawDoorConnectors();
-        }
+        //        Transform prefabTransform = _references.tileSet.transform.Find("Door_origin");
+        //        DrawPrefab(prefabTransform.gameObject, new Vector3(x, y, 20), _references.tileParent);
+        //    }
+        //    if (editMode == EditMode.DOOR) DrawDoorConnectors();
+        //}
         private void DrawGrid(EditMode editMode)
         {
             const int startX = 0;
@@ -1019,7 +1019,7 @@ namespace Assets.Scripts.WorldBuilder.RoomBuilder
             {
                 int upLeftNum = tileNum - 1 - roomWidth;
                 neighbors.isUpLeft = tiles[upLeftNum].isSolid;
-                if (IsDoorAtPosition(upLeftNum)) neighbors.isUpLeft = true;
+                //if (IsDoorAtPosition(upLeftNum)) neighbors.isUpLeft = true;
             }
             // up
             if (isInTopRow)
@@ -1030,7 +1030,7 @@ namespace Assets.Scripts.WorldBuilder.RoomBuilder
             {
                 int upNum = tileNum - roomWidth;
                 neighbors.isUp = tiles[upNum].isSolid;
-                if (IsDoorAtPosition(upNum)) neighbors.isUp = true;
+                //if (IsDoorAtPosition(upNum)) neighbors.isUp = true;
             }
             // upRight
             if (isInTopRow || isInRightColumn)
@@ -1041,7 +1041,7 @@ namespace Assets.Scripts.WorldBuilder.RoomBuilder
             {
                 int upRightNum = tileNum - roomWidth + 1;
                 neighbors.isUpRight = tiles[upRightNum].isSolid;
-                if (IsDoorAtPosition(upRightNum)) neighbors.isUpRight = true;
+                //if (IsDoorAtPosition(upRightNum)) neighbors.isUpRight = true;
             }
             // left
             if (isInLeftColumn)
@@ -1052,7 +1052,7 @@ namespace Assets.Scripts.WorldBuilder.RoomBuilder
             {
                 int leftNum = tileNum - 1;
                 neighbors.isLeft = tiles[leftNum].isSolid;
-                if (IsDoorAtPosition(leftNum)) neighbors.isLeft = true;
+                //if (IsDoorAtPosition(leftNum)) neighbors.isLeft = true;
             }
             // right
             if (isInRightColumn)
@@ -1063,7 +1063,7 @@ namespace Assets.Scripts.WorldBuilder.RoomBuilder
             {
                 int rightNum = tileNum + 1;
                 neighbors.isRight = tiles[rightNum].isSolid;
-                if (IsDoorAtPosition(rightNum)) neighbors.isRight = true;
+                //if (IsDoorAtPosition(rightNum)) neighbors.isRight = true;
             }
             // down left
             if (isInBottomRow || isInLeftColumn)
@@ -1074,7 +1074,7 @@ namespace Assets.Scripts.WorldBuilder.RoomBuilder
             {
                 int downLeftNum = tileNum - 1 + roomWidth;
                 neighbors.isDownLeft = tiles[downLeftNum].isSolid;
-                if (IsDoorAtPosition(downLeftNum)) neighbors.isDownLeft = true;
+                //if (IsDoorAtPosition(downLeftNum)) neighbors.isDownLeft = true;
             }
             // down
             if (isInBottomRow)
@@ -1085,7 +1085,7 @@ namespace Assets.Scripts.WorldBuilder.RoomBuilder
             {
                 int downNum = tileNum + roomWidth;
                 neighbors.isDown = tiles[downNum].isSolid;
-                if (IsDoorAtPosition(downNum)) neighbors.isDown = true;
+                //if (IsDoorAtPosition(downNum)) neighbors.isDown = true;
             }
             // downRight
             if (isInBottomRow || isInRightColumn)
@@ -1096,42 +1096,42 @@ namespace Assets.Scripts.WorldBuilder.RoomBuilder
             {
                 int downRightNum = tileNum + roomWidth + 1;
                 neighbors.isDownRight = tiles[downRightNum].isSolid;
-                if (IsDoorAtPosition(downRightNum)) neighbors.isDownRight = true;
+                //if (IsDoorAtPosition(downRightNum)) neighbors.isDownRight = true;
             }
             return neighbors;
         }
-        private bool IsDoorAtPosition(int tileIndex)
-        {
-            foreach (var door in doors)
-            {
-                // get the index of the left brick in each of the door's rows
-                int indexAtDoorUL = (door.position.row * roomWidth) + door.position.column;
-                int indexAtDoorML = indexAtDoorUL + roomWidth;
-                int indexAtDoorBL = indexAtDoorML + roomWidth;
+        //private bool IsDoorAtPosition(int tileIndex)
+        //{
+        //    foreach (var door in doors)
+        //    {
+        //        // get the index of the left brick in each of the door's rows
+        //        int indexAtDoorUL = (door.position.row * roomWidth) + door.position.column;
+        //        int indexAtDoorML = indexAtDoorUL + roomWidth;
+        //        int indexAtDoorBL = indexAtDoorML + roomWidth;
 
-                // if door is on the left wall, check the right side of it
-                if (door.position.column == -1)
-                {
-                    // upper row
-                    if (indexAtDoorUL + 1 == tileIndex) return true;
-                    // middle row
-                    if (indexAtDoorML + 1 == tileIndex) return true;
-                    // bottom row
-                    if (indexAtDoorBL + 1 == tileIndex) return true;
-                }
-                // if door is on the right wall, check the left side of it
-                else if (door.position.column == roomWidth - 1)
-                {
-                    // upper row
-                    if (indexAtDoorUL == tileIndex) return true;
-                    // middle row
-                    if (indexAtDoorML == tileIndex) return true;
-                    // bottom row
-                    if (indexAtDoorBL == tileIndex) return true;
-                }
-            }
-            return false;
-        } 
+        //        // if door is on the left wall, check the right side of it
+        //        if (door.position.column == -1)
+        //        {
+        //            // upper row
+        //            if (indexAtDoorUL + 1 == tileIndex) return true;
+        //            // middle row
+        //            if (indexAtDoorML + 1 == tileIndex) return true;
+        //            // bottom row
+        //            if (indexAtDoorBL + 1 == tileIndex) return true;
+        //        }
+        //        // if door is on the right wall, check the left side of it
+        //        else if (door.position.column == roomWidth - 1)
+        //        {
+        //            // upper row
+        //            if (indexAtDoorUL == tileIndex) return true;
+        //            // middle row
+        //            if (indexAtDoorML == tileIndex) return true;
+        //            // bottom row
+        //            if (indexAtDoorBL == tileIndex) return true;
+        //        }
+        //    }
+        //    return false;
+        //} 
         #endregion
     }
 }
