@@ -88,7 +88,7 @@
     <Compile Include="Assets\Scripts\CharacterControl\CharacterMovementCapabilities.cs" />
     <Compile Include="Assets\Scripts\Events\LightSwitch.cs" />
     <Compile Include="Assets\Scripts\Data\World\WorldSizeValues.cs" />
-    <Compile Include="Assets\Scripts\WorldBuilder\RoomBuilder\TileNeighbors.cs" />
+    <Compile Include="Assets\Scripts\Data\World\TileNeighbors.cs" />
     <Compile Include="Assets\Scripts\Data\World\EnemyPlacement.cs" />
     <Compile Include="Assets\Scripts\Utility\Globals.cs" />
     <Compile Include="Assets\Scripts\Camera\ConstantBackgroundPositioner.cs" />

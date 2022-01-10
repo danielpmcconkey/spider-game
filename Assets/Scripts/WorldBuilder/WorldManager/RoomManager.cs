@@ -167,7 +167,7 @@ namespace Assets.Scripts.WorldBuilder.WorldManager
                 {
                     int spriteNum = Utility.RNG.GetRandomInt(1, numberOfOptions);
                     TileManager tile = new TileManager();
-                    //tile.positionInGlobalSpace = GetGlobalPositionFromTileIndex(i);
+                    tile.tilePlacement = tilePlacement;
                     Transform prefabTransform = _tilePalette.transform.Find(string.Format(prefabNameString, spriteNum));
                     tile.prefab = prefabTransform.gameObject;
 
@@ -185,9 +185,16 @@ namespace Assets.Scripts.WorldBuilder.WorldManager
         }
         private GameObject AddTileToUnity(TileManager tile)
         {
-            
+
             // now draw it
-            return DrawPrefab(tile.prefab, tile.tilePlacement.positionInGlobalSpace);
+            try
+            {
+                return DrawPrefab(tile.prefab, tile.tilePlacement.positionInGlobalSpace);
+            }
+            catch (Exception)
+            {
+                throw;
+            }
         }
         private void AssignChildLightsToRoom(GameObject decoration)
         {
@@ -205,42 +212,7 @@ namespace Assets.Scripts.WorldBuilder.WorldManager
             Quaternion rotation = new Quaternion(0, 0, 0, 0);
             return UnityEngine.Object.Instantiate(prefab, position, rotation, _gameObject.transform);
         }
-        private Vector2 GetGlobalPositionFromTileIndex(int index)
-        {
-            try
-            {
-                Vector2 position = Vector2.zero;
-                int row = (int)Mathf.Floor(index / (float)roomWidthInTiles);
-                int column = (int)Mathf.Floor(index % roomWidthInTiles);
-                position.x = upperLeftInGlobalSpace.x + MeasurementConverter.TilesXToUnityMeters(column);
-                position.y = upperLeftInGlobalSpace.y - MeasurementConverter.TilesYToUnityMeters(row);
-                return position;
-            }
-            catch (Exception)
-            {
-
-                throw;
-            }
-        }
-        //private int GetTileIndexFromUnityPosition(float x, float y)
-        //{
-        //    int xAsHundredTimes = (int)Math.Round(Math.Round(x, 2) * 100);
-        //    int yAsHundredTimes = (int)Math.Round(Math.Round(y, 2) * 100);
-        //    int xUlAsHundredTimes = (int)Math.Round(Math.Round(upperLeftInGlobalSpace.x, 2) * 100);
-        //    int yUlAsHundredTimes = (int)Math.Round(Math.Round(upperLeftInGlobalSpace.y, 2) * 100);
-        //    int tileWidthAsHundredTimes = (int)Math.Round(Math.Round(MeasurementConverter.TilesXToUnityMeters(1), 2) * 100);
-        //    int tileHeightAsHundredTimes = (int)Math.Round(Math.Round(MeasurementConverter.TilesYToUnityMeters(1), 2) * 100);
-
-        //    // remember that unity y gets lower as we go downward
-        //    // but our index goes from up-left to down-right
-        //    //
-        //    // also, I rounded and multiplied by 100 because floats 
-        //    // were doing weird things with the math
-        //    int numRowsDown = (yUlAsHundredTimes - yAsHundredTimes) / tileHeightAsHundredTimes;
-        //    int valueInFirstColumnOfThatRow = numRowsDown * roomWidthInTiles;
-        //    int numColsIn = (xAsHundredTimes - xUlAsHundredTimes) / tileWidthAsHundredTimes;
-        //    return valueInFirstColumnOfThatRow + numColsIn;
-        //}
+        
         #endregion
 
 

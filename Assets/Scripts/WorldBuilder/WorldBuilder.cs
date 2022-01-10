@@ -22,17 +22,17 @@ namespace Assets.Scripts.WorldBuilder
         [Header("Tile sets")]
         [Space(10)]
         [SerializeField] public GameObject rock1TilePalette;
-        
+
         [Space(10)]
         [Header("Enemies")]
         [Space(10)]
         [SerializeField] public GameObject floatingBot;
 
-        
+
         private RoomManager[] _rooms;
         private List<DoorManager> _doors;
 
-        
+
         void Awake()
         {
             BuildWorld();
@@ -41,9 +41,9 @@ namespace Assets.Scripts.WorldBuilder
 
         public DoorPlacement GetDoorAtPosition(Vector2 globalPosition)
         {
-            foreach(DoorPlacement d in Globals.world.doorPlacements)
+            foreach (DoorPlacement d in Globals.world.doorPlacements)
             {
-                if (d.positionInGlobalSpace == globalPosition) return d;             
+                if (d.positionInGlobalSpace == globalPosition) return d;
             }
             return null;
         }
@@ -67,7 +67,7 @@ namespace Assets.Scripts.WorldBuilder
             activeRooms.Add(Globals.currentRoom);
             activeRooms = RoomAndTileHelper.GetRoomConnections(Globals.currentRoom, 1);
 
-            foreach(RoomManager r in _rooms)
+            foreach (RoomManager r in _rooms)
             {
                 if (activeRooms.Contains(r.id)) r.ActivateSelf();
                 else r.DeActivateSelf();
@@ -75,14 +75,14 @@ namespace Assets.Scripts.WorldBuilder
                 if (r.id == Globals.currentRoom) r.ActivateMasks();
                 else r.DeActivateMasks();
             }
-            foreach(DoorManager d in _doors)
+            foreach (DoorManager d in _doors)
             {
-                if (activeRooms.Contains(d.doorPlacement.room1Id) || 
+                if (activeRooms.Contains(d.doorPlacement.room1Id) ||
                     activeRooms.Contains(d.doorPlacement.room2Id)) d.ActivateSelf();
                 else d.DeActivateSelf();
             }
         }
-        
+
         private void BuildWorld()
         {
             CreatorBot bot = new CreatorBot();
@@ -171,7 +171,7 @@ namespace Assets.Scripts.WorldBuilder
         //private void ConnectRoomsWithDoor(RoomManager roomLeft, RoomManager roomRight, GameObject prefab, 
         //    float heightFromLeftFloorInTiles)
         //{
-            
+
         //    float posX = roomLeft.lowerRightInGlobalSpace.x - 1;
         //    float posY = roomLeft.lowerRightInGlobalSpace.y + heightFromLeftFloorInTiles + Globals.doorVHeightInTiles;
         //    // now knock out perimiter blocks in each room
@@ -232,9 +232,9 @@ namespace Assets.Scripts.WorldBuilder
         {
             foreach (DoorPlacement d in Globals.world.doorPlacements)
             {
-                for(int i = 0; i < Globals.doorVHeightInTiles; i++)
+                for (int i = 0; i < Globals.doorVHeightInTiles; i++)
                 {
-                    for(int i2 = 0; i2 < Globals.doorHWidthInTiles; i2++)
+                    for (int i2 = 0; i2 < Globals.doorHWidthInTiles; i2++)
                     {
                         Vector2 trialPosition = new Vector2(d.positionInGlobalSpace.x + i2, d.positionInGlobalSpace.y - i);
                         if (trialPosition == position) return true;
@@ -243,47 +243,50 @@ namespace Assets.Scripts.WorldBuilder
             }
             return false;
         }
-        //private void SealTheMap()
-        //{
-        //    int minX = 0;
-        //    int maxX = 0;
-        //    int minY = 0;
-        //    int maxY = 0;
+        private void SealTheMap()
+        {
 
-        //    // find the dimensions of all the rooms together
-        //    foreach(Room r in _rooms)
-        //    {
-        //        if (r.upperLeftInGlobalSpace.x < minX) minX = (int)Mathf.Floor(r.upperLeftInGlobalSpace.x);
-        //        if (r.lowerRightInGlobalSpace.x > maxX) maxX = (int)Mathf.Floor(r.lowerRightInGlobalSpace.x) + 1;
-        //        if (r.lowerRightInGlobalSpace.y < minY) minY = (int)Mathf.Floor(r.lowerRightInGlobalSpace.y);
-        //        if (r.upperLeftInGlobalSpace.x > maxY) maxY = (int)Mathf.Floor(r.upperLeftInGlobalSpace.y) + 1;
-        //    }
+            // todo: seal the map in a teleporter that bring the player character back to start
 
-        //    // now pad by 5
-        //    minX -= 5;
-        //    maxX += 5;
-        //    minY -= 5;
-        //    maxY += 5;
+            //    int minX = 0;
+            //    int maxX = 0;
+            //    int minY = 0;
+            //    int maxY = 0;
 
-        //    // now add blocks if they're not inside of a room
-        //    for(int i = minY; i <= maxY; i++)
-        //    {
-        //        for (int i2 = minX; i2 <= maxX; i2++)
-        //        {
-        //            Vector2 position = new Vector2(i2, i);
-        //            if(WhichRoomAreWeIn(position) == -1)
-        //            {
-        //                if(!IsDoorTileAtPosition(position))
-        //                {
-        //                    Transform prefabTransform = rock1TileSet.transform.Find("1_origin");
-        //                    GameObject prefab = prefabTransform.gameObject;
-        //                    Quaternion rotation = new Quaternion(0, 0, 0, 0);
-        //                    UnityEngine.Object.Instantiate(prefab, position, rotation, roomsParent.transform);
-        //                }
-        //            }
-        //        }
-        //    }
+            //    // find the dimensions of all the rooms together
+            //    foreach(Room r in _rooms)
+            //    {
+            //        if (r.upperLeftInGlobalSpace.x < minX) minX = (int)Mathf.Floor(r.upperLeftInGlobalSpace.x);
+            //        if (r.lowerRightInGlobalSpace.x > maxX) maxX = (int)Mathf.Floor(r.lowerRightInGlobalSpace.x) + 1;
+            //        if (r.lowerRightInGlobalSpace.y < minY) minY = (int)Mathf.Floor(r.lowerRightInGlobalSpace.y);
+            //        if (r.upperLeftInGlobalSpace.x > maxY) maxY = (int)Mathf.Floor(r.upperLeftInGlobalSpace.y) + 1;
+            //    }
 
-        //}
+            //    // now pad by 5
+            //    minX -= 5;
+            //    maxX += 5;
+            //    minY -= 5;
+            //    maxY += 5;
+
+            //    // now add blocks if they're not inside of a room
+            //    for(int i = minY; i <= maxY; i++)
+            //    {
+            //        for (int i2 = minX; i2 <= maxX; i2++)
+            //        {
+            //            Vector2 position = new Vector2(i2, i);
+            //            if(WhichRoomAreWeIn(position) == -1)
+            //            {
+            //                if(!IsDoorTileAtPosition(position))
+            //                {
+            //                    Transform prefabTransform = rock1TileSet.transform.Find("1_origin");
+            //                    GameObject prefab = prefabTransform.gameObject;
+            //                    Quaternion rotation = new Quaternion(0, 0, 0, 0);
+            //                    UnityEngine.Object.Instantiate(prefab, position, rotation, roomsParent.transform);
+            //                }
+            //            }
+            //        }
+            //    }
+
+        }
     }
 }

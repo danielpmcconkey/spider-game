@@ -4,7 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace Assets.Scripts.WorldBuilder.RoomBuilder
+namespace Assets.Scripts.Data.World
 {
     public struct TileNeighbors
     {

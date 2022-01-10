@@ -17,6 +17,7 @@ namespace Assets.Scripts.WorldBuilder.Bot
 
         private TilePlacement[] _worldTiles;
         private int _worldWidthInTiles;
+        private int _worldHeightInTiles;
 
         public void CreateWorld(WorldSize size, int rngSeed)
         {
@@ -36,6 +37,8 @@ namespace Assets.Scripts.WorldBuilder.Bot
             AddRoomMasks();
             // remove any tiles that are row replaced by doors
             KnockOutTilesBehindDoors();
+            // update tile types (only do this after you've added all the platforms
+            UpdateTileTypes();
             //decorateRooms();
 
 
@@ -49,6 +52,7 @@ namespace Assets.Scripts.WorldBuilder.Bot
             // add a base tile (tile map 1) to the room and to the global tile grid
 
             TilePlacement tilePlacement = new TilePlacement();
+            tilePlacement.roomId = room.id;
             tilePlacement.isSolid = true;
             tilePlacement.tileNum = 1;
             Position posInRoom = RoomAndTileHelper.GetPositionFromGridOrdinal(room.roomWidthInTiles, roomTileGridOrdinal);
@@ -499,6 +503,86 @@ namespace Assets.Scripts.WorldBuilder.Bot
         {
             return RoomAndTileHelper.GetPositionFromGridOrdinal(Globals.world.worldWidthInStandardRooms, gridOrdinal);
         }
+        private (TileNeighbors neighbors, List<TilePlacement> list) GetTileNeighbors(int tileNum)
+        {
+            TileNeighbors neighbors = new TileNeighbors();
+            List<TilePlacement> outList = new List<TilePlacement>();
+
+            // get whether this tile is on the periphery to avoid
+            // index out of range exceptions and to keep from checking
+            // the left-most tile of the row below you when you want
+            // to check right
+            bool isInTopRow = RoomAndTileHelper.IsInTopRow(_worldWidthInTiles, tileNum);
+            bool isInBottomRow = RoomAndTileHelper.IsInBottomRow(_worldWidthInTiles, tileNum, _worldHeightInTiles);
+            bool isInLeftColumn = RoomAndTileHelper.IsInLeftColumn(_worldWidthInTiles, tileNum);
+            bool isInRightColumn = RoomAndTileHelper.IsInRightColumn(_worldWidthInTiles, tileNum);
+
+            // up left
+            int upLeftNum = tileNum - 1 - _worldWidthInTiles;
+            if (!isInTopRow && !isInLeftColumn && _worldTiles[upLeftNum] != null && _worldTiles[upLeftNum].isSolid)
+            {
+                neighbors.isUpLeft = true;
+                outList.Add(_worldTiles[upLeftNum]);
+            }
+
+            // up
+            int upNum = tileNum - _worldWidthInTiles;
+            if (!isInTopRow && _worldTiles[upNum] != null && _worldTiles[upNum].isSolid)
+            {
+                neighbors.isUp = true;
+                outList.Add(_worldTiles[upNum]);
+            }
+
+            // upRight
+            int upRightNum = tileNum - _worldWidthInTiles + 1;
+            if (!isInTopRow && !isInRightColumn && _worldTiles[upRightNum] != null && _worldTiles[upRightNum].isSolid)
+            {
+                neighbors.isUpRight = true;
+                outList.Add(_worldTiles[upRightNum]);
+            }
+
+            // left
+            int leftNum = tileNum - 1;
+            if (!isInLeftColumn && _worldTiles[leftNum] != null && _worldTiles[leftNum].isSolid)
+            {
+                neighbors.isLeft = true;
+                outList.Add(_worldTiles[leftNum]);
+            }
+
+            // right
+            int rightNum = tileNum + 1;
+            if (!isInRightColumn && _worldTiles[rightNum] != null && _worldTiles[rightNum].isSolid)
+            {
+                neighbors.isRight = true;
+                outList.Add(_worldTiles[rightNum]);
+            }
+
+            // down left
+            int downLeftNum = tileNum - 1 + _worldWidthInTiles;
+            if (!isInBottomRow && !isInLeftColumn && _worldTiles[downLeftNum] != null && _worldTiles[downLeftNum].isSolid)
+            {
+                neighbors.isDownLeft = true;
+                outList.Add(_worldTiles[downLeftNum]);
+            }
+
+            // down
+            int downNum = tileNum + _worldWidthInTiles;
+            if (!isInBottomRow && _worldTiles[downNum] != null && _worldTiles[downNum].isSolid)
+            {
+                neighbors.isDown = true;
+                outList.Add(_worldTiles[downNum]);
+            }
+
+            // downRight
+            int downRightNum = tileNum + _worldWidthInTiles + 1;
+            if (!isInBottomRow && !isInRightColumn && _worldTiles[downRightNum] != null && _worldTiles[downRightNum].isSolid)
+            {
+                neighbors.isDownRight = true;
+                outList.Add(_worldTiles[downRightNum]);
+            }
+
+            return (neighbors, outList);
+        }
         private void KnockOutTilesAtPosition(Vector2 knockOutPosition, int roomId)
         {
             RoomPlacement r = Globals.world.rooms.Where(x => x.id == roomId).FirstOrDefault();
@@ -600,10 +684,430 @@ namespace Assets.Scripts.WorldBuilder.Bot
             Globals.world.worldWidthInStandardRooms = RNG.GetRandomInt(size.minWidth, size.maxWidth + 1);
             Globals.world.worldHeightInStandardRooms = RNG.GetRandomInt(size.minHeight, size.maxHeight + 1);
             _worldWidthInTiles = Globals.world.worldWidthInStandardRooms * Globals.standardRoomWidth;
-            int worldHeightInTiles = Globals.world.worldHeightInStandardRooms * Globals.standardRoomHeight;
-            _worldTiles = new TilePlacement[_worldWidthInTiles * worldHeightInTiles];
+            _worldHeightInTiles = Globals.world.worldHeightInStandardRooms * Globals.standardRoomHeight;
+            _worldTiles = new TilePlacement[_worldWidthInTiles * _worldHeightInTiles];
         }
+        private void UpdateTileTypes()
+        {
+            for(int i = 0; i < _worldTiles.Length; i++)
+            {
+                
+                var neighborsCheck = GetTileNeighbors(i);
+                TileNeighbors neighbors = neighborsCheck.neighbors;
 
+                int tileNumToDraw = -1;
+
+                
+                if (_worldTiles[i] != null && _worldTiles[i].isSolid)
+                {
+                    
+
+
+                    if (neighbors.isDown && neighbors.isDownLeft && neighbors.isDownRight && neighbors.isLeft
+                        && neighbors.isRight && neighbors.isUp && neighbors.isUpLeft && neighbors.isUpRight)
+                    {
+                        tileNumToDraw = 1;
+                    }
+                    else if (neighbors.isUp && neighbors.isDown && neighbors.isUpRight && neighbors.isRight &&
+                        neighbors.isDownRight && !neighbors.isLeft)
+                    {
+                        tileNumToDraw = 2;
+                    }
+                    else if (!neighbors.isUpRight && neighbors.isDown && neighbors.isUp && neighbors.isRight
+                        && neighbors.isDownRight && !neighbors.isLeft)
+                    {
+                        tileNumToDraw = 3;
+                    }
+                    else if (neighbors.isUp && neighbors.isDown && neighbors.isUpRight && neighbors.isRight
+                        && !neighbors.isDownRight && !neighbors.isLeft)
+                    {
+                        tileNumToDraw = 4;
+                    }
+                    else if (!neighbors.isLeft && !neighbors.isUpRight && !neighbors.isDownRight && neighbors.isRight
+                        && neighbors.isDown && neighbors.isUp)
+                    {
+                        tileNumToDraw = 5;
+                    }
+                    else if (neighbors.isDown && neighbors.isDownLeft && neighbors.isLeft && !neighbors.isRight
+                        && neighbors.isUp && neighbors.isUpLeft)
+                    {
+                        tileNumToDraw = 6;
+                    }
+                    else if (neighbors.isDown && neighbors.isDownLeft && neighbors.isLeft && !neighbors.isRight
+                        && neighbors.isUp && !neighbors.isUpLeft)
+                    {
+                        tileNumToDraw = 7;
+                    }
+                    else if (neighbors.isDown && neighbors.isUpLeft && neighbors.isLeft && !neighbors.isRight
+                        && neighbors.isUp && !neighbors.isDownLeft)
+                    {
+                        tileNumToDraw = 8;
+                    }
+                    else if (neighbors.isDown && !neighbors.isUpLeft && neighbors.isLeft && !neighbors.isRight
+                        && neighbors.isUp && !neighbors.isDownLeft)
+                    {
+                        tileNumToDraw = 9;
+                    }
+                    else if (!neighbors.isUp && neighbors.isLeft && neighbors.isRight && neighbors.isDown
+                        && neighbors.isDownLeft && neighbors.isDownRight)
+                    {
+                        tileNumToDraw = 10;
+                    }
+                    else if (!neighbors.isUp && neighbors.isLeft && neighbors.isRight && neighbors.isDown
+                        && !neighbors.isDownLeft && neighbors.isDownRight)
+                    {
+                        tileNumToDraw = 11;
+                    }
+                    else if (!neighbors.isUp && neighbors.isLeft && neighbors.isRight && neighbors.isDown
+                        && neighbors.isDownLeft && !neighbors.isDownRight)
+                    {
+                        tileNumToDraw = 12;
+                    }
+                    else if (!neighbors.isUp && neighbors.isLeft && neighbors.isRight && neighbors.isDown
+                        && !neighbors.isDownLeft && !neighbors.isDownRight)
+                    {
+                        tileNumToDraw = 13;
+                    }
+                    else if (!neighbors.isDown && neighbors.isLeft && neighbors.isRight && neighbors.isUp
+                        && neighbors.isUpLeft && neighbors.isUpRight)
+                    {
+                        tileNumToDraw = 14;
+                    }
+                    else if (!neighbors.isDown && neighbors.isLeft && neighbors.isRight && neighbors.isUp
+                        && !neighbors.isUpLeft && neighbors.isUpRight)
+                    {
+                        tileNumToDraw = 15;
+                    }
+                    else if (!neighbors.isDown && neighbors.isLeft && neighbors.isRight && neighbors.isUp
+                        && neighbors.isUpLeft && !neighbors.isUpRight)
+                    {
+                        tileNumToDraw = 16;
+                    }
+                    else if (!neighbors.isDown && neighbors.isLeft && neighbors.isRight && neighbors.isUp
+                        && !neighbors.isUpLeft && !neighbors.isUpRight)
+                    {
+                        tileNumToDraw = 17;
+                    }
+                    else if (neighbors.isDown && neighbors.isDownRight && !neighbors.isLeft
+                        && neighbors.isRight && !neighbors.isUp)
+                    {
+                        tileNumToDraw = 18;
+                    }
+                    else if (neighbors.isDown && !neighbors.isDownRight && !neighbors.isLeft
+                        && neighbors.isRight && !neighbors.isUp)
+                    {
+                        tileNumToDraw = 19;
+                    }
+                    else if (neighbors.isDown && neighbors.isDownLeft && neighbors.isLeft
+                        && !neighbors.isRight && !neighbors.isUp)
+                    {
+                        tileNumToDraw = 20;
+                    }
+                    else if (neighbors.isDown && !neighbors.isDownLeft && neighbors.isLeft
+                        && !neighbors.isRight && !neighbors.isUp)
+                    {
+                        tileNumToDraw = 21;
+                    }
+                    else if (!neighbors.isDown && !neighbors.isLeft
+                        && neighbors.isRight && neighbors.isUp && neighbors.isUpRight)
+                    {
+                        tileNumToDraw = 22;
+                    }
+                    else if (!neighbors.isDown && !neighbors.isLeft
+                        && neighbors.isRight && neighbors.isUp && !neighbors.isUpRight)
+                    {
+                        tileNumToDraw = 23;
+                    }
+                    else if (!neighbors.isDown && neighbors.isLeft
+                        && !neighbors.isRight && neighbors.isUp && neighbors.isUpLeft)
+                    {
+                        tileNumToDraw = 24;
+                    }
+                    else if (!neighbors.isDown && neighbors.isLeft
+                        && !neighbors.isRight && neighbors.isUp && !neighbors.isUpLeft)
+                    {
+                        tileNumToDraw = 25;
+                    }
+                    else if (!neighbors.isDown && !neighbors.isLeft
+                        && !neighbors.isRight && !neighbors.isUp)
+                    {
+                        tileNumToDraw = 26;
+                    }
+                    else if (!neighbors.isDown && !neighbors.isLeft
+                        && neighbors.isRight && !neighbors.isUp)
+                    {
+                        tileNumToDraw = 27;
+                    }
+                    else if (!neighbors.isDown && neighbors.isLeft
+                        && !neighbors.isRight && !neighbors.isUp)
+                    {
+                        tileNumToDraw = 28;
+                    }
+                    else if (neighbors.isDown && !neighbors.isLeft
+                        && !neighbors.isRight && !neighbors.isUp)
+                    {
+                        tileNumToDraw = 29;
+                    }
+                    else if (!neighbors.isDown && !neighbors.isLeft
+                        && !neighbors.isRight && neighbors.isUp)
+                    {
+                        tileNumToDraw = 30;
+                    }
+                    else if (!neighbors.isDown && neighbors.isLeft
+                        && neighbors.isRight && !neighbors.isUp)
+                    {
+                        tileNumToDraw = 31;
+                    }
+                    else if (neighbors.isDown && !neighbors.isLeft
+                        && !neighbors.isRight && neighbors.isUp)
+                    {
+                        tileNumToDraw = 32;
+                    }
+                    else if (neighbors.isDown && neighbors.isDownLeft && neighbors.isDownRight && neighbors.isLeft
+                        && neighbors.isRight && neighbors.isUp && !neighbors.isUpLeft && neighbors.isUpRight)
+                    {
+                        tileNumToDraw = 33;
+                    }
+                    else if (neighbors.isDown && neighbors.isDownLeft && neighbors.isDownRight && neighbors.isLeft
+                        && neighbors.isRight && neighbors.isUp && neighbors.isUpLeft && !neighbors.isUpRight)
+                    {
+                        tileNumToDraw = 34;
+                    }
+                    else if (neighbors.isDown && !neighbors.isDownLeft && neighbors.isDownRight && neighbors.isLeft
+                        && neighbors.isRight && neighbors.isUp && neighbors.isUpLeft && neighbors.isUpRight)
+                    {
+                        tileNumToDraw = 35;
+                    }
+                    else if (neighbors.isDown && neighbors.isDownLeft && !neighbors.isDownRight && neighbors.isLeft
+                        && neighbors.isRight && neighbors.isUp && neighbors.isUpLeft && neighbors.isUpRight)
+                    {
+                        tileNumToDraw = 36;
+                    }
+                    else if (neighbors.isDown && neighbors.isDownLeft && neighbors.isDownRight && neighbors.isLeft
+                        && neighbors.isRight && neighbors.isUp && !neighbors.isUpLeft && !neighbors.isUpRight)
+                    {
+                        tileNumToDraw = 37;
+                    }
+                    else if (neighbors.isDown && !neighbors.isDownLeft && !neighbors.isDownRight && neighbors.isLeft
+                        && neighbors.isRight && neighbors.isUp && neighbors.isUpLeft && neighbors.isUpRight)
+                    {
+                        tileNumToDraw = 38;
+                    }
+                    else if (neighbors.isDown && !neighbors.isDownLeft && neighbors.isDownRight && neighbors.isLeft
+                        && neighbors.isRight && neighbors.isUp && !neighbors.isUpLeft && neighbors.isUpRight)
+                    {
+                        tileNumToDraw = 39;
+                    }
+                    else if (neighbors.isDown && neighbors.isDownLeft && !neighbors.isDownRight && neighbors.isLeft
+                        && neighbors.isRight && neighbors.isUp && neighbors.isUpLeft && !neighbors.isUpRight)
+                    {
+                        tileNumToDraw = 40;
+                    }
+                    else if (neighbors.isDown && !neighbors.isDownLeft && !neighbors.isDownRight && neighbors.isLeft
+                        && neighbors.isRight && neighbors.isUp && !neighbors.isUpLeft && !neighbors.isUpRight)
+                    {
+                        tileNumToDraw = 41;
+                    }
+                    if (neighbors.isDown && !neighbors.isDownLeft && !neighbors.isDownRight && neighbors.isLeft
+                        && neighbors.isRight && neighbors.isUp && !neighbors.isUpLeft && neighbors.isUpRight)
+                    {
+                        tileNumToDraw = 55;
+                    }
+                    if (neighbors.isDown && !neighbors.isDownLeft && !neighbors.isDownRight && neighbors.isLeft
+                        && neighbors.isRight && neighbors.isUp && neighbors.isUpLeft && !neighbors.isUpRight)
+                    {
+                        tileNumToDraw = 56;
+                    }
+                    if (neighbors.isDown && !neighbors.isDownLeft && neighbors.isDownRight && neighbors.isLeft
+                        && neighbors.isRight && neighbors.isUp && !neighbors.isUpLeft && !neighbors.isUpRight)
+                    {
+                        tileNumToDraw = 57;
+                    }
+                    if (neighbors.isDown && neighbors.isDownLeft && !neighbors.isDownRight && neighbors.isLeft
+                        && neighbors.isRight && neighbors.isUp && !neighbors.isUpLeft && !neighbors.isUpRight)
+                    {
+                        tileNumToDraw = 58;
+                    }
+                    if (!neighbors.isUpLeft && !neighbors.isDownRight && neighbors.isUp && neighbors.isUpRight
+                        && neighbors.isLeft && neighbors.isRight && neighbors.isDownLeft && neighbors.isDown)
+                    {
+                        tileNumToDraw = 61;
+                    }
+                    if (neighbors.isUpLeft && neighbors.isDownRight && neighbors.isUp && !neighbors.isUpRight
+                        && neighbors.isLeft && neighbors.isRight && !neighbors.isDownLeft && neighbors.isDown)
+                    {
+                        tileNumToDraw = 62;
+                    }
+                    _worldTiles[i].tileNum = tileNumToDraw;
+                }
+                else
+                {
+                    bool shouldDrawATile = false;
+
+
+                    // check for hollow tiles
+                    if (!neighbors.isDown && neighbors.isLeft
+                        && !neighbors.isRight && neighbors.isUp && neighbors.isUpLeft)
+                    {
+                        tileNumToDraw = 42;
+                        shouldDrawATile = true;
+                    }
+                    else if (!neighbors.isDown && !neighbors.isLeft
+                        && neighbors.isRight && neighbors.isUp && neighbors.isUpRight)
+                    {
+                        tileNumToDraw = 43;
+                        shouldDrawATile = true;
+                    }
+                    else if (neighbors.isDown && neighbors.isDownLeft && neighbors.isLeft
+                        && !neighbors.isRight && !neighbors.isUp)
+                    {
+                        tileNumToDraw = 44;
+                        shouldDrawATile = true;
+                    }
+                    else if (neighbors.isDown && neighbors.isDownRight && !neighbors.isLeft
+                        && neighbors.isRight && !neighbors.isUp)
+                    {
+                        tileNumToDraw = 45;
+                        shouldDrawATile = true;
+                    }
+                    else if (!neighbors.isDown && neighbors.isLeft
+                        && neighbors.isRight && neighbors.isUp && neighbors.isUpLeft && neighbors.isUpRight)
+                    {
+                        tileNumToDraw = 46;
+                        shouldDrawATile = true;
+                    }
+                    else if (!neighbors.isUp && neighbors.isLeft
+                        && neighbors.isRight && neighbors.isDown && neighbors.isDownLeft && neighbors.isDownRight)
+                    {
+                        tileNumToDraw = 47;
+                        shouldDrawATile = true;
+                    }
+                    else if (neighbors.isDown && neighbors.isDownLeft && neighbors.isLeft
+                        && !neighbors.isRight && neighbors.isUp && neighbors.isUpLeft)
+                    {
+                        tileNumToDraw = 48;
+                        shouldDrawATile = true;
+                    }
+                    else if (neighbors.isDown && neighbors.isDownRight && neighbors.isRight
+                        && !neighbors.isLeft && neighbors.isUp && neighbors.isUpRight)
+                    {
+                        tileNumToDraw = 49;
+                        shouldDrawATile = true;
+                    }
+                    else if (neighbors.isDown && neighbors.isDownLeft && neighbors.isDownRight && neighbors.isLeft
+                        && neighbors.isRight && neighbors.isUp && !neighbors.isUpLeft && neighbors.isUpRight)
+                    {
+                        tileNumToDraw = 50;
+                        shouldDrawATile = true;
+                    }
+                    else if (neighbors.isDown && neighbors.isDownLeft && neighbors.isDownRight && neighbors.isLeft
+                        && neighbors.isRight && neighbors.isUp && neighbors.isUpLeft && !neighbors.isUpRight)
+                    {
+                        tileNumToDraw = 51;
+                        shouldDrawATile = true;
+                    }
+                    else if (neighbors.isDown && !neighbors.isDownLeft && neighbors.isDownRight && neighbors.isLeft
+                        && neighbors.isRight && neighbors.isUp && neighbors.isUpLeft && neighbors.isUpRight)
+                    {
+                        tileNumToDraw = 52;
+                        shouldDrawATile = true;
+                    }
+                    else if (neighbors.isDown && neighbors.isDownLeft && !neighbors.isDownRight && neighbors.isLeft
+                        && neighbors.isRight && neighbors.isUp && neighbors.isUpLeft && neighbors.isUpRight)
+                    {
+                        tileNumToDraw = 53;
+                        shouldDrawATile = true;
+                    }
+                    else if (neighbors.isDown && neighbors.isDownLeft && neighbors.isDownRight && neighbors.isLeft
+                        && neighbors.isRight && neighbors.isUp && neighbors.isUpLeft && neighbors.isUpRight)
+                    {
+                        tileNumToDraw = 54;
+                        shouldDrawATile = true;
+                    }
+                    else if (neighbors.isDown && neighbors.isDownLeft && !neighbors.isDownRight && neighbors.isLeft
+                        && neighbors.isRight && neighbors.isUp && !neighbors.isUpLeft && neighbors.isUpRight)
+                    {
+                        tileNumToDraw = 59;
+                        shouldDrawATile = true;
+                    }
+                    else if (neighbors.isDown && !neighbors.isDownLeft && neighbors.isDownRight && neighbors.isLeft
+                        && neighbors.isRight && neighbors.isUp && neighbors.isUpLeft && !neighbors.isUpRight)
+                    {
+                        tileNumToDraw = 60;
+                        shouldDrawATile = true;
+                    }
+                    // update the array with a tile to draw
+                    if (shouldDrawATile)
+                    {
+                        // need to create a tilePlacement object as there wouldn't have been one already
+                        TilePlacement tilePlacement = new TilePlacement();
+                        tilePlacement.isSolid = false;
+                        Position posInWorld = RoomAndTileHelper.GetPositionFromGridOrdinal(_worldWidthInTiles, i);
+                        tilePlacement.positionInGlobalSpace = new Vector2(
+                            MeasurementConverter.TilesXToUnityMeters(posInWorld.column),
+                            -1 * MeasurementConverter.TilesYToUnityMeters(posInWorld.row)
+                            );                        
+                        tilePlacement.roomId = WhichRoomIsAWorldTileIn(i, neighborsCheck.list);
+                        tilePlacement.tileNum = tileNumToDraw;
+
+                        RoomPlacement room = Globals.world.rooms.Where(x => x.id == tilePlacement.roomId).FirstOrDefault();
+                        Position posInRoom = RoomAndTileHelper.GetTilePositionInRoomFromWorldSpaceLocation(
+                            room, tilePlacement.positionInGlobalSpace);
+                        tilePlacement.columnInRoom = posInRoom.column;
+                        tilePlacement.rowInRoom = posInRoom.row;
+                        int ordinalInRoom = RoomAndTileHelper.GetGridOrdinalFromPosition(room.roomWidthInTiles, posInRoom);
+
+                        // now add it to both the room and global list
+                        _worldTiles[i] = tilePlacement;
+                        try
+                        {
+                            room.tiles[ordinalInRoom] = tilePlacement;
+                        }
+                        catch (Exception)
+                        {
+
+                            throw;
+                        }
+                    }
+                    else
+                    {
+                        // do nothing
+                    }
+                }
+            }
+        }
+        private int WhichRoomIsAWorldTileIn(int worldTileOrdinal, List<TilePlacement> neighbors = null)
+        {
+            // first check if there's already a tile there with a room
+            TilePlacement existingTile = _worldTiles[worldTileOrdinal];
+            if(existingTile != null)
+            {
+                return existingTile.roomId;
+            }
+
+            // no luck. go the hard way
+            // check all neighbors. Whichever room has the highest count
+            // go w/ that
+            List<TilePlacement> neighborsToUse = neighbors;
+            if (neighbors == null)
+            {
+                var neighborsCheck = GetTileNeighbors(worldTileOrdinal);
+                neighborsToUse = neighborsCheck.list;
+            }
+
+            var counts = neighborsToUse
+                .GroupBy(x => x.roomId)
+                .Select(g => new {
+                    roomId = g.Key,
+                    count = g.Count()
+                });
+
+            int maxCount = counts.Max(x => x.count);
+            int roomId = counts.Where(y => y.count == maxCount).FirstOrDefault().roomId;
+
+            return roomId;
+
+        }
 
     }
 }
