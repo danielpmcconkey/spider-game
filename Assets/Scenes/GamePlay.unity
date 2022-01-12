@@ -230,8 +230,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: cfba5f970d5399c4cb5f9fdb688a23fd, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  idealDistanceInFrontOfPlayer: 6
-  moveSpeed: 2.5
+  idealDistanceInFrontOfPlayer: 3
+  moveSpeed: 50
   player: {fileID: 593497461}
   roomPadBottom: 1
   roomPadTop: 1

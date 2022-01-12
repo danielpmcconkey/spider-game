@@ -65,7 +65,7 @@ namespace Assets.Scripts.WorldBuilder
         {
             List<int> activeRooms = new List<int>();
             activeRooms.Add(Globals.currentRoom);
-            activeRooms = RoomAndTileHelper.GetRoomConnections(Globals.currentRoom, 1);
+            activeRooms = RoomAndTileHelper.GetRoomConnections(Globals.currentRoom, 0);
 
             foreach (RoomManager r in _rooms)
             {

@@ -424,8 +424,27 @@ namespace Assets.Scripts.WorldBuilder.Bot
                 int cellLowRightOrdinal = RoomAndTileHelper.GetGridOrdinalFromPosition(widthInTiles,
                     new Position() { row = cellLowRightRow, column = cellLowRightColumn });
 
+                bool isRoomAbove = (cells.Where(x => x.row == cell.row - 1 && x.column == cell.column).Count() == 0) ?
+                    false : true;
+                bool isRoomRight = (cells.Where(x => x.column == cell.column + 1 && x.row == cell.row).Count() == 0) ?
+                    false : true;
+                bool isRoomBelow = (cells.Where(x => x.row == cell.row + 1 && x.column == cell.column).Count() == 0) ?
+                    false : true;
+                bool isRoomLeft = (cells.Where(x => x.column == cell.column - 1 && x.row == cell.row).Count() == 0) ?
+                    false : true;
+                bool isRoomUpperRight = (cells.Where(x => x.column == cell.column + 1 && x.row == cell.row - 1).Count() == 0) ?
+                    false : true;
+                bool isRoomUpperLeft = (cells.Where(x => x.column == cell.column - 1 && x.row == cell.row - 1).Count() == 0) ?
+                    false : true;
+                bool isRoomLowerRight = (cells.Where(x => x.column == cell.column + 1 && x.row == cell.row + 1).Count() == 0) ?
+                    false : true;
+                bool isRoomLowerLeft = (cells.Where(x => x.column == cell.column - 1 && x.row == cell.row + 1).Count() == 0) ?
+                    false : true;
+
+                // fill in the base perimeter
+
                 // if there's no room above add a ceiling
-                if (cells.Where(x => x.row == cell.row - 1 && x.column == cell.column).Count() == 0)
+                if (!isRoomAbove)
                 {
                     for(int i = cellUpLeftOrdinal; i <= cellUpRightOrdinal; i++)
                     {
@@ -434,7 +453,7 @@ namespace Assets.Scripts.WorldBuilder.Bot
                     }
                 }
                 // if there's no room to the right add the right wall
-                if (cells.Where(x => x.column == cell.column + 1 && x.row == cell.row).Count() == 0)
+                if (!isRoomRight)
                 {
                     for (int i = cellUpRightOrdinal; i <= cellLowRightOrdinal; i += widthInTiles)
                     {
@@ -451,7 +470,7 @@ namespace Assets.Scripts.WorldBuilder.Bot
                     }
                 }
                 // if there's no room below add a floor
-                if (cells.Where(x => x.row == cell.row + 1 && x.column == cell.column).Count() == 0)
+                if (!isRoomBelow)
                 {
                     for (int i = cellLowLeftOrdinal; i <= cellLowRightOrdinal; i++)
                     {
@@ -460,12 +479,57 @@ namespace Assets.Scripts.WorldBuilder.Bot
                     }
                 }
                 // if there's no room to the left add the left wall
-                if (cells.Where(x => x.column == cell.column - 1 && x.row == cell.row).Count() == 0)
+                if (!isRoomLeft)
                 {
                     for (int i = cellUpLeftOrdinal; i <= cellLowLeftOrdinal; i += widthInTiles)
                     {
                         AddBaseTilePlacement(room, i);
                         AddBaseTilePlacement(room, i + 1);
+                    }
+                }
+
+                // now fill in the jagged corners. 
+                // in the above graphic example, column 6, row 4 would
+                // have a "staircase" corner in the lower left
+
+                // no room below, room to the left, room to the lower-left
+                if(!isRoomBelow && isRoomLeft && isRoomLowerLeft)
+                {
+                    // extend the floor 2 tiles to the left
+                    for (int i = cellLowLeftOrdinal - 2; i < cellLowLeftOrdinal; i++)
+                    {
+                        AddBaseTilePlacement(room, i);
+                        AddBaseTilePlacement(room, i - widthInTiles);
+                    }
+                }
+                // no room below, room to the right, room to the lower-right
+                if (!isRoomBelow && isRoomRight && isRoomLowerRight)
+                {
+                    // extend the floor 2 tiles to the right
+                    for (int i = cellLowRightOrdinal + 1; i <= cellLowRightOrdinal + 2; i++)
+                    {
+                        AddBaseTilePlacement(room, i);
+                        AddBaseTilePlacement(room, i - widthInTiles);
+                    }
+                }
+                // no room above, room to the left, room to the upper-left
+                if (!isRoomAbove && isRoomLeft && isRoomUpperLeft)
+                {
+                    // extend the ceiling 2 tiles to the left
+                    for (int i = cellUpLeftOrdinal - 2; i < cellUpLeftOrdinal; i++)
+                    {
+                        AddBaseTilePlacement(room, i);
+                        AddBaseTilePlacement(room, i + widthInTiles);
+                    }
+                }
+                // no room above, room to the right, room to the upper-right
+                if (!isRoomAbove && isRoomRight && isRoomUpperRight)
+                {
+                    // extend the floor 2 tiles to the right
+                    for (int i = cellUpRightOrdinal + 1; i <= cellUpRightOrdinal + 2; i++)
+                    {
+                        AddBaseTilePlacement(room, i);
+                        AddBaseTilePlacement(room, i + widthInTiles);
                     }
                 }
             }
@@ -519,66 +583,98 @@ namespace Assets.Scripts.WorldBuilder.Bot
 
             // up left
             int upLeftNum = tileNum - 1 - _worldWidthInTiles;
-            if (!isInTopRow && !isInLeftColumn && _worldTiles[upLeftNum] != null && _worldTiles[upLeftNum].isSolid)
+            if (isInTopRow || isInLeftColumn)
             {
                 neighbors.isUpLeft = true;
-                outList.Add(_worldTiles[upLeftNum]);
+            }
+            else if (_worldTiles[upLeftNum] != null && _worldTiles[upLeftNum].isSolid)
+            {
+                neighbors.isUpLeft = true;
+                if(upLeftNum > 0 && upLeftNum <_worldTiles.Length) outList.Add(_worldTiles[upLeftNum]);
             }
 
             // up
             int upNum = tileNum - _worldWidthInTiles;
-            if (!isInTopRow && _worldTiles[upNum] != null && _worldTiles[upNum].isSolid)
+            if (isInTopRow)
             {
                 neighbors.isUp = true;
-                outList.Add(_worldTiles[upNum]);
+            }
+            else if (_worldTiles[upNum] != null && _worldTiles[upNum].isSolid)
+            {
+                neighbors.isUp = true;
+                if (upNum > 0 && upNum < _worldTiles.Length) outList.Add(_worldTiles[upNum]);
             }
 
             // upRight
             int upRightNum = tileNum - _worldWidthInTiles + 1;
-            if (!isInTopRow && !isInRightColumn && _worldTiles[upRightNum] != null && _worldTiles[upRightNum].isSolid)
+            if (isInTopRow || isInRightColumn)
             {
                 neighbors.isUpRight = true;
-                outList.Add(_worldTiles[upRightNum]);
+            }
+            else if (_worldTiles[upRightNum] != null && _worldTiles[upRightNum].isSolid)
+            {
+                neighbors.isUpRight = true;
+                if (upRightNum > 0 && upRightNum < _worldTiles.Length) outList.Add(_worldTiles[upRightNum]);
             }
 
             // left
             int leftNum = tileNum - 1;
-            if (!isInLeftColumn && _worldTiles[leftNum] != null && _worldTiles[leftNum].isSolid)
+            if (isInLeftColumn)
             {
                 neighbors.isLeft = true;
-                outList.Add(_worldTiles[leftNum]);
+            }
+            else if (_worldTiles[leftNum] != null && _worldTiles[leftNum].isSolid)
+            {
+                neighbors.isLeft = true;
+                if (leftNum > 0 && leftNum < _worldTiles.Length) outList.Add(_worldTiles[leftNum]);
             }
 
             // right
             int rightNum = tileNum + 1;
-            if (!isInRightColumn && _worldTiles[rightNum] != null && _worldTiles[rightNum].isSolid)
+            if (isInRightColumn)
             {
                 neighbors.isRight = true;
-                outList.Add(_worldTiles[rightNum]);
+            }
+            else if (_worldTiles[rightNum] != null && _worldTiles[rightNum].isSolid)
+            {
+                neighbors.isRight = true;
+                if (rightNum > 0 && rightNum < _worldTiles.Length) outList.Add(_worldTiles[rightNum]);
             }
 
             // down left
             int downLeftNum = tileNum - 1 + _worldWidthInTiles;
-            if (!isInBottomRow && !isInLeftColumn && _worldTiles[downLeftNum] != null && _worldTiles[downLeftNum].isSolid)
+            if (isInBottomRow || isInLeftColumn)
             {
                 neighbors.isDownLeft = true;
-                outList.Add(_worldTiles[downLeftNum]);
+            }
+            else if (_worldTiles[downLeftNum] != null && _worldTiles[downLeftNum].isSolid)
+            {
+                neighbors.isDownLeft = true;
+                if (downLeftNum > 0 && downLeftNum < _worldTiles.Length) outList.Add(_worldTiles[downLeftNum]);
             }
 
             // down
             int downNum = tileNum + _worldWidthInTiles;
-            if (!isInBottomRow && _worldTiles[downNum] != null && _worldTiles[downNum].isSolid)
+            if (isInBottomRow)
             {
                 neighbors.isDown = true;
-                outList.Add(_worldTiles[downNum]);
+            }
+            else if (_worldTiles[downNum] != null && _worldTiles[downNum].isSolid)
+            {
+                neighbors.isDown = true;
+                if (downNum > 0 && downNum < _worldTiles.Length) outList.Add(_worldTiles[downNum]);
             }
 
             // downRight
             int downRightNum = tileNum + _worldWidthInTiles + 1;
-            if (!isInBottomRow && !isInRightColumn && _worldTiles[downRightNum] != null && _worldTiles[downRightNum].isSolid)
+            if (isInBottomRow || isInRightColumn)
             {
                 neighbors.isDownRight = true;
-                outList.Add(_worldTiles[downRightNum]);
+            }
+            else if (_worldTiles[downRightNum] != null && _worldTiles[downRightNum].isSolid)
+            {
+                neighbors.isDownRight = true;
+                if (downRightNum > 0 && downRightNum < _worldTiles.Length) outList.Add(_worldTiles[downRightNum]);
             }
 
             return (neighbors, outList);
@@ -1095,17 +1191,27 @@ namespace Assets.Scripts.WorldBuilder.Bot
                 neighborsToUse = neighborsCheck.list;
             }
 
-            var counts = neighborsToUse
-                .GroupBy(x => x.roomId)
-                .Select(g => new {
-                    roomId = g.Key,
-                    count = g.Count()
-                });
+            try
+            {
+                var counts = neighborsToUse
+                        .GroupBy(x => x.roomId)
+                        .Select(g => new
+                        {
+                            roomId = g.Key,
+                            count = g.Count()
+                        });
+                int maxCount = counts.Max(x => x.count);
+                int roomId = counts.Where(y => y.count == maxCount).FirstOrDefault().roomId;
 
-            int maxCount = counts.Max(x => x.count);
-            int roomId = counts.Where(y => y.count == maxCount).FirstOrDefault().roomId;
+                return roomId;
+            }
+            catch (Exception)
+            {
 
-            return roomId;
+                throw;
+            }
+
+            
 
         }
 
