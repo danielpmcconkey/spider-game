@@ -33,6 +33,10 @@ namespace Assets.Scripts.WorldBuilder.Bot
             FinalizeRoomDoors();
             // actually turn them into rooms and add perimiter tiles
             MakeRoomsFromGrid();
+            FleshOutRoomCellDetails();
+            FillInRoomPerimiters();
+            // add the miscellaneous platforms
+            AddPlatformsToRoom();
             // put masking objects around rooms and do this before knocking out tiles behind doors
             AddRoomMasks();
             // remove any tiles that are row replaced by doors
@@ -63,7 +67,16 @@ namespace Assets.Scripts.WorldBuilder.Bot
             tilePlacement.positionInGlobalSpace = new Vector2(x, y);
 
             // add it to the room grid
-            room.tiles[roomTileGridOrdinal] = tilePlacement;
+            try
+            {
+                room.tiles[roomTileGridOrdinal] = tilePlacement;
+            }
+            catch (Exception)
+            {
+                //return;
+                throw;
+                
+            }
 
             // add it to the world grid
             Position posInWorldTileGrid = new Position() { row = 0, column = 0 };
@@ -142,6 +155,61 @@ namespace Assets.Scripts.WorldBuilder.Bot
                     roomId++;
                 }
             }
+        }
+        private void AddPlatformsForDoors()
+        {
+            foreach(RoomPlacement room in Globals.world.rooms)
+            {
+                var doorsInRoom = Globals.world.doorPlacements.Where(x => x.room1Id == room.id || x.room2Id == room.id);
+                foreach(DoorPlacement door in doorsInRoom)
+                {
+                    Position doorPosInRoom = WhereIsDoorInRoomSpace(door, room);
+
+                    if (door.isHorizontal && door.room2Id == room.id)
+                    {
+                        // this room is lower room; add a platform just below it
+                        int row = doorPosInRoom.row + Globals.doorHHeightInTiles + 3;
+                        int col = doorPosInRoom.column + 1;
+                        Position upLeftPos = new Position() { row = row, column = col};
+                        AddPlatformToRoom(room, upLeftPos, 3, 1);                        
+                    }
+                    if (!door.isHorizontal && door.room1Id == room.id)
+                    {
+                        // this room is left room; add a platform to the right of it
+                        int row = doorPosInRoom.row + Globals.doorVHeightInTiles;
+                        int col = doorPosInRoom.column - 3;
+                        Position upLeftPos = new Position() { row = row, column = col };
+                        AddPlatformToRoom(room, upLeftPos, 3, 1);
+                    }
+                    if (!door.isHorizontal && door.room2Id == room.id)
+                    {
+                        // this room is right room; add a platform to the left of it
+                        int row = doorPosInRoom.row + Globals.doorVHeightInTiles;
+                        int col = doorPosInRoom.column + 3 + 1;
+                        Position upLeftPos = new Position() { row = row, column = col };
+                        AddPlatformToRoom(room, upLeftPos, 3, 1);
+                    }
+                }
+            }
+        }
+        private void AddPlatformToRoom(RoomPlacement room, Position upLeftPos, int numCols, int numRows)
+        {
+            for(int i = 0; i < numRows; i++)
+            {
+                // rows
+                for (int i2 = 0; i2 < numCols; i2++)
+                {
+                    // columns
+                    Position placementPos = new Position() { row = upLeftPos.row + i, column = upLeftPos.column + i2 };
+                    int ordinal = RoomAndTileHelper.GetGridOrdinalFromPosition(room.roomWidthInTiles, placementPos);
+                    AddBaseTilePlacement(room, ordinal);
+                }
+            }
+        }
+        private void AddPlatformsToRoom()
+        {
+            // add ledges around doors
+            AddPlatformsForDoors();
         }
         //private List<int> AddRoomConnectionsRecurrsive(List<int> knownConnectedIds, int roomId, int layers = -1)
         //{
@@ -320,7 +388,7 @@ namespace Assets.Scripts.WorldBuilder.Bot
                     else
                     {
                         // actually combine these two
-                        CombineTwoGridCells(targetCell, candidateCell);
+                        CombineTwoGridCells(targetCell.roomId, candidateCell.roomId);
 
                         // run it again until we're good
                         CombineGridCellsIntoRooms(cursor + 1);
@@ -329,14 +397,14 @@ namespace Assets.Scripts.WorldBuilder.Bot
             }
             else return;
         }
-        private void CombineTwoGridCells(WorldGridCell targetCell, WorldGridCell candidateCell)
+        private void CombineTwoGridCells(int roomId1, int roomId2)
         {
             // first remove any doors between these cells
             List<DoorPlacement> newDoors = new List<DoorPlacement>();
             foreach(DoorPlacement d in Globals.world.doorPlacements)
             {
-                if (d.room1Id == targetCell.roomId && d.room2Id == candidateCell.roomId ||
-                    d.room1Id == candidateCell.roomId && d.room2Id == targetCell.roomId)
+                if (d.room1Id == roomId1 && d.room2Id == roomId2 ||
+                    d.room1Id == roomId2 && d.room2Id == roomId1)
                 {
                     // get rid of it by not adding
                 }
@@ -346,11 +414,11 @@ namespace Assets.Scripts.WorldBuilder.Bot
 
             // now combine cells by updating their roomIds
 
-            int newRoomId = (targetCell.roomId < candidateCell.roomId) ? targetCell.roomId : candidateCell.roomId;
+            int newRoomId = (roomId1 < roomId2) ? roomId1 : roomId2;
             for (int i = 0; i < Globals.world.worldGrid.Length; i++)
             {
-                if (Globals.world.worldGrid[i].roomId == targetCell.roomId ||
-                    Globals.world.worldGrid[i].roomId == candidateCell.roomId)
+                if (Globals.world.worldGrid[i].roomId == roomId1 ||
+                    Globals.world.worldGrid[i].roomId == roomId2)
                 {
                     Globals.world.worldGrid[i].roomId = newRoomId;
                 }
@@ -359,11 +427,11 @@ namespace Assets.Scripts.WorldBuilder.Bot
             // now update any doors to use the new ID
             foreach (DoorPlacement d in Globals.world.doorPlacements)
             {
-                if(d.room1Id == targetCell.roomId || d.room1Id == candidateCell.roomId)
+                if(d.room1Id == roomId1 || d.room1Id == roomId2)
                 {
                     d.room1Id = newRoomId;
                 }
-                if (d.room2Id == targetCell.roomId || d.room2Id == candidateCell.roomId)
+                if (d.room2Id == roomId1 || d.room2Id == roomId2)
                 {
                     d.room2Id = newRoomId;
                 }
@@ -380,160 +448,106 @@ namespace Assets.Scripts.WorldBuilder.Bot
             float start = Globals.unityWorldUpLeftY;
             return start - MeasurementConverter.TilesYToUnityMeters(Globals.standardRoomHeight * gridRow);
         }
-        private void FillInRoomsPerimiter(RoomPlacement room, List<WorldGridCell> cells, int widthInTiles)
+        private void FillInRoomPerimiters()
         {
-            StringBuilder sb = new StringBuilder();
-            foreach (var cell in cells)
+            foreach (RoomPlacement room in Globals.world.rooms)
             {
-                sb.AppendLine(string.Format("new cell: {0}, {1}, {2}", cell.roomId, cell.row, cell.column));
-                // get the starting points of the cell within the room
-                /*
-                 *               3         4         5         6         7   <-- grid column
-                 *                        10        20        30        40   <-- room column
-                 *               01234567890123456789012345678901234567890123456789
-                 * 3           0 |--------||--------||########||########||--------|
-                 * 3           1 |--------||--------||########||########||--------|
-                 * 3           2 |--------||--------||########||########||--------|
-                 * 4           3 |--------||########||########||########||########|
-                 * 4           4 |--------||########||########||########||########|
-                 * 4           5 |--------||########||########||########||########|
-                 * 5           6 |--------||########||########||--------||--------|
-                 * 5           7 |--------||########||########||--------||--------|
-                 * 5           8 |--------||########||########||--------||--------|
-                 *               01234567890123456789012345678901234567890123456789
-                 * ^ Grid row
-                 *             ^ Room row    
-                 * */
-                int cellUpLeftColumn = (cell.column - cells.Min(x => x.column)) * Globals.standardRoomWidth;
-                int cellUpLeftRow = (cell.row - cells.Min(x => x.row)) * Globals.standardRoomHeight;
-                int cellUpLeftOrdinal = RoomAndTileHelper.GetGridOrdinalFromPosition(widthInTiles,
-                    new Position() { row = cellUpLeftRow, column = cellUpLeftColumn });
-
-                int cellUpRightColumn = cellUpLeftColumn + Globals.standardRoomWidth - 1;
-                int cellUpRightRow = cellUpLeftRow;
-                int cellUpRightOrdinal = RoomAndTileHelper.GetGridOrdinalFromPosition(widthInTiles,
-                    new Position() { row = cellUpRightRow, column = cellUpRightColumn });
-
-                int cellLowLeftColumn = cellUpLeftColumn;
-                int cellLowLeftRow = cellUpLeftRow + Globals.standardRoomHeight - 1;
-                int cellLowLeftOrdinal = RoomAndTileHelper.GetGridOrdinalFromPosition(widthInTiles,
-                    new Position() { row = cellLowLeftRow, column = cellLowLeftColumn });
-
-                int cellLowRightColumn = cellUpRightColumn;
-                int cellLowRightRow = cellLowLeftRow;
-                int cellLowRightOrdinal = RoomAndTileHelper.GetGridOrdinalFromPosition(widthInTiles,
-                    new Position() { row = cellLowRightRow, column = cellLowRightColumn });
-
-                bool isRoomAbove = (cells.Where(x => x.row == cell.row - 1 && x.column == cell.column).Count() == 0) ?
-                    false : true;
-                bool isRoomRight = (cells.Where(x => x.column == cell.column + 1 && x.row == cell.row).Count() == 0) ?
-                    false : true;
-                bool isRoomBelow = (cells.Where(x => x.row == cell.row + 1 && x.column == cell.column).Count() == 0) ?
-                    false : true;
-                bool isRoomLeft = (cells.Where(x => x.column == cell.column - 1 && x.row == cell.row).Count() == 0) ?
-                    false : true;
-                bool isRoomUpperRight = (cells.Where(x => x.column == cell.column + 1 && x.row == cell.row - 1).Count() == 0) ?
-                    false : true;
-                bool isRoomUpperLeft = (cells.Where(x => x.column == cell.column - 1 && x.row == cell.row - 1).Count() == 0) ?
-                    false : true;
-                bool isRoomLowerRight = (cells.Where(x => x.column == cell.column + 1 && x.row == cell.row + 1).Count() == 0) ?
-                    false : true;
-                bool isRoomLowerLeft = (cells.Where(x => x.column == cell.column - 1 && x.row == cell.row + 1).Count() == 0) ?
-                    false : true;
-
-                // fill in the base perimeter
-
-                // if there's no room above add a ceiling
-                if (!isRoomAbove)
+                List<WorldGridCell> cells = Globals.world.worldGrid.Where(x => x.roomId == room.id).ToList();
+                foreach (var cell in cells)
                 {
-                    for(int i = cellUpLeftOrdinal; i <= cellUpRightOrdinal; i++)
+                    // fill in the base perimeter
+
+                    // if there's no room above add a ceiling
+                    if (!cell.isCellAbove)
                     {
-                        AddBaseTilePlacement(room, i);
-                        AddBaseTilePlacement(room, i + widthInTiles);
-                    }
-                }
-                // if there's no room to the right add the right wall
-                if (!isRoomRight)
-                {
-                    for (int i = cellUpRightOrdinal; i <= cellLowRightOrdinal; i += widthInTiles)
-                    {
-                        try
+                        for (int i = cell.cellUpLeftOrdinal; i <= cell.cellUpRightOrdinal; i++)
                         {
                             AddBaseTilePlacement(room, i);
-                            AddBaseTilePlacement(room, i - 1);
+                            AddBaseTilePlacement(room, i + room.roomWidthInTiles);
                         }
-                        catch (Exception)
+                    }
+                    // if there's no room to the right add the right wall
+                    if (!cell.isCellRight)
+                    {
+                        for (int i = cell.cellUpRightOrdinal; i <= cell.cellLowRightOrdinal; i += room.roomWidthInTiles)
                         {
+                            try
+                            {
+                                AddBaseTilePlacement(room, i);
+                                AddBaseTilePlacement(room, i - 1);
+                            }
+                            catch (Exception)
+                            {
 
-                            throw;
+                                throw;
+                            }
                         }
                     }
-                }
-                // if there's no room below add a floor
-                if (!isRoomBelow)
-                {
-                    for (int i = cellLowLeftOrdinal; i <= cellLowRightOrdinal; i++)
+                    // if there's no room below add a floor
+                    if (!cell.isCellBelow)
                     {
-                        AddBaseTilePlacement(room, i);
-                        AddBaseTilePlacement(room, i - widthInTiles);
+                        for (int i = cell.cellLowLeftOrdinal; i <= cell.cellLowRightOrdinal; i++)
+                        {
+                            AddBaseTilePlacement(room, i);
+                            AddBaseTilePlacement(room, i - room.roomWidthInTiles);
+                        }
                     }
-                }
-                // if there's no room to the left add the left wall
-                if (!isRoomLeft)
-                {
-                    for (int i = cellUpLeftOrdinal; i <= cellLowLeftOrdinal; i += widthInTiles)
+                    // if there's no room to the left add the left wall
+                    if (!cell.isCellLeft)
                     {
-                        AddBaseTilePlacement(room, i);
-                        AddBaseTilePlacement(room, i + 1);
+                        for (int i = cell.cellUpLeftOrdinal; i <= cell.cellLowLeftOrdinal; i += room.roomWidthInTiles)
+                        {
+                            AddBaseTilePlacement(room, i);
+                            AddBaseTilePlacement(room, i + 1);
+                        }
                     }
-                }
 
-                // now fill in the jagged corners. 
-                // in the above graphic example, column 6, row 4 would
-                // have a "staircase" corner in the lower left
+                    // now fill in the jagged corners. 
+                    // in the above graphic example, column 6, row 4 would
+                    // have a "staircase" corner in the lower left
 
-                // no room below, room to the left, room to the lower-left
-                if(!isRoomBelow && isRoomLeft && isRoomLowerLeft)
-                {
-                    // extend the floor 2 tiles to the left
-                    for (int i = cellLowLeftOrdinal - 2; i < cellLowLeftOrdinal; i++)
+                    // no room below, room to the left, room to the lower-left
+                    if (!cell.isCellBelow && cell.isCellLeft && cell.isCellLowerLeft)
                     {
-                        AddBaseTilePlacement(room, i);
-                        AddBaseTilePlacement(room, i - widthInTiles);
+                        // extend the floor 2 tiles to the left
+                        for (int i = cell.cellLowLeftOrdinal - 2; i < cell.cellLowLeftOrdinal; i++)
+                        {
+                            AddBaseTilePlacement(room, i);
+                            AddBaseTilePlacement(room, i - room.roomWidthInTiles);
+                        }
                     }
-                }
-                // no room below, room to the right, room to the lower-right
-                if (!isRoomBelow && isRoomRight && isRoomLowerRight)
-                {
-                    // extend the floor 2 tiles to the right
-                    for (int i = cellLowRightOrdinal + 1; i <= cellLowRightOrdinal + 2; i++)
+                    // no room below, room to the right, room to the lower-right
+                    if (!cell.isCellBelow && cell.isCellRight && cell.isCellLowerRight)
                     {
-                        AddBaseTilePlacement(room, i);
-                        AddBaseTilePlacement(room, i - widthInTiles);
+                        // extend the floor 2 tiles to the right
+                        for (int i = cell.cellLowRightOrdinal + 1; i <= cell.cellLowRightOrdinal + 2; i++)
+                        {
+                            AddBaseTilePlacement(room, i);
+                            AddBaseTilePlacement(room, i - room.roomWidthInTiles);
+                        }
                     }
-                }
-                // no room above, room to the left, room to the upper-left
-                if (!isRoomAbove && isRoomLeft && isRoomUpperLeft)
-                {
-                    // extend the ceiling 2 tiles to the left
-                    for (int i = cellUpLeftOrdinal - 2; i < cellUpLeftOrdinal; i++)
+                    // no room above, room to the left, room to the upper-left
+                    if (!cell.isCellAbove && cell.isCellLeft && cell.isCellUpperLeft)
                     {
-                        AddBaseTilePlacement(room, i);
-                        AddBaseTilePlacement(room, i + widthInTiles);
+                        // extend the ceiling 2 tiles to the left
+                        for (int i = cell.cellUpLeftOrdinal - 2; i < cell.cellUpLeftOrdinal; i++)
+                        {
+                            AddBaseTilePlacement(room, i);
+                            AddBaseTilePlacement(room, i + room.roomWidthInTiles);
+                        }
                     }
-                }
-                // no room above, room to the right, room to the upper-right
-                if (!isRoomAbove && isRoomRight && isRoomUpperRight)
-                {
-                    // extend the floor 2 tiles to the right
-                    for (int i = cellUpRightOrdinal + 1; i <= cellUpRightOrdinal + 2; i++)
+                    // no room above, room to the right, room to the upper-right
+                    if (!cell.isCellAbove && cell.isCellRight && cell.isCellUpperRight)
                     {
-                        AddBaseTilePlacement(room, i);
-                        AddBaseTilePlacement(room, i + widthInTiles);
+                        // extend the floor 2 tiles to the right
+                        for (int i = cell.cellUpRightOrdinal + 1; i <= cell.cellUpRightOrdinal + 2; i++)
+                        {
+                            AddBaseTilePlacement(room, i);
+                            AddBaseTilePlacement(room, i + room.roomWidthInTiles);
+                        }
                     }
                 }
             }
-
         }
         private void FinalizeRoomDoors()
         {
@@ -545,6 +559,7 @@ namespace Assets.Scripts.WorldBuilder.Bot
             int doorRemovalCountTarget = (int)Math.Floor(Globals.world.doorPlacements.Count * 0.5f) + 1;
             int doorRemovalCount = 0;
 
+            int attemptCount = 0;
             while(doorRemovalCount < doorRemovalCountTarget)
             {
                 int indexToRemove = RNG.GetRandomInt(0, Globals.world.doorPlacements.Count);
@@ -556,8 +571,81 @@ namespace Assets.Scripts.WorldBuilder.Bot
                 {
                     // add back in the sacrificial door to keep all rooms connected
                     Globals.world.doorPlacements.Add(sacrifice);
+                    attemptCount++;
+                    if (attemptCount > 500)
+                    {
+                        return; // throw new Exception("Burp");
+                    }
                 }
-            }            
+            }
+            
+        }
+        private void FleshOutRoomCellDetails()
+        {
+            foreach (RoomPlacement room in Globals.world.rooms)
+            {
+                List<WorldGridCell> cells = Globals.world.worldGrid.Where(x => x.roomId == room.id).ToList();
+                for(int i = 0; i < cells.Count; i++)                
+                {
+                    var cell = cells[i];
+                    // get the starting points of the cell within the room
+                    /*
+                        *               3         4         5         6         7   <-- grid column
+                        *                        10        20        30        40   <-- room column
+                        *               01234567890123456789012345678901234567890123456789
+                        * 3           0 |--------||--------||########||########||--------|
+                        * 3           1 |--------||--------||########||########||--------|
+                        * 3           2 |--------||--------||########||########||--------|
+                        * 4           3 |--------||########||########||########||########|
+                        * 4           4 |--------||########||########||########||########|
+                        * 4           5 |--------||########||########||########||########|
+                        * 5           6 |--------||########||########||--------||--------|
+                        * 5           7 |--------||########||########||--------||--------|
+                        * 5           8 |--------||########||########||--------||--------|
+                        *               01234567890123456789012345678901234567890123456789
+                        * ^ Grid row
+                        *             ^ Room row    
+                        * */
+                    int cellUpLeftColumn = (cell.column - cells.Min(x => x.column)) * Globals.standardRoomWidth;
+                    int cellUpLeftRow = (cell.row - cells.Min(x => x.row)) * Globals.standardRoomHeight;
+                    cell.cellUpLeftOrdinal = RoomAndTileHelper.GetGridOrdinalFromPosition(room.roomWidthInTiles,
+                        new Position() { row = cellUpLeftRow, column = cellUpLeftColumn });
+
+                    int cellUpRightColumn = cellUpLeftColumn + Globals.standardRoomWidth - 1;
+                    int cellUpRightRow = cellUpLeftRow;
+                    cell.cellUpRightOrdinal = RoomAndTileHelper.GetGridOrdinalFromPosition(room.roomWidthInTiles,
+                        new Position() { row = cellUpRightRow, column = cellUpRightColumn });
+
+                    int cellLowLeftColumn = cellUpLeftColumn;
+                    int cellLowLeftRow = cellUpLeftRow + Globals.standardRoomHeight - 1;
+                    cell.cellLowLeftOrdinal = RoomAndTileHelper.GetGridOrdinalFromPosition(room.roomWidthInTiles,
+                        new Position() { row = cellLowLeftRow, column = cellLowLeftColumn });
+
+                    int cellLowRightColumn = cellUpRightColumn;
+                    int cellLowRightRow = cellLowLeftRow;
+                    cell.cellLowRightOrdinal = RoomAndTileHelper.GetGridOrdinalFromPosition(room.roomWidthInTiles,
+                        new Position() { row = cellLowRightRow, column = cellLowRightColumn });
+
+                    cell.isCellAbove = (cells.Where(x => x.row == cell.row - 1 && x.column == cell.column).Count() == 0) ?
+                        false : true;
+                    cell.isCellRight = (cells.Where(x => x.column == cell.column + 1 && x.row == cell.row).Count() == 0) ?
+                        false : true;
+                    cell.isCellBelow = (cells.Where(x => x.row == cell.row + 1 && x.column == cell.column).Count() == 0) ?
+                        false : true;
+                    cell.isCellLeft = (cells.Where(x => x.column == cell.column - 1 && x.row == cell.row).Count() == 0) ?
+                        false : true;
+                    cell.isCellUpperRight = (cells.Where(x => x.column == cell.column + 1 && x.row == cell.row - 1).Count() == 0) ?
+                        false : true;
+                    cell.isCellUpperLeft = (cells.Where(x => x.column == cell.column - 1 && x.row == cell.row - 1).Count() == 0) ?
+                        false : true;
+                    cell.isCellLowerRight = (cells.Where(x => x.column == cell.column + 1 && x.row == cell.row + 1).Count() == 0) ?
+                        false : true;
+                    cell.isCellLowerLeft = (cells.Where(x => x.column == cell.column - 1 && x.row == cell.row + 1).Count() == 0) ?
+                        false : true;
+                    
+                   
+                }
+            }
         }
         private int GetGridOrdinalFromPosition(Position position)
         {
@@ -747,9 +835,6 @@ namespace Assets.Scripts.WorldBuilder.Bot
                 float distanceY = MeasurementConverter.TilesYToUnityMeters(heightInTiles);
                 float lowerRightY = upLeftY - distanceY;
 
-                
-
-                // create the empty tiles array
                 int widthInTiles = MeasurementConverter.UnityMetersToTilesX(Math.Abs(lowerRightX - upLeftX) + 1);
 
                 RoomPlacement r = new RoomPlacement()
@@ -765,14 +850,7 @@ namespace Assets.Scripts.WorldBuilder.Bot
                     doors = new List<DoorPlacement>(),
                 };
                 
-
-                
-
-                FillInRoomsPerimiter(r, cells, widthInTiles);
-
                 Globals.world.rooms.Add(r);
-
-
             }
         }
         private void SizeWorld()
@@ -1171,6 +1249,16 @@ namespace Assets.Scripts.WorldBuilder.Bot
                     }
                 }
             }
+        }
+        private Position WhereIsDoorInRoomSpace(DoorPlacement door, RoomPlacement room)
+        {
+            float roomTop = room.upperLeftInGlobalSpace.y;
+            float roomLeft = room.upperLeftInGlobalSpace.x;
+            float doorTop = door.positionInGlobalSpace.y;
+            float doorLeft = door.positionInGlobalSpace.x;
+            int row = -1 * MeasurementConverter.UnityMetersToTilesY(doorTop - roomTop);
+            int col = MeasurementConverter.UnityMetersToTilesX(doorLeft - roomLeft);
+            return new Position() { row = row, column = col };
         }
         private int WhichRoomIsAWorldTileIn(int worldTileOrdinal, List<TilePlacement> neighbors = null)
         {
